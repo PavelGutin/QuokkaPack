@@ -362,3 +362,6 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /API/httpenv.json
+/QuokkaPack.API/quokkapack.db
+/QuokkaPack.API/quokkapack.db-shm
+/QuokkaPack.API/quokkapack.db-wal
