@@ -7,14 +7,10 @@ namespace QuokkaPack.RazorPages.Pages.Trips
 {
     public class IndexModel : PageModel
     {
-        private readonly IDownstreamApi _api;
-        private readonly ITokenAcquisition _tokenAcquisition;
         private readonly IDownstreamApi _downstreamApi;
 
-        public IndexModel(IDownstreamApi api, ITokenAcquisition tokenAcquisition, IDownstreamApi downstreamApi)
+        public IndexModel(IDownstreamApi downstreamApi)
         {
-            _api = api;
-            _tokenAcquisition = tokenAcquisition;
             _downstreamApi = downstreamApi; ;
         }
 

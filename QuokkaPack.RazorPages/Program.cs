@@ -17,10 +17,15 @@ builder.Services.AddAuthorization(options =>
 });
 
 builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
-    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"))
-        .EnableTokenAcquisitionToCallDownstreamApi(initialScopes)
-            .AddDownstreamApi("DownstreamApi",builder.Configuration.GetSection("DownstreamApi"))
-            .AddInMemoryTokenCaches();
+    .AddMicrosoftIdentityWebApp(options =>
+    {
+        builder.Configuration.Bind("AzureAd", options);
+        options.Prompt = "consent";
+    })
+     //.EnableTokenAcquisitionToCallDownstreamApi(initialScopes)
+    .EnableTokenAcquisitionToCallDownstreamApi(["api://6c0192cd-df66-43af-b252-b2e823643f12/access_as_user"])
+    .AddDownstreamApi("DownstreamApi",builder.Configuration.GetSection("DownstreamApi"))
+    .AddInMemoryTokenCaches();
 
 builder.Services.AddRazorPages()
     .AddMicrosoftIdentityUI();

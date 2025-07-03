@@ -1,4 +1,5 @@
 ﻿using Microsoft.Identity.Abstractions;
+using Microsoft.Identity.Client;
 using System.Security.Claims;
 
 namespace QuokkaPack.RazorPages.UserLogin
@@ -16,11 +17,13 @@ namespace QuokkaPack.RazorPages.UserLogin
         {
             try
             {
-                await _api.CallApiForUserAsync("QuokkaApi", 
-                (DownstreamApiOptions options) =>
+
+                await _api.CallApiForUserAsync("DownstreamApi", options =>
                 {
                     options.RelativePath = "api/users/initialize";
-                });
+                    options.HttpMethod = "POST";
+                }, 
+                user);
             }
             catch (Exception ex)
             {

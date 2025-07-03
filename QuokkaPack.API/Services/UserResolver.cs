@@ -16,15 +16,15 @@ namespace QuokkaPack.API.Services
 
         public async Task<MasterUser> GetOrCreateAsync(ClaimsPrincipal user)
         {
-            var sub = user.FindFirst("sub")?.Value;
+            var oid = user.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier")?.Value;  //TODO: see if this is needed
             var issuer = user.FindFirst("iss")?.Value;
 
-            if (sub == null || issuer == null)
-                throw new UnauthorizedAccessException("Missing sub or iss claim.");
+            if (oid == null || issuer == null)
+                throw new UnauthorizedAccessException("Missing oid or iss claim.");
 
             var login = await _db.UserLogins
                 .Include(x => x.MasterUser)
-                .FirstOrDefaultAsync(x => x.ProviderUserId == sub && x.Issuer == issuer);
+                .FirstOrDefaultAsync(x => x.ProviderUserId == oid && x.Issuer == issuer);
 
             if (login != null)
                 return login.MasterUser;
@@ -33,7 +33,7 @@ namespace QuokkaPack.API.Services
             login = new UserLogin
             {
                 Provider = "entra",
-                ProviderUserId = sub,
+                ProviderUserId = oid,
                 Issuer = issuer,
                 Email = user.FindFirst(ClaimTypes.Email)?.Value,
                 DisplayName = user.Identity?.Name ?? "",
