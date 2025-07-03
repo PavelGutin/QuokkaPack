@@ -1,13 +1,17 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36221.1 d17.14
+VisualStudioVersion = 17.14.36221.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuokkaPack.API", "API\QuokkaPack.API.csproj", "{3BF2B457-8C9C-4100-B0EA-622E7F05B0C2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuokkaPack.API", "QuokkaPack.API\QuokkaPack.API.csproj", "{3BF2B457-8C9C-4100-B0EA-622E7F05B0C2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuokkaPack.RazorPages", "RazorPages\QuokkaPack.RazorPages.csproj", "{5A5DEABF-C209-4024-8E26-72C267A548B5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuokkaPack.RazorPages", "QuokkaPack.RazorPages\QuokkaPack.RazorPages.csproj", "{5A5DEABF-C209-4024-8E26-72C267A548B5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuokkaPack.Data", "Data\QuokkaPack.Data.csproj", "{3C4465B1-0E74-4BA1-85A6-99CF731D7D6A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuokkaPack.Data", "QuokkaPack.Data\QuokkaPack.Data.csproj", "{3C4465B1-0E74-4BA1-85A6-99CF731D7D6A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuokkaPack.Shared", "QuokkaPack.Shared\QuokkaPack.Shared.csproj", "{DEF8C1F9-C874-42D5-A4C2-0A4407409DBD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuokkaPack.Infrastructure", "QuokkaPack.Infrastructure\QuokkaPack.Infrastructure.csproj", "{AE642352-4E79-4BE3-8C98-4034EB815DEC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +31,14 @@ Global
 		{3C4465B1-0E74-4BA1-85A6-99CF731D7D6A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3C4465B1-0E74-4BA1-85A6-99CF731D7D6A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3C4465B1-0E74-4BA1-85A6-99CF731D7D6A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DEF8C1F9-C874-42D5-A4C2-0A4407409DBD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DEF8C1F9-C874-42D5-A4C2-0A4407409DBD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DEF8C1F9-C874-42D5-A4C2-0A4407409DBD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DEF8C1F9-C874-42D5-A4C2-0A4407409DBD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AE642352-4E79-4BE3-8C98-4034EB815DEC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AE642352-4E79-4BE3-8C98-4034EB815DEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AE642352-4E79-4BE3-8C98-4034EB815DEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AE642352-4E79-4BE3-8C98-4034EB815DEC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,0 +1,29 @@
+#az login --use-device-code --allow-no-subscriptions --scope api://bac7197e-bcf0-4ef6-864b-35c576fe01d8/access_as_user --tenant pavelformosa.onmicrosoft.com
+#az account get-access-token --scope api://bac7197e-bcf0-4ef6-864b-35c576fe01d8/.default
+
+@API_HostAddress = http://localhost:5186
+@accessToken = {{accessToken}}
+
+GET {{API_HostAddress}}/weatherforecast/
+Authorization: Bearer {{accessToken}}
+Accept: application/json
+
+###
+### GET all trips
+GET {{API_HostAddress}}/api/trips
+Authorization: Bearer {{accessToken}}
+Accept: application/json
+
+###
+
+### POST a new trip
+POST {{API_HostAddress}}/api/trips
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "startDate": "2025-07-10T00:00:00",
+  "endDate": "2025-07-15T00:00:00",
+  "destination": "Reykjavik"
+}

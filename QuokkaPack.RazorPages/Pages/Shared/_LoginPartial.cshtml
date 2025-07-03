@@ -1,0 +1,17 @@
+﻿@using System.Security.Principal
+
+<ul class="navbar-nav">
+@if (User.Identity?.IsAuthenticated == true)
+{
+        <span class="navbar-text text-dark">Hello @User.Identity?.Name!</span>
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-area="MicrosoftIdentity" asp-controller="Account" asp-action="SignOut" asp-route-postLogoutRedirectUri="/">Sign out</a>
+        </li>
+}
+else
+{
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-area="MicrosoftIdentity" asp-controller="Account" asp-action="SignIn" asp-route-scope="api://bac7197e-bcf0-4ef6-864b-35c576fe01d8/access_as_user" asp-route-returnUrl="/">Sign in</a>
+        </li>
+}
+</ul>
