@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Abstractions;
 using QuokkaPack.Data;
 using QuokkaPack.Data.Models;
+using QuokkaPack.Shared.DTOs.Trip;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,33 +15,39 @@ namespace QuokkaPack.RazorPages.Pages.Trips
 {
     public class DetailsModel : PageModel
     {
-        private readonly HttpClient _httpClient;
+        private readonly IDownstreamApi _downstreamApi;
+        private readonly ILogger<DeleteModel> _logger;
 
-        public DetailsModel(IHttpClientFactory factory)
+        public DetailsModel(IDownstreamApi downstreamApi, ILogger<DeleteModel> logger)
         {
-            _httpClient = factory.CreateClient("QuokkaApi");
+            _downstreamApi = downstreamApi;
+            _logger = logger;
         }
 
-        public Trip Trip { get; set; } = default!;
+        public TripReadDto Trip { get; set; } = default!;
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
-            //var trip = await _context.Trips.FirstOrDefaultAsync(m => m.Id == id);
-            Trip trip = null;
-
-            if (trip is not null)
+            try
             {
-                Trip = trip;
+                var trip = await _downstreamApi.CallApiForUserAsync<TripReadDto>(
+                    "DownstreamApi",
+                    options => options.RelativePath = $"/api/trips/{id}");
 
+                if (trip == null)
+                    return NotFound();
+
+                Trip = trip;
                 return Page();
             }
-
-            return NotFound();
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching trip with ID {TripId}", id);
+                return NotFound();
+            }
         }
     }
 }

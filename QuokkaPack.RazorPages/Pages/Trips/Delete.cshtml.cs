@@ -1,65 +1,79 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
-using QuokkaPack.Data;
+using Microsoft.Identity.Abstractions;
 using QuokkaPack.Data.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Threading.Tasks;
+using QuokkaPack.Shared.DTOs.Trip;
+using System.Net;
+using Microsoft.Identity.Web;
 
 namespace QuokkaPack.RazorPages.Pages.Trips
 {
     public class DeleteModel : PageModel
     {
-        private readonly HttpClient _httpClient;
+        private readonly IDownstreamApi _downstreamApi;
+        private readonly ILogger<DeleteModel> _logger;
 
-        public DeleteModel(IHttpClientFactory factory)
+        public DeleteModel(IDownstreamApi downstreamApi, ILogger<DeleteModel> logger)
         {
-            _httpClient = factory.CreateClient("QuokkaApi");
+            _downstreamApi = downstreamApi;
+            _logger = logger;
         }
 
         [BindProperty]
-        public Trip Trip { get; set; } = default!;
+        public TripReadDto Trip { get; set; } = default!;
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
-            //var trip = await _context.Trips.FirstOrDefaultAsync(m => m.Id == id);
-            Trip trip = null;
-
-            if (trip is not null)
+            try
             {
-                Trip = trip;
+                var trip = await _downstreamApi.CallApiForUserAsync<TripReadDto>(
+                    "DownstreamApi",
+                    options => options.RelativePath = $"/api/trips/{id}");
 
+                if (trip == null)
+                    return NotFound();
+
+                Trip = trip;
                 return Page();
             }
-
-            return NotFound();
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching trip with ID {TripId}", id);
+                return NotFound();
+            }
         }
 
         public async Task<IActionResult> OnPostAsync(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
-            //var trip = await _context.Trips.FindAsync(id);
-            Trip trip = null;
-            if (trip != null)
+            try
             {
-                Trip = trip;
-                //_context.Trips.Remove(Trip);
-                //await _context.SaveChangesAsync();
-            }
+                await _downstreamApi.DeleteForUserAsync<int>(
+                    "DownstreamApi",
+                    id.Value,
+                    options =>
+                    {
+                        options.RelativePath = $"/api/trips/{id}";
 
-            return RedirectToPage("./Index");
+                    });
+
+                return RedirectToPage("./Index");
+            }
+            catch (HttpRequestException ex)
+            {
+                _logger.LogError(ex, "HTTP request failed when deleting trip {TripId}", id);
+                return StatusCode(500);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error deleting trip {TripId}", id);
+                return StatusCode(500);
+            }
         }
     }
 }

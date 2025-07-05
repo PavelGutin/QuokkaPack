@@ -2,8 +2,10 @@
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Abstractions;
 using QuokkaPack.Data;
 using QuokkaPack.Data.Models;
+using QuokkaPack.Shared.DTOs.Trip;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,31 +16,40 @@ namespace QuokkaPack.RazorPages.Pages.Trips
 {
     public class EditModel : PageModel
     {
-        private readonly HttpClient _httpClient;
+        private readonly IDownstreamApi _downstreamApi;
+        private readonly ILogger<DeleteModel> _logger;
 
-        public EditModel(IHttpClientFactory factory)
+        public EditModel(IDownstreamApi downstreamApi, ILogger<DeleteModel> logger)
         {
-            _httpClient = factory.CreateClient("QuokkaApi");
+            _downstreamApi = downstreamApi;
+            _logger = logger;
         }
 
         [BindProperty]
-        public Trip Trip { get; set; } = default!;
+        public TripEditDto Trip { get; set; } = default!;
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
-            //var trip =  await _context.Trips.FirstOrDefaultAsync(m => m.Id == id);
-            Trip trip = null;
-            if (trip == null)
+            try
             {
+                var trip = await _downstreamApi.CallApiForUserAsync<TripEditDto>(
+                    "DownstreamApi",
+                    options => options.RelativePath = $"/api/trips/{id}");
+
+                if (trip == null)
+                    return NotFound();
+
+                Trip = trip;
+                return Page();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching trip with ID {TripId}", id);
                 return NotFound();
             }
-            Trip = trip;
-            return Page();
         }
 
         // To protect from overposting attacks, enable the specific properties you want to bind to.
@@ -49,23 +60,25 @@ namespace QuokkaPack.RazorPages.Pages.Trips
             {
                 return Page();
             }
-
-            //_context.Attach(Trip).State = EntityState.Modified;
-
             try
             {
-                //await _context.SaveChangesAsync();
+                await _downstreamApi.PutForUserAsync(
+                    "DownstreamApi",
+                    Trip,
+                    options =>
+                    {
+                        options.RelativePath = $"/api/trips/{Trip.Id}";
+                    });
             }
-            catch (DbUpdateConcurrencyException)
+            catch (HttpRequestException ex)
             {
-                if (!TripExists(Trip.Id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                _logger.LogError(ex, "HTTP request failed when updating trip {TripId}", Trip.Id);
+                return StatusCode(500);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error updating trip {TripId}", Trip.Id);
+                return StatusCode(500);
             }
 
             return RedirectToPage("./Index");

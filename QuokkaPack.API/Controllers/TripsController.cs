@@ -62,14 +62,19 @@ namespace QuokkaPack.API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateTrip(int id, Trip trip)
+        public async Task<IActionResult> UpdateTrip(int id, TripEditDto dto)
         {
-            if (id != trip.Id)
-            {
-                return BadRequest();
-            }
+            if (id != dto.Id)
+                return BadRequest("ID in URL does not match ID in body.");
 
-            _context.Entry(trip).State = EntityState.Modified;
+            var trip = await _context.Trips.FindAsync(id);
+            if (trip == null)
+                return NotFound();
+
+            //TODO: Use automapper or an extension method to map DTO to entity
+            trip.Destination = dto.Destination;
+            trip.StartDate = dto.StartDate;
+            trip.EndDate = dto.EndDate;
 
             try
             {

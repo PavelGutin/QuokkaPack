@@ -21,20 +21,7 @@ namespace QuokkaPack.RazorPages.Pages
 
         public async Task OnGet()
         {
-            /*
-            using var response = await _downstreamApi.CallApiForUserAsync("DownstreamApi").ConfigureAwait(false);
-            if (response.StatusCode == System.Net.HttpStatusCode.OK)
-            {
-                var apiResult = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                ViewData["ApiResult"] = apiResult;
-            }
-            else
-            {
-                var error = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                throw new HttpRequestException($"Invalid status code in the HttpResponseMessage: {response.StatusCode}: {error}");
-            }
-            */
-            ViewData["ApiResult"] = "hi";
+            ViewData["ApiResult"] = "Hello There";
 
             using var response = await _downstreamApi
                 .CallApiForUserAsync(
