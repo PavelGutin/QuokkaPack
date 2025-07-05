@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using QuokkaPack.API.Services;
 using QuokkaPack.Data;
 using QuokkaPack.Data.Models;
+using QuokkaPack.Shared.DTOs.Trip;
+using QuokkaPack.Shared.Mappings;
 
 namespace QuokkaPack.API.Controllers
 {
@@ -41,14 +43,22 @@ namespace QuokkaPack.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Trip>> CreateTrip(Trip trip)
+        public async Task<ActionResult<TripReadDto>> CreateTrip(TripCreateDto tripDto)
         {
+            var trip = tripDto.ToTrip();
             var user = await _userResolver.GetOrCreateAsync(User);
             trip.MasterUserId = user.Id;
             _context.Trips.Add(trip);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetTrip), new { id = trip.Id }, trip);
+            try
+            {
+                return CreatedAtAction(nameof(GetTrip), new { id = trip.Id }, trip.ToReadDto());
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error generating CreatedAtAction: {ex.Message}");
+            }
         }
 
         [HttpPut("{id}")]

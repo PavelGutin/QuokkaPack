@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Identity.Abstractions;
-using QuokkaPack.Data.Models;
+using QuokkaPack.Shared.DTOs.Trip;
 
 namespace QuokkaPack.RazorPages.Pages.Trips
 {
@@ -15,7 +15,7 @@ namespace QuokkaPack.RazorPages.Pages.Trips
         }
 
         [BindProperty]
-        public Trip Trip { get; set; } = default!;
+        public TripCreateDto Trip { get; set; } = default!;
 
         public IActionResult OnGet()
         {
@@ -29,7 +29,7 @@ namespace QuokkaPack.RazorPages.Pages.Trips
                 return Page();
             }
 
-            await _downstreamApi.PostForUserAsync<Trip>(
+            await _downstreamApi.PostForUserAsync(
                 "DownstreamApi",
                 Trip,
                 options =>
@@ -37,14 +37,6 @@ namespace QuokkaPack.RazorPages.Pages.Trips
                     options.RelativePath = "/api/trips";
                 });
 
-            //await _downstreamApi.CallApiForUserAsync(
-            //    "DownstreamApi",
-            //    options =>
-            //    {
-            //        options.RelativePath = "/api/trips";
-            //        options.HttpMethod = HttpMethod.Post.ToString();
-            //        options.JsonBody = Trip;
-            //    });
 
             return RedirectToPage("./Index");
         }

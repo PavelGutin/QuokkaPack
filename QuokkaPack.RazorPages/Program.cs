@@ -22,8 +22,7 @@ builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
         builder.Configuration.Bind("AzureAd", options);
         options.Prompt = "consent";
     })
-     //.EnableTokenAcquisitionToCallDownstreamApi(initialScopes)
-    .EnableTokenAcquisitionToCallDownstreamApi(["api://6c0192cd-df66-43af-b252-b2e823643f12/access_as_user"])
+    .EnableTokenAcquisitionToCallDownstreamApi(initialScopes)
     .AddDownstreamApi("DownstreamApi",builder.Configuration.GetSection("DownstreamApi"))
     .AddInMemoryTokenCaches();
 
