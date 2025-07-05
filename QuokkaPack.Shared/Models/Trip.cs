@@ -10,5 +10,6 @@ namespace QuokkaPack.Data.Models
         public string Destination { get; set; } = string.Empty;
         public Guid MasterUserId { get; set; }
         public MasterUser MasterUser { get; set; } = default!;
+        public ICollection<Category> Categories { get; set; } = [];
     }
 }

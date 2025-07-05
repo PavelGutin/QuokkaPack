@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Identity.Abstractions;
-using QuokkaPack.Shared.DTOs.Trip;
+using QuokkaPack.Shared.DTOs.Category;
 
-namespace QuokkaPack.RazorPages.Pages.Trips
+namespace QuokkaPack.RazorPages.Pages.Categories
 {
     public class EditModel : PageModel
     {
@@ -17,7 +17,7 @@ namespace QuokkaPack.RazorPages.Pages.Trips
         }
 
         [BindProperty]
-        public TripEditDto Trip { get; set; } = default!;
+        public CategoryEditDto Category { get; set; } = default!;
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
@@ -26,19 +26,19 @@ namespace QuokkaPack.RazorPages.Pages.Trips
 
             try
             {
-                var trip = await _downstreamApi.CallApiForUserAsync<TripEditDto>(
+                var category = await _downstreamApi.CallApiForUserAsync<CategoryEditDto>(
                     "DownstreamApi",
-                    options => options.RelativePath = $"/api/trips/{id}");
+                    options => options.RelativePath = $"/api/categories/{id}");
 
-                if (trip == null)
+                if (category == null)
                     return NotFound();
 
-                Trip = trip;
+                Category = category;
                 return Page();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error fetching trip with ID {TripId}", id);
+                _logger.LogError(ex, "Error fetching category with ID {CategoryId}", id);
                 return NotFound();
             }
         }
@@ -55,20 +55,20 @@ namespace QuokkaPack.RazorPages.Pages.Trips
             {
                 await _downstreamApi.PutForUserAsync(
                     "DownstreamApi",
-                    Trip,
+                    Category,
                     options =>
                     {
-                        options.RelativePath = $"/api/trips/{Trip.Id}";
+                        options.RelativePath = $"/api/categories/{Category.Id}";
                     });
             }
             catch (HttpRequestException ex)
             {
-                _logger.LogError(ex, "HTTP request failed when updating trip {TripId}", Trip.Id);
+                _logger.LogError(ex, "HTTP request failed when updating category {CategoryId}", Category.Id);
                 return StatusCode(500);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Unexpected error updating trip {TripId}", Trip.Id);
+                _logger.LogError(ex, "Unexpected error updating category {CategoryId}", Category.Id);
                 return StatusCode(500);
             }
 

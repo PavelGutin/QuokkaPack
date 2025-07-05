@@ -4,6 +4,9 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
 using QuokkaPack.RazorPages.UserLogin;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using QuokkaPack.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +31,8 @@ builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
 
 builder.Services.AddRazorPages()
     .AddMicrosoftIdentityUI();
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("AppDbContext") ?? throw new InvalidOperationException("Connection string 'AppDbContext' not found.")));
 
 builder.Services.AddHttpClient();
 

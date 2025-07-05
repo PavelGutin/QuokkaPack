@@ -1,10 +1,17 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Identity.Abstractions;
+using QuokkaPack.Data;
+using QuokkaPack.Data.Models;
+using QuokkaPack.Shared.DTOs.Category;
+using QuokkaPack.Shared.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
-using QuokkaPack.Shared.DTOs.Trip;
-
-namespace QuokkaPack.RazorPages.Pages.Trips
+namespace QuokkaPack.RazorPages.Pages.Categories
 {
     public class CreateModel : PageModel
     {
@@ -15,14 +22,15 @@ namespace QuokkaPack.RazorPages.Pages.Trips
             _downstreamApi = downstreamApi;
         }
 
-        [BindProperty]
-        public TripCreateDto Trip { get; set; } = default!;
-
         public IActionResult OnGet()
         {
             return Page();
         }
 
+        [BindProperty]
+        public CategoryCreateDto Category { get; set; } = default!;
+
+        // For more information, see https://aka.ms/RazorPagesCRUD.
         public async Task<IActionResult> OnPostAsync()
         {
             if (!ModelState.IsValid)
@@ -32,10 +40,10 @@ namespace QuokkaPack.RazorPages.Pages.Trips
 
             await _downstreamApi.PostForUserAsync(
                 "DownstreamApi",
-                Trip,
+                Category,
                 options =>
                 {
-                    options.RelativePath = "/api/trips";
+                    options.RelativePath = "/api/categories";
                 });
 
 

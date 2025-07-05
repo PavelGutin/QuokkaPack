@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Identity.Abstractions;
-using QuokkaPack.Data.Models;
+using QuokkaPack.Shared.Models;
 
-namespace QuokkaPack.RazorPages.Pages.Trips
+namespace QuokkaPack.RazorPages.Pages.Categories
 {
     public class IndexModel : PageModel
     {
@@ -13,13 +13,13 @@ namespace QuokkaPack.RazorPages.Pages.Trips
             _downstreamApi = downstreamApi; ;
         }
 
-        public IList<Trip> Trips { get; set; } = [];
+        public IList<Category> Categories { get;set; } = default!;
 
         public async Task OnGetAsync()
         {
-            Trips = await _downstreamApi.CallApiForUserAsync<IList<Trip>>(
+            Categories = await _downstreamApi.CallApiForUserAsync<IList<Category>>(
                 "DownstreamApi",
-                options => options.RelativePath = "/api/trips"
+                options => options.RelativePath = "/api/categories"
             ) ?? [];
         }
     }
