@@ -1,9 +1,10 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
 using QuokkaPack.API.Services;
 using QuokkaPack.Data;
-using Microsoft.AspNetCore.Authentication;
+using QuokkaPack.Data.Seeding;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,6 +24,20 @@ builder.Services.AddScoped<IUserResolver, UserResolver>();
 
 var app = builder.Build();
 
+
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    var env = scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>();
+
+    context.Database.Migrate(); // ensure schema is created
+
+    if (env.IsDevelopment())
+    {
+        await SeedData.InitializeAsync(context); // await the async method
+    }
+}
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -38,3 +53,4 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+

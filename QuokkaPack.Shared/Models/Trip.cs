@@ -11,5 +11,6 @@ namespace QuokkaPack.Data.Models
         public Guid MasterUserId { get; set; }
         public MasterUser MasterUser { get; set; } = default!;
         public ICollection<Category> Categories { get; set; } = [];
+        public ICollection<Item> Item { get; set; } = [];
     }
 }
