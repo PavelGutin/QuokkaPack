@@ -50,7 +50,7 @@ namespace QuokkaPack.RazorPages.Pages.Categories
 
             try
             {
-                await _downstreamApi.DeleteForUserAsync<int>(
+                await _downstreamApi.DeleteForUserAsync(
                     "DownstreamApi",
                     id.Value,
                     options =>

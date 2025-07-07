@@ -26,28 +26,41 @@ namespace QuokkaPack.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Trip>>> GetTrips()
         {
+            //TODO: return a DTO
             return await _context.Trips.ToListAsync();
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Trip>> GetTrip(int id)
+        public async Task<ActionResult<TripReadDto>> GetTrip(int id)
         {
-            var trip = await _context.Trips.FindAsync(id);
+            var user = await _userResolver.GetOrCreateAsync(User);
+
+            var trip = await _context.Trips
+                .Include(t => t.Categories)
+                .FirstOrDefaultAsync(t => t.Id == id && t.MasterUserId == user.Id);
 
             if (trip == null)
-            {
                 return NotFound();
-            }
 
-            return trip;
+            return trip.ToReadDto();
         }
 
         [HttpPost]
         public async Task<ActionResult<TripReadDto>> CreateTrip(TripCreateDto tripDto)
         {
-            var trip = tripDto.ToTrip();
             var user = await _userResolver.GetOrCreateAsync(User);
+
+            // Create the base trip
+            var trip = tripDto.ToTrip(); // this should exclude category binding
             trip.MasterUserId = user.Id;
+
+            // Fetch categories that match the provided IDs and belong to the user
+            var categories = await _context.Categories
+                .Where(c => tripDto.CategoryIds.Contains(c.Id) && c.MasterUserId == user.Id)
+                .ToListAsync();
+
+            trip.Categories = categories;
+
             _context.Trips.Add(trip);
             await _context.SaveChangesAsync();
 

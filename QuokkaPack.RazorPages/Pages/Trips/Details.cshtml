@@ -30,6 +30,14 @@
             @Html.DisplayFor(model => model.Trip.Destination)
         </dd>
     </dl>
+    @if (Model.Trip.Categories?.Any() == true)
+    {
+        <p><strong>Categories:</strong> @string.Join(", ", Model.Trip.Categories)</p>
+    }
+    else
+    {
+        <p><strong>Categories:</strong> None</p>
+    }
 </div>
 <div>
     <a asp-page="./Edit" asp-route-id="@Model.Trip.Id">Edit</a> |

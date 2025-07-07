@@ -11,8 +11,8 @@ namespace QuokkaPack.Shared.Mappings
             {
                 Name = dto.Name,
                 Notes = dto.Notes,
-                IsEssential = dto.IsEssential,
-                Categories = dto.Categories
+                IsEssential = dto.IsEssential//,
+                //Categories = dto.Categories
             };
         }
 
@@ -20,10 +20,11 @@ namespace QuokkaPack.Shared.Mappings
         {
             return new ItemReadDto
             {
+                Id = item.Id,
                 Name = item.Name,
                 Notes = item.Notes,
-                IsEssential = item.IsEssential,
-                Categories = item.Categories
+                IsEssential = item.IsEssential//,
+                //Categories = item.Categories
             };
         }
     }
