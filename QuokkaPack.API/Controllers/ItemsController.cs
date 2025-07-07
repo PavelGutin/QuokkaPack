@@ -3,55 +3,58 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QuokkaPack.API.Services;
 using QuokkaPack.Data;
-using QuokkaPack.Shared.DTOs.CategoryDTOs;
+using QuokkaPack.Shared.DTOs.ItemDTOs;
 using QuokkaPack.Shared.Mappings;
+using QuokkaPack.Shared.Models;
+using static Azure.Core.HttpHeader;
 
 namespace QuokkaPack.API.Controllers
 {
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
-    public class CategoriesController : ControllerBase
+    public class ItemsController : ControllerBase
     {
         private readonly IUserResolver _userResolver;
         private readonly AppDbContext _context;
 
-        public CategoriesController(IUserResolver userResolver, AppDbContext context)
+        public ItemsController(IUserResolver userResolver, AppDbContext context)
         {
             _userResolver = userResolver;
             _context = context;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<CategoryReadDto>>> GetCategories()
+        public async Task<ActionResult<IEnumerable<Item>>> GetItems()
         {
-            var categories = await _context.Categories.ToListAsync();
-            return categories.Select(c => c.ToReadDto()).ToList();
+            return await _context.Items.ToListAsync();
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<CategoryReadDto>> GetCategory(int id)
+        public async Task<ActionResult<Item>> GetItem(int id)
         {
-            var category = await _context.Categories.FindAsync(id);
-            if (category == null)
-                return NotFound();
+            var item = await _context.Items.FindAsync(id);
 
-            return category.ToReadDto();
+            if (item == null)
+            {
+                return NotFound();
+            }
+
+            return item;
         }
 
         [HttpPost]
-        public async Task<ActionResult<CategoryReadDto>> CreateCategory(CategoryCreateDto dto)
+        public async Task<ActionResult<ItemReadDto>> CreateItem(ItemCreateDto itemDto)
         {
-            var category = dto.ToCategory();
+            var item = itemDto.ToItem();
             var user = await _userResolver.GetOrCreateAsync(User);
-            category.MasterUserId = user.Id;
-
-            _context.Categories.Add(category);
+            item.MasterUserId = user.Id;
+            _context.Items.Add(item);
             await _context.SaveChangesAsync();
 
             try
             {
-                return CreatedAtAction(nameof(GetCategory), new { id = category.Id }, category.ToReadDto());
+                return CreatedAtAction(nameof(GetItem), new { id = item.Id }, item.ToReadDto());
             }
             catch (Exception ex)
             {
@@ -60,19 +63,20 @@ namespace QuokkaPack.API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateCategory(int id, CategoryEditDto dto)
+        public async Task<IActionResult> UpdateItem(int id, ItemEditDto dto)
         {
             if (id != dto.Id)
                 return BadRequest("ID in URL does not match ID in body.");
 
-            var category = await _context.Categories.FindAsync(id);
-            if (category == null)
+            var item = await _context.Items.FindAsync(id);
+            if (item == null)
                 return NotFound();
 
-            // TODO: Replace with mapper or extension
-            category.Name = dto.Name;
-            category.Description = dto.Description;
-            category.IsDefault = dto.IsDefault;
+            //TODO: Use automapper or an extension method to map DTO to entity
+            item.Name = dto.Name;
+            item.Notes = dto.Notes;
+            item.IsEssential = dto.IsEssential;
+            item.Categories = dto.Categories;
 
             try
             {
@@ -80,7 +84,7 @@ namespace QuokkaPack.API.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!_context.Categories.Any(e => e.Id == id))
+                if (!_context.Items.Any(e => e.Id == id))
                     return NotFound();
                 else
                     throw;
@@ -90,13 +94,15 @@ namespace QuokkaPack.API.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCategory(int id)
+        public async Task<IActionResult> DeleteItem(int id)
         {
-            var category = await _context.Categories.FindAsync(id);
-            if (category == null)
+            var item = await _context.Items.FindAsync(id);
+            if (item == null)
+            {
                 return NotFound();
+            }
 
-            _context.Categories.Remove(category);
+            _context.Items.Remove(item);
             await _context.SaveChangesAsync();
 
             return NoContent();

@@ -1,9 +1,18 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Abstractions;
-using QuokkaPack.Shared.DTOs.CategoryDTOs;
+using QuokkaPack.Data;
+using QuokkaPack.Data.Models;
+using QuokkaPack.Shared.DTOs.ItemDTOs;
+using QuokkaPack.Shared.DTOs.Trip;
+using QuokkaPack.Shared.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace QuokkaPack.RazorPages.Pages.Categories
+namespace QuokkaPack.RazorPages.Pages.Items
 {
     public class DetailsModel : PageModel
     {
@@ -16,7 +25,7 @@ namespace QuokkaPack.RazorPages.Pages.Categories
             _logger = logger;
         }
 
-        public CategoryReadDto Category { get; set; } = default!;
+        public ItemReadDto Item { get; set; } = default!;
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
@@ -25,19 +34,19 @@ namespace QuokkaPack.RazorPages.Pages.Categories
 
             try
             {
-                var category = await _downstreamApi.CallApiForUserAsync<CategoryReadDto>(
+                var item = await _downstreamApi.CallApiForUserAsync<ItemReadDto>(
                     "DownstreamApi",
-                    options => options.RelativePath = $"/api/categories/{id}");
+                    options => options.RelativePath = $"/api/items/{id}");
 
-                if (category == null)
+                if (item == null)
                     return NotFound();
 
-                Category = category;
+                Item = item;
                 return Page();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error fetching category with ID {CategoryId}", id);
+                _logger.LogError(ex, "Error fetching item with ID {ItemId}", id);
                 return NotFound();
             }
         }

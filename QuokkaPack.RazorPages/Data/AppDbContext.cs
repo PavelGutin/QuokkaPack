@@ -15,5 +15,6 @@ namespace QuokkaPack.Data
         }
 
         public DbSet<QuokkaPack.Shared.Models.Category> Category { get; set; } = default!;
+        public DbSet<QuokkaPack.Shared.Models.Item> Item { get; set; } = default!;
     }
 }

@@ -1,15 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Abstractions;
-using QuokkaPack.Data;
-using QuokkaPack.Data.Models;
 using QuokkaPack.Shared.DTOs.Trip;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Threading.Tasks;
 
 namespace QuokkaPack.RazorPages.Pages.Trips
 {

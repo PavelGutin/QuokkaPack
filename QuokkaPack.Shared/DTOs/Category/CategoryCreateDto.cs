@@ -1,4 +1,4 @@
-﻿namespace QuokkaPack.Shared.DTOs.Category;
+﻿namespace QuokkaPack.Shared.DTOs.CategoryDTOs;
 
 public class CategoryCreateDto
 {

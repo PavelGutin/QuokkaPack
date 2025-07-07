@@ -1,9 +1,17 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Abstractions;
+using QuokkaPack.Data;
 using QuokkaPack.Shared.DTOs.CategoryDTOs;
+using QuokkaPack.Shared.DTOs.ItemDTOs;
+using QuokkaPack.Shared.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace QuokkaPack.RazorPages.Pages.Categories
+namespace QuokkaPack.RazorPages.Pages.Items
 {
     public class DeleteModel : PageModel
     {
@@ -17,7 +25,7 @@ namespace QuokkaPack.RazorPages.Pages.Categories
         }
 
         [BindProperty]
-        public CategoryReadDto Category { get; set; } = default!;
+        public ItemReadDto Item { get; set; } = default!;
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
@@ -26,19 +34,19 @@ namespace QuokkaPack.RazorPages.Pages.Categories
 
             try
             {
-                var category = await _downstreamApi.CallApiForUserAsync<CategoryReadDto>(
+                var item = await _downstreamApi.CallApiForUserAsync<ItemReadDto>(
                     "DownstreamApi",
-                    options => options.RelativePath = $"/api/categories/{id}");
+                    options => options.RelativePath = $"/api/items/{id}");
 
-                if (category == null)
+                if (item == null)
                     return NotFound();
 
-                Category = category;
+                Item = item;
                 return Page();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error fetching category with ID {CategoryId}", id);
+                _logger.LogError(ex, "Error fetching item with ID {ItemId}", id);
                 return NotFound();
             }
         }
@@ -55,7 +63,7 @@ namespace QuokkaPack.RazorPages.Pages.Categories
                     id.Value,
                     options =>
                     {
-                        options.RelativePath = $"/api/categories/{id}";
+                        options.RelativePath = $"/api/items/{id}";
 
                     });
 
@@ -63,12 +71,12 @@ namespace QuokkaPack.RazorPages.Pages.Categories
             }
             catch (HttpRequestException ex)
             {
-                _logger.LogError(ex, "HTTP request failed when deleting category {CategoryId}", id);
+                _logger.LogError(ex, "HTTP request failed when deleting item {ItemId}", id);
                 return StatusCode(500);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Unexpected error deleting category {CategoryId}", id);
+                _logger.LogError(ex, "Unexpected error deleting item {ItemId}", id);
                 return StatusCode(500);
             }
         }

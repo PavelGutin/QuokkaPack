@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Identity.Abstractions;
-using QuokkaPack.Shared.DTOs.CategoryDTOs;
+using QuokkaPack.Shared.DTOs.ItemDTOs;
 
-namespace QuokkaPack.RazorPages.Pages.Categories
+namespace QuokkaPack.RazorPages.Pages.Items
 {
     public class EditModel : PageModel
     {
@@ -17,7 +17,7 @@ namespace QuokkaPack.RazorPages.Pages.Categories
         }
 
         [BindProperty]
-        public CategoryEditDto Category { get; set; } = default!;
+        public ItemEditDto Item { get; set; } = default!;
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
@@ -26,19 +26,19 @@ namespace QuokkaPack.RazorPages.Pages.Categories
 
             try
             {
-                var category = await _downstreamApi.CallApiForUserAsync<CategoryEditDto>(
+                var item = await _downstreamApi.CallApiForUserAsync<ItemEditDto>(
                     "DownstreamApi",
-                    options => options.RelativePath = $"/api/categories/{id}");
+                    options => options.RelativePath = $"/api/items/{id}");
 
-                if (category == null)
+                if (item == null)
                     return NotFound();
 
-                Category = category;
+                Item = item;
                 return Page();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error fetching category with ID {CategoryId}", id);
+                _logger.LogError(ex, "Error fetching item with ID {ItemId}", id);
                 return NotFound();
             }
         }
@@ -55,20 +55,20 @@ namespace QuokkaPack.RazorPages.Pages.Categories
             {
                 await _downstreamApi.PutForUserAsync(
                     "DownstreamApi",
-                    Category,
+                    Item,
                     options =>
                     {
-                        options.RelativePath = $"/api/categories/{Category.Id}";
+                        options.RelativePath = $"/api/categories/{Item.Id}";
                     });
             }
             catch (HttpRequestException ex)
             {
-                _logger.LogError(ex, "HTTP request failed when updating category {CategoryId}", Category.Id);
+                _logger.LogError(ex, "HTTP request failed when updating item {ItemId}", Item.Id);
                 return StatusCode(500);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Unexpected error updating category {CategoryId}", Category.Id);
+                _logger.LogError(ex, "Unexpected error updating item {ItemId}", Item.Id);
                 return StatusCode(500);
             }
 

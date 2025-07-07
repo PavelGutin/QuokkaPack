@@ -1,9 +1,16 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Identity.Abstractions;
-using QuokkaPack.Shared.DTOs.CategoryDTOs;
+using QuokkaPack.Data;
+using QuokkaPack.Shared.DTOs.ItemDTOs;
+using QuokkaPack.Shared.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace QuokkaPack.RazorPages.Pages.Categories
+namespace QuokkaPack.RazorPages.Pages.Items
 {
     public class CreateModel : PageModel
     {
@@ -20,7 +27,7 @@ namespace QuokkaPack.RazorPages.Pages.Categories
         }
 
         [BindProperty]
-        public CategoryCreateDto Category { get; set; } = default!;
+        public ItemCreateDto Item { get; set; } = default!;
 
         // For more information, see https://aka.ms/RazorPagesCRUD.
         public async Task<IActionResult> OnPostAsync()
@@ -32,10 +39,10 @@ namespace QuokkaPack.RazorPages.Pages.Categories
 
             await _downstreamApi.PostForUserAsync(
                 "DownstreamApi",
-                Category,
+                Item,
                 options =>
                 {
-                    options.RelativePath = "/api/categories";
+                    options.RelativePath = "/api/items";
                 });
 
 
