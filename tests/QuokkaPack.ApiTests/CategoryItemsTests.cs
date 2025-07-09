@@ -31,13 +31,28 @@ namespace QuokkaPack.ApiTests.Controllers
             response.StatusCode.Should().Be(HttpStatusCode.NotFound);
         }
 
+        //[Fact]
+        //public async Task Post_ShouldReturnCreated_WhenValid()
+        //{
+        //    var postData = new { Name = "Test", Description = "Testing", IsDefault = false };
+        //    var response = await _client.PostAsJsonAsync("/api/categoryitems", postData);
+        //    response.StatusCode.Should().Be(HttpStatusCode.Created);
+        //}
+
         [Fact]
         public async Task Post_ShouldReturnCreated_WhenValid()
         {
-            var postData = new { Name = "Test", Description = "Testing", IsDefault = false };
-            var response = await _client.PostAsJsonAsync("/api/categoryitems", postData);
+            var item = await TestSeedHelper.SeedCatgoryAndItemAsync(_factory);
+            var categoryId = item.Categories.First().Id;
+            var itemId = item.Id;
+
+            var postData = new { categoryId, itemId };
+            var response = await _client.PostAsJsonAsync(
+                $"api/categories/{categoryId}/items/{itemId}", postData);
+
             response.StatusCode.Should().Be(HttpStatusCode.Created);
         }
+
 
         [Fact]
         public async Task Put_ShouldReturnBadRequest_WhenIdMismatch()

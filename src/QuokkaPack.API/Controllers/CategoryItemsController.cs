@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using QuokkaPack.API.Services;
 using QuokkaPack.Data;
 using QuokkaPack.Shared.DTOs.ItemDTOs;
+using QuokkaPack.Shared.Mappings;
 
 namespace QuokkaPack.API.Controllers
 {
@@ -70,7 +71,12 @@ namespace QuokkaPack.API.Controllers
 
             await _context.SaveChangesAsync();
 
-            return NoContent();
+            return CreatedAtAction(
+                actionName: nameof(ItemsController.GetItem), // assumes a matching GET method exists
+                controllerName: "Items",
+                routeValues: new { id = item.Id },
+                value: item.ToReadDto() // or return a minimal DTO if preferred
+            );
         }
 
         // DELETE: /api/categories/5/items/10
