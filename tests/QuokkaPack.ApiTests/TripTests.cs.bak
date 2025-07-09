@@ -1,0 +1,28 @@
+﻿using FluentAssertions;
+using System.Net;
+
+namespace QuokkaPack.ApiTests
+{
+    public class TripTests : IClassFixture<ApiTestFactory>
+    {
+        private readonly HttpClient _client;
+
+        public TripTests(ApiTestFactory factory)
+        {
+            _client = factory.CreateClient();
+        }
+
+        [Fact]
+        public async Task GetTrips_ShouldReturnSuccess()
+        {
+            // Act
+            var response = await _client.GetAsync("/api/trips");
+
+            // Assert
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+            var content = await response.Content.ReadAsStringAsync();
+            content.Should().NotBeNullOrWhiteSpace();
+        }
+    }
+}

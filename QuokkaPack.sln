@@ -3,15 +3,21 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.36221.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuokkaPack.API", "QuokkaPack.API\QuokkaPack.API.csproj", "{3BF2B457-8C9C-4100-B0EA-622E7F05B0C2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuokkaPack.API", "src\QuokkaPack.API\QuokkaPack.API.csproj", "{3BF2B457-8C9C-4100-B0EA-622E7F05B0C2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuokkaPack.RazorPages", "QuokkaPack.RazorPages\QuokkaPack.RazorPages.csproj", "{5A5DEABF-C209-4024-8E26-72C267A548B5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuokkaPack.RazorPages", "src\QuokkaPack.RazorPages\QuokkaPack.RazorPages.csproj", "{5A5DEABF-C209-4024-8E26-72C267A548B5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuokkaPack.Data", "QuokkaPack.Data\QuokkaPack.Data.csproj", "{3C4465B1-0E74-4BA1-85A6-99CF731D7D6A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuokkaPack.Data", "src\QuokkaPack.Data\QuokkaPack.Data.csproj", "{3C4465B1-0E74-4BA1-85A6-99CF731D7D6A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuokkaPack.Shared", "QuokkaPack.Shared\QuokkaPack.Shared.csproj", "{DEF8C1F9-C874-42D5-A4C2-0A4407409DBD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuokkaPack.Shared", "src\QuokkaPack.Shared\QuokkaPack.Shared.csproj", "{DEF8C1F9-C874-42D5-A4C2-0A4407409DBD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuokkaPack.Infrastructure", "QuokkaPack.Infrastructure\QuokkaPack.Infrastructure.csproj", "{AE642352-4E79-4BE3-8C98-4034EB815DEC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuokkaPack.Infrastructure", "src\QuokkaPack.Infrastructure\QuokkaPack.Infrastructure.csproj", "{AE642352-4E79-4BE3-8C98-4034EB815DEC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{F0F36299-0FF7-4FC1-9FD6-7736D4674ACB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuokkaPack.ApiTests", "tests\QuokkaPack.ApiTests\QuokkaPack.ApiTests.csproj", "{9FAA16F4-72F4-4D10-9DDE-83D5B1D8F77A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,9 +45,21 @@ Global
 		{AE642352-4E79-4BE3-8C98-4034EB815DEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AE642352-4E79-4BE3-8C98-4034EB815DEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AE642352-4E79-4BE3-8C98-4034EB815DEC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9FAA16F4-72F4-4D10-9DDE-83D5B1D8F77A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9FAA16F4-72F4-4D10-9DDE-83D5B1D8F77A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9FAA16F4-72F4-4D10-9DDE-83D5B1D8F77A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9FAA16F4-72F4-4D10-9DDE-83D5B1D8F77A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{3BF2B457-8C9C-4100-B0EA-622E7F05B0C2} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{5A5DEABF-C209-4024-8E26-72C267A548B5} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{3C4465B1-0E74-4BA1-85A6-99CF731D7D6A} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{DEF8C1F9-C874-42D5-A4C2-0A4407409DBD} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{AE642352-4E79-4BE3-8C98-4034EB815DEC} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{9FAA16F4-72F4-4D10-9DDE-83D5B1D8F77A} = {F0F36299-0FF7-4FC1-9FD6-7736D4674ACB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E5E3188E-AC1E-4BF1-92B0-E74D958D0644}

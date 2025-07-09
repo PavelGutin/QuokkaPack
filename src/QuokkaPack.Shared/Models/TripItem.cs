@@ -1,0 +1,11 @@
+﻿using QuokkaPack.Shared.Models;
+
+namespace QuokkaPack.Data.Models
+{
+    public class TripItem
+    {
+        public int Id { get; set; }
+        public Item Item { get; set; } = default!;
+        public bool IsPacked { get; set; } = false;
+    }
+}
