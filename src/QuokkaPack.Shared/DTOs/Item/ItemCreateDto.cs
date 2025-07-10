@@ -2,7 +2,7 @@
 
 namespace QuokkaPack.Shared.DTOs.ItemDTOs
 {
-    public class TripItemCreateDto
+    public class ItemCreateDto
     {
         public string Name { get; set; } = default!;
         public string? Notes { get; set; }

@@ -6,6 +6,7 @@ namespace QuokkaPack.Data.Models
     {
         public int Id { get; set; }
         public Item Item { get; set; } = default!;
+        public Trip Trip { get; set; } = default!;
         public bool IsPacked { get; set; } = false;
     }
 }

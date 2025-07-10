@@ -6,7 +6,6 @@ using QuokkaPack.Data;
 using QuokkaPack.Shared.DTOs.ItemDTOs;
 using QuokkaPack.Shared.Mappings;
 using QuokkaPack.Shared.Models;
-using static Azure.Core.HttpHeader;
 
 namespace QuokkaPack.API.Controllers
 {
@@ -25,26 +24,33 @@ namespace QuokkaPack.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Item>>> GetItems()
+        public async Task<ActionResult<IEnumerable<ItemReadDto>>> GetItems()
         {
-            return await _context.Items.ToListAsync();
+            var items = await _context.Items
+                .AsNoTracking()
+                .Select(item => item.ToReadDto())
+                .ToListAsync();
+
+            return Ok(items);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Item>> GetItem(int id)
+        public async Task<ActionResult<ItemReadDto>> GetItem(int id)
         {
-            var item = await _context.Items.FindAsync(id);
+            var item = await _context.Items
+                .AsNoTracking()
+                .FirstOrDefaultAsync(i => i.Id == id);
 
             if (item == null)
             {
                 return NotFound();
             }
 
-            return item;
+            return item.ToReadDto();
         }
 
         [HttpPost]
-        public async Task<ActionResult<ItemReadDto>> CreateItem(TripItemCreateDto itemDto)
+        public async Task<ActionResult<ItemReadDto>> CreateItem(ItemCreateDto itemDto)
         {
             var item = itemDto.ToItem();
             var user = await _userResolver.GetOrCreateAsync(User);

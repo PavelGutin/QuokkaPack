@@ -45,7 +45,8 @@ namespace QuokkaPack.RazorPages.Pages.Trips
 
         public async Task<IActionResult> OnPostAddAsync()
         {
-            if (!ModelState.IsValid || string.IsNullOrWhiteSpace(NewTripItem.Name))
+            //if (!ModelState.IsValid || string.IsNullOrWhiteSpace(NewTripItem.Name))
+            if (!ModelState.IsValid)
             {
                 return await OnGetAsync();
             }

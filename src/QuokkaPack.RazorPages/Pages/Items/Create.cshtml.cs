@@ -27,7 +27,7 @@ namespace QuokkaPack.RazorPages.Pages.Items
         }
 
         [BindProperty]
-        public TripItemCreateDto Item { get; set; } = default!;
+        public ItemCreateDto Item { get; set; } = default!;
 
         // For more information, see https://aka.ms/RazorPagesCRUD.
         public async Task<IActionResult> OnPostAsync()

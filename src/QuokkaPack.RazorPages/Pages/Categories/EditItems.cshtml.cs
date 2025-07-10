@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Identity.Abstractions;
 using QuokkaPack.Shared.DTOs.ItemDTOs;
+using QuokkaPack.Shared.DTOs.TripItem;
 
 namespace QuokkaPack.RazorPages.Pages.Categories
 {
@@ -22,7 +23,7 @@ namespace QuokkaPack.RazorPages.Pages.Categories
         public List<ItemReadDto> ExistingItems { get; set; } = [];
 
         [BindProperty]
-        public TripItemCreateDto NewItem { get; set; } = new();
+        public ItemCreateDto NewItem { get; set; } = new();
 
         public async Task<IActionResult> OnGetAsync()
         {
@@ -51,7 +52,7 @@ namespace QuokkaPack.RazorPages.Pages.Categories
 
             try
             {
-                var createdItem = await _downstreamApi.PostForUserAsync<TripItemCreateDto, ItemReadDto>(
+                var createdItem = await _downstreamApi.PostForUserAsync<ItemCreateDto, ItemReadDto>(
                     "DownstreamApi",
                     NewItem,
                     options => options.RelativePath = "/api/items");

@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using FluentAssertions;
 using QuokkaPack.ApiTests;
+using QuokkaPack.Shared.Models;
 using Xunit;
 
 namespace QuokkaPack.ApiTests.Controllers
@@ -50,10 +51,10 @@ namespace QuokkaPack.ApiTests.Controllers
         [Fact]
         public async Task Put_ShouldReturnNoContent_WhenValid()
         {
-            int id = await TestSeedHelper.SeedCategoryAsync(_factory);
+            Category category = await TestSeedHelper.SeedCategoryAsync(_factory);
 
-            var putData = new { Id = id, Name = "Updated", Description = "Updated Desc", IsDefault = true };
-            var putResponse = await _client.PutAsJsonAsync($"/api/categories/{id}", putData);
+            var putData = new { Id = category.Id, Name = "Updated", Description = "Updated Desc", IsDefault = true };
+            var putResponse = await _client.PutAsJsonAsync($"/api/categories/{category.Id}", putData);
 
             putResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
         }
@@ -68,9 +69,9 @@ namespace QuokkaPack.ApiTests.Controllers
         [Fact]
         public async Task Delete_ShouldReturnNoContent_WhenValid()
         {
-            int id = await TestSeedHelper.SeedCategoryAsync(_factory);
+            Category category = await TestSeedHelper.SeedCategoryAsync(_factory);
 
-            var deleteResponse = await _client.DeleteAsync($"/api/categories/{id}");
+            var deleteResponse = await _client.DeleteAsync($"/api/categories/{category.Id}");
             deleteResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
         }
     }

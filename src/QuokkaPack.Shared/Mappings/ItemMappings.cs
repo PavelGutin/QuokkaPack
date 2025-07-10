@@ -1,11 +1,12 @@
 ﻿using QuokkaPack.Shared.DTOs.ItemDTOs;
+using QuokkaPack.Shared.DTOs.Trip;
 using QuokkaPack.Shared.Models;
 
 namespace QuokkaPack.Shared.Mappings
 {
     public static class ItemMappings
     {
-        public static Item ToItem(this TripItemCreateDto dto)
+        public static Item ToItem(this ItemCreateDto dto)
         {
             return new Item
             {

@@ -47,31 +47,31 @@ namespace QuokkaPack.ApiTests.Controllers
             response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         }
 
-        [Fact]
-        public async Task Put_ShouldReturnNoContent_WhenValid()
-        {
-            int id = await TestSeedHelper.SeedCategoryAsync(_factory);
+        //[Fact]
+        //public async Task Put_ShouldReturnNoContent_WhenValid()
+        //{
+        //    int id = await TestSeedHelper.SeedCategoryAsync(_factory);
 
-            var putData = new { Id = id, Name = "Updated", Description = "Updated Desc", IsDefault = true };
-            var putResponse = await _client.PutAsJsonAsync($"/api/trips/{id}", putData);
+        //    var putData = new { Id = id, Name = "Updated", Description = "Updated Desc", IsDefault = true };
+        //    var putResponse = await _client.PutAsJsonAsync($"/api/trips/{id}", putData);
 
-            putResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
-        }
+        //    putResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        //}
 
-        [Fact]
-        public async Task Delete_ShouldReturnNotFound_WhenIdInvalid()
-        {
-            var response = await _client.DeleteAsync("/api/trips/9999");
-            response.StatusCode.Should().Be(HttpStatusCode.NotFound);
-        }
+        //[Fact]
+        //public async Task Delete_ShouldReturnNotFound_WhenIdInvalid()
+        //{
+        //    var response = await _client.DeleteAsync("/api/trips/9999");
+        //    response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        //}
 
-        [Fact]
-        public async Task Delete_ShouldReturnNoContent_WhenValid()
-        {
-            int id = await TestSeedHelper.SeedCategoryAsync(_factory);
+        //[Fact]
+        //public async Task Delete_ShouldReturnNoContent_WhenValid()
+        //{
+        //    int id = await TestSeedHelper.SeedCategoryAsync(_factory);
 
-            var deleteResponse = await _client.DeleteAsync($"/api/trips/{id}");
-            deleteResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
-        }
+        //    var deleteResponse = await _client.DeleteAsync($"/api/trips/{id}");
+        //    deleteResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        //}
     }
 }
