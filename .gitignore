@@ -366,3 +366,6 @@ FodyWeavers.xsd
 /QuokkaPack.API/quokkapack.db-shm
 /QuokkaPack.API/quokkapack.db-wal
 /QuokkaPack.API/httpenv.json
+/src/QuokkaPack.API/quokkapack.db
+/src/QuokkaPack.API/quokkapack.db-shm
+/src/QuokkaPack.API/quokkapack.db-wal
