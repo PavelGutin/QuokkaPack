@@ -1,94 +1,62 @@
 using FluentAssertions;
-using QuokkaPack.ApiTests;
 using QuokkaPack.Shared.Models;
 using System.Net;
 using System.Net.Http.Json;
-using Xunit;
 
+//TODO clean up all the copy pasted code. I just need to get this working first
 namespace QuokkaPack.ApiTests.Controllers
 {
     public class CategoryItemsTests : IClassFixture<ApiTestFactory>
     {
         private readonly HttpClient _client;
-        private readonly ApiTestFactory _factory;
+        private readonly TestScope _scope;
 
         public CategoryItemsTests(ApiTestFactory factory)
         {
-            _factory = factory;
             _client = factory.CreateClient();
+            _scope = TestScope.CreateAsync(factory).GetAwaiter().GetResult();
         }
 
         [Fact]
         public async Task GetAll_ShouldReturnOk()
         {
-            var (categoryId, itemId) = await SeedCategoryAndItemAsync();
-            var response = await _client.GetAsync(BuildCategoryItemUrl(categoryId));
+            var item = await SeedCategoryAndItemAsync();
+            var response = await _client.GetAsync(BuildCategoryItemUrl(item.Categories.First().Id));
             response.StatusCode.Should().Be(HttpStatusCode.OK);
         }
 
         [Fact]
         public async Task GetById_ShouldReturnNotFound_WhenIdDoesNotExist()
         {
-            var response = await _client.GetAsync(BuildCategoryItemUrl(999999, 999999));
+            var response = await _client.GetAsync(BuildCategoryItemUrl(999999));
             response.StatusCode.Should().Be(HttpStatusCode.NotFound);
         }
 
         [Fact]
         public async Task Post_ShouldReturnCreated_WhenValid()
         {
-            var (categoryId, itemId) = await SeedCategoryAndItemAsync();
+            var item = await SeedCategoryAndItemAsync();
 
-            var postData = new { categoryId, itemId };
+            var postData = new { categoryId = item.Categories.First().Id, itemId = item.Id };
             var response = await _client.PostAsJsonAsync(
-                BuildCategoryItemUrl(categoryId, itemId), postData);
+                BuildCategoryItemUrl(item.Categories.First().Id, item.Id), postData);
 
             response.StatusCode.Should().Be(HttpStatusCode.Created);
         }
 
-
-        //[Fact]
-        //public async Task Put_ShouldReturnBadRequest_WhenIdMismatch()
-        //{
-        //    var putData = new { Id = 1234, Name = "Updated", Description = "Updated", IsDefault = true };
-        //    var response = await _client.PutAsJsonAsync("/api/categoryitems/9999", putData);
-        //    response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        //}
-
-        //[Fact]
-        //public async Task Put_ShouldReturnNoContent_WhenValid()
-        //{
-        //    var (categoryId, itemId) = await SeedCategoryAndItemAsync();
-
-        //    var putData = new { Id = id, Name = "Updated", Description = "Updated Desc", IsDefault = true };
-        //    var putResponse = await _client.PutAsJsonAsync($"/api/categoryitems/{id}", putData);
-
-        //    putResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
-        //}
-
         [Fact]
         public async Task Delete_ShouldReturnNotFound_WhenIdInvalid()
         {
-            var response = await _client.DeleteAsync("/api/categoryitems/9999");
+            var response = await _client.DeleteAsync(BuildCategoryItemUrl(999999, 999999));
             response.StatusCode.Should().Be(HttpStatusCode.NotFound);
         }
 
         [Fact]
         public async Task Delete_ShouldReturnNoContent_WhenValid()
         {
-            var (categoryId, itemId) = await SeedCategoryAndItemAsync();
-
-            var deleteResponse = await _client.DeleteAsync(BuildCategoryItemUrl(categoryId, itemId));
+            var item = await SeedCategoryAndItemAsync();
+            var deleteResponse = await _client.DeleteAsync(BuildCategoryItemUrl(item.Categories.First().Id, item.Id));
             deleteResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
-        }
-
-
-        // Helper methods to seed data and build URLs
-        private async Task<(int categoryId, int itemId)> SeedCategoryAndItemAsync()
-        {
-            var item = await TestSeedHelper.SeedCatgoryAndItemAsync(_factory);
-            var categoryId = item.Categories.First().Id;
-            var itemId = item.Id;
-            return (categoryId, itemId);
         }
 
         private static string BuildCategoryItemUrl(int categoryId, int itemId)
@@ -100,5 +68,31 @@ namespace QuokkaPack.ApiTests.Controllers
         {
             return $"api/categories/{categoryId}/items/";
         }
+
+        private async Task<Item> SeedCategoryAndItemAsync()
+        {
+            var category = CreateCategory(_scope.MasterUser.Id);
+            var item = CreateItem(_scope.MasterUser.Id);
+            item.Categories.Add(category);
+            _scope.Db.Items.Add(item);
+            await _scope.Db.SaveChangesAsync();
+            return item;
+        }
+
+        private static Category CreateCategory(Guid masterUserId) => new Category
+        {
+            Name = "SeededCategory",
+            Description = "Seeded for testing",
+            IsDefault = false,
+            MasterUserId = masterUserId
+        };
+
+        private static Item CreateItem(Guid masterUserId) => new Item
+        {
+            Name = "SeededItem",
+            Notes = "Seeded for testing",
+            IsEssential = false,
+            MasterUserId = masterUserId
+        };
     }
 }

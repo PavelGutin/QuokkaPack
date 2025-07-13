@@ -1,20 +1,20 @@
+using FluentAssertions;
+using QuokkaPack.Data.Models;
+using QuokkaPack.Shared.DTOs.Trip;
 using System.Net;
 using System.Net.Http.Json;
-using FluentAssertions;
-using QuokkaPack.ApiTests;
-using Xunit;
 
 namespace QuokkaPack.ApiTests.Controllers
 {
     public class TripsTests : IClassFixture<ApiTestFactory>
     {
         private readonly HttpClient _client;
-        private readonly ApiTestFactory _factory;
+        private readonly TestScope _scope;
 
         public TripsTests(ApiTestFactory factory)
         {
-            _factory = factory;
             _client = factory.CreateClient();
+            _scope = TestScope.CreateAsync(factory).GetAwaiter().GetResult();
         }
 
         [Fact]
@@ -34,8 +34,14 @@ namespace QuokkaPack.ApiTests.Controllers
         [Fact]
         public async Task Post_ShouldReturnCreated_WhenValid()
         {
-            var postData = new { Name = "Test", Description = "Testing", IsDefault = false };
-            var response = await _client.PostAsJsonAsync("/api/trips", postData);
+            var trip = new TripCreateDto() 
+            { 
+                CategoryIds = new List<int>(), 
+                Destination = "Test Trip", 
+                StartDate = DateTime.Parse("2025/01/01"), 
+                EndDate = DateTime.Parse("2025/02/01")
+            };
+            var response = await _client.PostAsJsonAsync("/api/trips", trip);
             response.StatusCode.Should().Be(HttpStatusCode.Created);
         }
 
@@ -47,31 +53,52 @@ namespace QuokkaPack.ApiTests.Controllers
             response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         }
 
-        //[Fact]
-        //public async Task Put_ShouldReturnNoContent_WhenValid()
-        //{
-        //    int id = await TestSeedHelper.SeedCategoryAsync(_factory);
+        [Fact]
+        public async Task Put_ShouldReturnNoContent_WhenValid()
+        {
+            var trip = await SeedTripAsync();
 
-        //    var putData = new { Id = id, Name = "Updated", Description = "Updated Desc", IsDefault = true };
-        //    var putResponse = await _client.PutAsJsonAsync($"/api/trips/{id}", putData);
+            var tripEditDto = new TripEditDto 
+            { 
+                Id = trip.Id, 
+                Destination = trip.Destination + " updated",
+                StartDate = trip.StartDate.AddMonths(1),
+                EndDate = trip.EndDate.AddMonths(1),
+            };
+            var putResponse = await _client.PutAsJsonAsync($"/api/trips/{trip.Id}", tripEditDto);
 
-        //    putResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
-        //}
+            putResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        }
 
-        //[Fact]
-        //public async Task Delete_ShouldReturnNotFound_WhenIdInvalid()
-        //{
-        //    var response = await _client.DeleteAsync("/api/trips/9999");
-        //    response.StatusCode.Should().Be(HttpStatusCode.NotFound);
-        //}
+        [Fact]
+        public async Task Delete_ShouldReturnNotFound_WhenIdInvalid()
+        {
+            var response = await _client.DeleteAsync("/api/trips/9999");
+            response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        }
 
-        //[Fact]
-        //public async Task Delete_ShouldReturnNoContent_WhenValid()
-        //{
-        //    int id = await TestSeedHelper.SeedCategoryAsync(_factory);
+        [Fact]
+        public async Task Delete_ShouldReturnNoContent_WhenValid()
+        {
+            var trip = await SeedTripAsync();
 
-        //    var deleteResponse = await _client.DeleteAsync($"/api/trips/{id}");
-        //    deleteResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
-        //}
+            var deleteResponse = await _client.DeleteAsync($"/api/trips/{trip.Id}");
+            deleteResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        }
+
+        public async Task<Trip> SeedTripAsync()
+        {
+            var trip = CreateTrip(_scope.MasterUser.Id);
+            _scope.Db.Trips.Add(trip);
+            await _scope.Db.SaveChangesAsync();
+            return trip;
+        }
+        private Trip CreateTrip(Guid masterUserId) => new Trip
+        {
+            Destination = "SeededTrip",
+            StartDate = DateTime.Parse("2025/01/01"),
+            EndDate = DateTime.Parse("2025/02/01"),
+            MasterUserId = masterUserId
+        };
     }
 }

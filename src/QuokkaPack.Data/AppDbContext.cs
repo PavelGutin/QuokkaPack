@@ -15,5 +15,6 @@ namespace QuokkaPack.Data
         public DbSet<UserLogin> UserLogins { get; set; }
         public DbSet<Item> Items { get; set; }
         public DbSet<Category> Categories { get; set; }
+        public DbSet<TripItem> TripItems { get; set; }
     }
 }

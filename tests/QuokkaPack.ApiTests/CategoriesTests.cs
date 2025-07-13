@@ -1,21 +1,19 @@
+using FluentAssertions;
+using QuokkaPack.Shared.Models;
 using System.Net;
 using System.Net.Http.Json;
-using FluentAssertions;
-using QuokkaPack.ApiTests;
-using QuokkaPack.Shared.Models;
-using Xunit;
 
 namespace QuokkaPack.ApiTests.Controllers
 {
     public class CategoriesTests : IClassFixture<ApiTestFactory>
     {
         private readonly HttpClient _client;
-        private readonly ApiTestFactory _factory;
+        private readonly TestScope _scope;
 
         public CategoriesTests(ApiTestFactory factory)
         {
-            _factory = factory;
             _client = factory.CreateClient();
+            _scope = TestScope.CreateAsync(factory).GetAwaiter().GetResult();
         }
 
         [Fact]
@@ -51,7 +49,7 @@ namespace QuokkaPack.ApiTests.Controllers
         [Fact]
         public async Task Put_ShouldReturnNoContent_WhenValid()
         {
-            Category category = await TestSeedHelper.SeedCategoryAsync(_factory);
+            Category category = await SeedCategoryAsync();
 
             var putData = new { Id = category.Id, Name = "Updated", Description = "Updated Desc", IsDefault = true };
             var putResponse = await _client.PutAsJsonAsync($"/api/categories/{category.Id}", putData);
@@ -69,10 +67,29 @@ namespace QuokkaPack.ApiTests.Controllers
         [Fact]
         public async Task Delete_ShouldReturnNoContent_WhenValid()
         {
-            Category category = await TestSeedHelper.SeedCategoryAsync(_factory);
+            Category category = await SeedCategoryAsync();
 
             var deleteResponse = await _client.DeleteAsync($"/api/categories/{category.Id}");
             deleteResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        }
+
+        private async Task<Category> SeedCategoryAsync()
+        {
+            var category = BuildCategory(_scope.MasterUser.Id);
+            _scope.Db.Categories.Add(category);
+            await _scope.Db.SaveChangesAsync();
+            return category;
+        }
+
+        private Category BuildCategory(Guid masterUserId)
+        {
+            return new Category
+            {
+                Name = "Test Category",
+                Description = "This is a test category",
+                MasterUserId = masterUserId,
+                IsDefault = false
+            };
         }
     }
 }

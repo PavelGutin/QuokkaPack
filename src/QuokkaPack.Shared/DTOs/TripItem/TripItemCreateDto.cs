@@ -9,8 +9,7 @@ namespace QuokkaPack.Shared.DTOs.TripItem
 {
     public class TripItemCreateDto
     {
-        public int TripId { get; set; } //TODO: Is this necessary? Maybe we can remove it later.
-        public ItemReadDto ItemReadDto { get; set; } = default!;
+        public int ItemId { get; set; } = default!;
         public bool IsPacked { get; set; } = false;
     }
 }

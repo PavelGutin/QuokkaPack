@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using QuokkaPack.API.Services;
 using QuokkaPack.Data;
 
+//TODO: add unit tests for this controller
 namespace QuokkaPack.API.Controllers
 {
     [Authorize]
@@ -19,7 +20,7 @@ namespace QuokkaPack.API.Controllers
             _db = db;
             _resolver = resolver;
         }
-
+        
         [HttpPost("initialize")]
         public async Task<IActionResult> Initialize()
         {

@@ -11,6 +11,7 @@ namespace QuokkaPack.API.Controllers
 {
     [Authorize]
     [ApiController]
+    [Route("api/trips")]
     public class TripItemsController : ControllerBase
     {
         private readonly AppDbContext _context;
@@ -24,8 +25,8 @@ namespace QuokkaPack.API.Controllers
 
 
         // GET: /api/trips/{tripId}/items
-        [HttpGet("api/trips/{tripId}/tripItems")]
-        public async Task<ActionResult<List<TripItemReadDto>>> GetItemsForTrip(int tripId)
+        [HttpGet("{tripId}/tripItems")]
+        public async Task<ActionResult<List<TripItemReadDto>>> GetTripItems(int tripId)
         {
             var user = await _userResolver.GetOrCreateAsync(User);
 
@@ -45,45 +46,78 @@ namespace QuokkaPack.API.Controllers
 
             return Ok(items);
         }
+        // GET: /api/trips/{tripId}/items
+        [HttpGet("{tripId}/tripItems/{tripItemId}")]
+        public async Task<ActionResult<List<TripItemReadDto>>> GetTripItem(int tripId, int tripItemId)
+        {
+            var user = await _userResolver.GetOrCreateAsync(User);
 
+            var trip = await _context.Trips.FirstOrDefaultAsync(trip => trip.Id == tripId);
+            if (trip == null) return NotFound();
 
-        [HttpPost("api/trips/{tripId}/tripItems/{tripItemId}")]
+            var tripItem = trip.TripItems.FirstOrDefault(tripItem => tripItem.Id == tripItemId);
+            if (tripItem == null) return NotFound();
+
+            var result = new TripItemReadDto
+            {
+                Id = tripItem.Id,
+                ItemReadDto = tripItem.Item.ToReadDto(),
+                IsPacked = tripItem.IsPacked
+            };
+
+            return Ok(result);
+        }
+
+        [HttpPost("{tripId}/tripItems")]
         public async Task<IActionResult> AddItemToTrip(int tripId, [FromBody] TripItemCreateDto tripItemDto)
         {
-            if (tripItemDto.TripId != tripId)
-                return BadRequest("Trip ID mismatch");
-
             var user = await _userResolver.GetOrCreateAsync(User);
 
             //TODO: the AI slop code has masterUserID here, but that seems redundant. Be sure to test with multiple users
             var trip = await _context.Trips.FirstOrDefaultAsync(trip => trip.Id == tripId);
-            var item = await _context.Items.FirstOrDefaultAsync(item => item.Id == tripItemDto.ItemReadDto.Id);
+            var item = await _context.Items.FirstOrDefaultAsync(item => item.Id == tripItemDto.ItemId);
 
             if (trip == null || item == null)
                 return NotFound();
 
-            if (!trip.TripItems.Any(tripItem => tripItem.Item.Id == item.Id))  //don't add duplicates
-                trip.TripItems.Add(new TripItem() { Item = item, IsPacked = false});
+            //don't add duplicates
+            if (!trip.TripItems.Any(tripItem => tripItem.Item.Id == item.Id))
+            {
+                var tripItem = new TripItem()
+                {
+                    Item = item,
+                    IsPacked = tripItemDto.IsPacked
+                };
+                trip.TripItems.Add(tripItem);
+                await _context.SaveChangesAsync();
 
-            await _context.SaveChangesAsync();
+                var result = new TripItemReadDto
+                {
+                    Id = tripItem.Id, // You'll need to track this
+                    ItemReadDto = item.ToReadDto(),
+                    IsPacked = tripItemDto.IsPacked
+                };
+                return CreatedAtAction(nameof(GetTripItem), new { tripId, tripItemId = tripItem.Id }, result);
+            }
 
-            return NoContent();
+            return Conflict(new
+            {
+                Message = $"Item with ID {item.Id} is already part of Trip {trip.Id}."
+            });
+
         }
 
         // DELETE: /api/trips/5/items/10
-        [HttpDelete("api/trips/{tripId}/tripItems/{tripItemId}")]
+        [HttpDelete("{tripId}/tripItems/{tripItemId}")]
         public async Task<IActionResult> RemoveItemFromTrip(int tripId, int tripItemId)
         {
             var user = await _userResolver.GetOrCreateAsync(User);
 
             var trip = await _context.Trips.FirstOrDefaultAsync(trip => trip.Id == tripId);
+            if (trip == null) return NotFound();
 
-            if (trip == null)
-                return NotFound();
-
-            var tripItem = trip.TripItems.FirstOrDefault(i => i.Id == tripItemId);
-            if (tripItem == null)
-                return NotFound();
+            var tripItem = await _context.TripItems.FirstOrDefaultAsync(tripItem => tripItem.Id == tripItemId);
+            if (tripItem == null) return NotFound();
 
             trip.TripItems.Remove(tripItem);
             await _context.SaveChangesAsync();
@@ -91,26 +125,20 @@ namespace QuokkaPack.API.Controllers
             return NoContent();
         }
         // PUT: /api/trips/{tripId}/items/{itemId}
-        [HttpPut("api/trips/{tripId}/tripItems/{tripItemId}")]
+        [HttpPut("{tripId}/tripItems/{tripItemId}")]
         public async Task<IActionResult> UpdateTripItem(int tripId, int tripItemId, [FromBody] TripItemEditDto tripItemDto)
         {
-            if (tripItemDto.TripId != tripId || tripItemDto.Id != tripItemId)
-                return BadRequest("Trip ID or TripItem ID mismatch");
-
             var user = await _userResolver.GetOrCreateAsync(User);
 
             var trip = await _context.Trips.FirstOrDefaultAsync(trip => trip.Id == tripId);
+            if (trip == null) return BadRequest();
 
-            if (trip == null)
-                return NotFound();
+            var tripItem = await _context.TripItems.FirstOrDefaultAsync(tripItem => tripItem.Id == tripItemId);
+            if (tripItem == null) return BadRequest();
 
-            var tripItem = trip.TripItems.FirstOrDefault(tripItem => tripItem.Id == tripItemId);
-            if (tripItem == null)
-                return NotFound();
+            if (tripItemDto.Id != tripItemId) return BadRequest();
 
-            //TODO: There might be other properties to update, so eventually move the logic to some exteion method
             tripItem.IsPacked = tripItemDto.IsPacked;
-
             await _context.SaveChangesAsync();
 
             return NoContent();

@@ -1,20 +1,17 @@
 using FluentAssertions;
-using QuokkaPack.ApiTests;
 using QuokkaPack.Data.Models;
-using QuokkaPack.Shared.DTOs.ItemDTOs;
 using QuokkaPack.Shared.DTOs.TripItem;
-using QuokkaPack.Shared.Mappings;
 using QuokkaPack.Shared.Models;
 using System.Net;
 using System.Net.Http.Json;
-using Xunit;
 
 namespace QuokkaPack.ApiTests.Controllers
 {
-    public class TripItemsTests : IClassFixture<ApiTestFactory>
+    public class TripItemsTests : IClassFixture<ApiTestFactory>, IAsyncLifetime
     {
         private readonly HttpClient _client;
         private readonly ApiTestFactory _factory;
+        private TestScope _scope;
 
         public TripItemsTests(ApiTestFactory factory)
         {
@@ -22,93 +19,161 @@ namespace QuokkaPack.ApiTests.Controllers
             _client = factory.CreateClient();
         }
 
+        public async Task InitializeAsync()
+        {
+            _scope = await TestScope.CreateAsync(_factory);
+        }
+
+        public async Task DisposeAsync()
+        {
+            await _scope.DisposeAsync();
+        }
+
         [Fact]
-        public async Task GetAll_ShouldReturnOk()
+        public async Task GetAll_ShouldReturnOk() //why does this fail?????
         {
             var (tripId, tripItemId) = await SeedTripAndItemAsync();
             var response = await _client.GetAsync(BuildTripItemUrl(tripId));
             response.StatusCode.Should().Be(HttpStatusCode.OK);
         }
 
-        //[Fact]
-        //public async Task GetById_ShouldReturnNotFound_WhenIdDoesNotExist()
-        //{
-        //    var response = await _client.GetAsync(BuildTripItemUrl(999999));
-        //    response.StatusCode.Should().Be(HttpStatusCode.NotFound);
-        //}
+        [Fact]
+        public async Task GetById_ShouldReturnNotFound_WhenIdDoesNotExist()
+        {
+            var response = await _client.GetAsync(BuildTripItemUrl(999999));
+            response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        }
 
-        //[Fact]
-        //public async Task Post_ShouldReturnCreated_WhenValid()
-        //{
-        //    var (tripId, item) = await SeedTripAndItemAsync();
+        [Fact]
+        public async Task Post_ShouldReturnCreated_WhenValid()
+        {
+            var (tripId, item) = await SeedTripAndItemAsync();
 
-        //    var tripItemCreateDto = new TripItemCreateDto
-        //    {
-        //        TripId = tripId,
-        //        ItemReadDto = item.ToReadDto(),
-        //        IsPacked = false
-        //    };
+            var tripItemCreateDto = new TripItemCreateDto
+            {
+                ItemId = item.Id,
+                IsPacked = false
+            };
 
-        //    var response = await _client.PostAsJsonAsync(BuildTripItemUrl(tripId), tripItemCreateDto);
-        //    response.StatusCode.Should().Be(HttpStatusCode.Created);
-        //}
+            var response = await _client.PostAsJsonAsync(BuildTripItemUrl(tripId), tripItemCreateDto);
+            response.StatusCode.Should().Be(HttpStatusCode.Created);
+        }
 
-        //[Fact]
-        //public async Task Put_ShouldReturnBadRequest_WhenIdMismatch()
-        //{
-        //    var putData = new { Id = 1234, Name = "Updated", Description = "Updated", IsDefault = true };
-        //    var response = await _client.PutAsJsonAsync("/api/tripitems/9999", putData);
-        //    response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        //}
+        [Fact]
+        public async Task Put_ShouldReturnBadRequest_WhenIdMismatch()
+        {
+            var tripItem = await SeedTripItemAsync();
 
-        //[Fact]
-        //public async Task Put_ShouldReturnNoContent_WhenValid()
-        //{
-        //    var (tripId, item) = await SeedTripAndItemAsync();
+            var tripItemEditDto = new TripItemEditDto
+            {
+                Id = tripItem.Id + 1, // Intentionally mismatching ID
+                IsPacked = false
+            };
 
-        //    var tripItemEditDto = new TripItemEditDto
-        //    {
-        //        TripId = tripId,
-        //        ItemReadDto = item.ToReadDto(),
-        //        IsPacked = false
-        //    };
-        //    var putResponse = await _client.PutAsJsonAsync(BuildTripItemUrl(tripId), tripItemEditDto);
+            var response = await _client.PutAsJsonAsync(BuildTripItemUrl(tripItem.Trip.Id, tripItem.Id), tripItemEditDto);
+            response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        }
 
-        //    putResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
-        //}
+        [Fact]
+        public async Task Put_ShouldReturnNoContent_WhenValid()
+        {
+            var tripItem = await SeedTripItemAsync();
 
-        //[Fact]
-        //public async Task Delete_ShouldReturnNotFound_WhenIdInvalid()
-        //{
-        //    var response = await _client.DeleteAsync(BuildTripItemUrl(999999, 999999));
-        //    response.StatusCode.Should().Be(HttpStatusCode.NotFound);
-        //}
+            var tripItemEditDto = new TripItemEditDto
+            {
+                Id = tripItem.Id,
+                IsPacked = !tripItem.IsPacked 
+            };
+            var putResponse = await _client.PutAsJsonAsync(BuildTripItemUrl(tripItem.Trip.Id, tripItem.Id), tripItemEditDto);
 
-        //[Fact]
-        //public async Task Delete_ShouldReturnNoContent_WhenValid()
-        //{
-        //    var (tripId, tripItemId) = await SeedTripAndItemAsync();
-        //    var deleteResponse = await _client.DeleteAsync(BuildTripItemUrl(tripId, tripItemId));
-        //    deleteResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
-        //}
+            putResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        }
+
+        [Fact]
+        public async Task Delete_ShouldReturnNotFound_WhenIdInvalid()
+        {
+            var response = await _client.DeleteAsync(BuildTripItemUrl(999999, 999999));
+            response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        }
+
+        [Fact]
+        public async Task Delete_ShouldReturnNoContent_WhenValid()
+        {
+            var tripItem = await SeedTripItemAsync();
+            var deleteResponse = await _client.DeleteAsync(BuildTripItemUrl(tripItem.Trip.Id, tripItem.Id));
+            deleteResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        }
 
         // Helper methods to seed data and build URLs
 
         private async Task<(int tripId, Item item)> SeedTripAndItemAsync()
         {
-            var trip = await TestSeedHelper.SeedTripAsync(_factory);
-            var item = await TestSeedHelper.SeedItemAsync(_factory);
+            var trip = BuildTrip(_scope.MasterUser.Id);
+            var item = BuildItem(_scope.MasterUser.Id);
+
+            _scope.Db.Trips.Add(trip);
+            _scope.Db.Items.Add(item);
+            await _scope.Db.SaveChangesAsync();
+
             return (trip.Id, item);
         }
 
-        private static string BuildTripItemUrl(int tripId, int itemId)
+        private async Task<TripItem> SeedTripItemAsync()
         {
-            return $"api/trips/{tripId}/items/{itemId}";
+            var trip = BuildTrip(_scope.MasterUser.Id);
+            var item = BuildItem(_scope.MasterUser.Id);
+
+            _scope.Db.Trips.Add(trip);
+            _scope.Db.Items.Add(item);
+            await _scope.Db.SaveChangesAsync();
+
+            var tripItem = BuildTripItem(trip.Id, item.Id);
+            _scope.Db.TripItems.Add(tripItem);
+            await _scope.Db.SaveChangesAsync();
+
+            return tripItem;
         }
 
-        private static string BuildTripItemUrl(int tripId)
+        private string BuildTripItemUrl(int tripId, int itemId)
         {
-            return $"api/trips/{tripId}/items";
+            return $"api/trips/{tripId}/tripItems/{itemId}";
+        }
+
+        private string BuildTripItemUrl(int tripId)
+        {
+            return $"api/trips/{tripId}/tripItems";
+        }
+
+        private Trip BuildTrip(Guid masterUserId)
+        {
+            return new Trip
+            {
+                Destination = "Test Trip",
+                StartDate = DateTime.Parse("2025/01/01"),
+                EndDate = DateTime.Parse("2025/02/01"),
+                MasterUserId = masterUserId
+            };
+        }
+
+        private Item BuildItem(Guid masterUserId)
+        {
+            return new Item
+            {
+                Name = "Test Item",
+                Notes = "Testing item creation",
+                IsEssential = false,
+                MasterUserId = masterUserId
+            };
+        }
+
+        private TripItem BuildTripItem(int tripId, int itemId)
+        {
+            return new TripItem
+            {
+                TripId = tripId,
+                ItemId = itemId,
+                IsPacked = false
+            };
         }
     }
 }

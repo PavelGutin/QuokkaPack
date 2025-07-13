@@ -11,12 +11,12 @@ namespace QuokkaPack.ApiTests
 {
     public class ApiTestFactory : WebApplicationFactory<Program>
     {
+        // Generate a fixed name per factory instance
+        private readonly string _dbName = Guid.NewGuid().ToString();
+
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
             builder.UseEnvironment("Testing");
-
-
-
 
             builder.ConfigureTestServices(services =>
             {
@@ -25,7 +25,7 @@ namespace QuokkaPack.ApiTests
                     options.DefaultAuthenticateScheme = TestAuthHandler.TestScheme;
                     options.DefaultChallengeScheme = TestAuthHandler.TestScheme;
                 }).AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(
-                TestAuthHandler.TestScheme, options => { });
+                    TestAuthHandler.TestScheme, options => { });
 
                 // Remove existing AppDbContext registration
                 var descriptor = services.SingleOrDefault(
@@ -36,13 +36,13 @@ namespace QuokkaPack.ApiTests
                     services.Remove(descriptor);
                 }
 
-                // Add in-memory test database
+                // Register a named in-memory database (consistent per factory)
                 services.AddDbContext<AppDbContext>(options =>
                 {
-                    options.UseInMemoryDatabase("TestDb");
+                    options.UseInMemoryDatabase(_dbName);
                 });
 
-                // Ensure the database is created
+                // Ensure database is created on the correct instance
                 var sp = services.BuildServiceProvider();
                 using var scope = sp.CreateScope();
                 var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();

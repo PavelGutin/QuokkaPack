@@ -10,12 +10,12 @@ namespace QuokkaPack.ApiTests.Controllers
     public class ItemsTests : IClassFixture<ApiTestFactory>
     {
         private readonly HttpClient _client;
-        private readonly ApiTestFactory _factory;
+        private readonly TestScope _scope;
 
         public ItemsTests(ApiTestFactory factory)
         {
-            _factory = factory;
             _client = factory.CreateClient();
+            _scope = TestScope.CreateAsync(factory).GetAwaiter().GetResult();
         }
 
         [Fact]
@@ -49,7 +49,7 @@ namespace QuokkaPack.ApiTests.Controllers
         [Fact]
         public async Task Put_ShouldReturnBadRequest_WhenIdMismatch()
         {
-            Item item = await TestSeedHelper.SeedItemAsync(_factory);
+            Item item = await SeedItemAsync();
             var itemDto = item.ToReadDto();
             var response = await _client.PutAsJsonAsync($"/api/items/{itemDto.Id + 1}", itemDto);
             response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -58,7 +58,7 @@ namespace QuokkaPack.ApiTests.Controllers
         [Fact]
         public async Task Put_ShouldReturnNoContent_WhenValid()
         {
-            Item item = await TestSeedHelper.SeedItemAsync(_factory);
+            Item item = await SeedItemAsync();
             var itemEditDto = new ItemEditDto() 
             { 
                 Id = item.Id, 
@@ -73,7 +73,7 @@ namespace QuokkaPack.ApiTests.Controllers
         [Fact]
         public async Task Delete_ShouldReturnNotFound_WhenIdInvalid()
         {
-            Item item = await TestSeedHelper.SeedItemAsync(_factory);
+            Item item = await SeedItemAsync();
             var response = await _client.DeleteAsync($"/api/items/{item.Id + 1}");
             response.StatusCode.Should().Be(HttpStatusCode.NotFound);
         }
@@ -81,9 +81,24 @@ namespace QuokkaPack.ApiTests.Controllers
         [Fact]
         public async Task Delete_ShouldReturnNoContent_WhenValid()
         {
-            var item = await TestSeedHelper.SeedItemAsync(_factory);
+            var item = await SeedItemAsync();
             var deleteResponse = await _client.DeleteAsync($"/api/items/{item.Id}");
             deleteResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
         }
+
+        public async Task<Item> SeedItemAsync()
+        {
+            var item = CreateItem(_scope.MasterUser.Id);
+            _scope.Db.Items.Add(item);
+            await _scope.Db.SaveChangesAsync();
+            return item;
+        }
+        private Item CreateItem(Guid masterUserId) => new Item
+        {
+            Name = "SeededItem",
+            Notes = "Seeded for testing",
+            IsEssential = false,
+            MasterUserId = masterUserId
+        };
     }
 }

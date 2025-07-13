@@ -24,10 +24,13 @@ namespace QuokkaPack.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Trip>>> GetTrips()
+        public async Task<ActionResult<IEnumerable<TripReadDto>>> GetTrips()
         {
             //TODO: return a DTO
-            return await _context.Trips.ToListAsync();
+            return await _context.Trips
+                .AsNoTracking()
+                .Select(trip => trip.ToReadDto())
+                .ToListAsync();
         }
 
         [HttpGet("{id}")]
