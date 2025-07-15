@@ -1,61 +1,34 @@
 ﻿@page
 @model QuokkaPack.RazorPages.Pages.Trips.EditTripItemsModel
 @{
-    ViewData["Title"] = "Edit Items";
+    ViewData["Title"] = "Edit Trip Items";
 }
 
-<h2>Items in this Category</h2>
+<h2>Edit Trip Items</h2>
 
-@if (Model.ExistingItems.Count == 0)
-{
-    <p>No items yet.</p>
-}
-else
-{
+<form method="post" asp-page-handler="UpdatePackedStatus">
+    <input type="hidden" asp-for="TripId" />
+
     <table class="table">
         <thead>
             <tr>
-                <th>Name</th>
-                <th>Essential</th>
-                <th>Actions</th>
+                <th>Packed</th>
+                <th>Item Name</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var tripItem in Model.ExistingItems)
+            @for (int i = 0; i < Model.ExistingItems.Count; i++)
             {
                 <tr>
-                    <td>@tripItem.ItemReadDto.Name</td>
-                    <td>@(tripItem.ItemReadDto.IsEssential ? "Yes" : "No")</td>
                     <td>
-@*                         <a asp-page="/Items/Edit" asp-route-id="@tripItem.ItemReadDto.Id">Edit</a> |
-                        <form method="post" asp-page-handler="Delete" asp-route-itemId="@tripItem.ItemReadDto.Id" style="display:inline">
-                            <input type="hidden" name="CategoryId" value="@Model.TripId" />
-                            <button type="submit" class="btn btn-link">Delete</button>
-                        </form> *@
+                        <input type="hidden" name="UpdatedItems[@i].Id" value="@Model.ExistingItems[i].Id" />
+                        <input type="checkbox" name="UpdatedItems[@i].IsPacked" value="true" @(Model.ExistingItems[i].IsPacked ? "checked" : "") />
                     </td>
+                    <td>@Model.ExistingItems[i].ItemReadDto.Name</td>
                 </tr>
             }
         </tbody>
     </table>
-}
 
-<hr />
-
-<h3>Add New Item</h3>
-<form method="post" asp-page-handler="Add">
-@*     <input type="hidden" asp-for="TripId" />
-    <div class="mb-3">
-        <label asp-for="NewItem.Name" class="form-label"></label>
-        <input asp-for="NewItem.Name" class="form-control" />
-        <span asp-validation-for="NewItem.Name" class="text-danger"></span>
-    </div>
-    <div class="mb-3">
-        <label asp-for="NewItem.Notes" class="form-label"></label>
-        <textarea asp-for="NewItem.Notes" class="form-control"></textarea>
-    </div>
-    <div class="form-check">
-        <input asp-for="NewItem.IsEssential" class="form-check-input" />
-        <label asp-for="NewItem.IsEssential" class="form-check-label"></label>
-    </div>
-    <button type="submit" class="btn btn-primary">Add Item</button> *@
+    <button type="submit" class="btn btn-primary">Update Packed Status</button>
 </form>

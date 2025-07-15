@@ -24,14 +24,15 @@ namespace QuokkaPack.API.Controllers
         }
 
 
-        // GET: /api/trips/{tripId}/items
+        // GET: /api/trips/{tripId}/tripItems
         [HttpGet("{tripId}/tripItems")]
         public async Task<ActionResult<List<TripItemReadDto>>> GetTripItems(int tripId)
         {
             var user = await _userResolver.GetOrCreateAsync(User);
 
             var trip = await _context.Trips
-                .Include(c => c.TripItems)
+                .Include(trip => trip.TripItems)
+                .ThenInclude(TripItem => TripItem.Item)
                 .FirstOrDefaultAsync(c => c.Id == tripId && c.MasterUserId == user.Id);
 
             if (trip == null)
@@ -39,14 +40,15 @@ namespace QuokkaPack.API.Controllers
 
             var items = trip.TripItems.Select(i => new TripItemReadDto
             {
-                Id = i.Item.Id,
+                Id = i.Id,
                 ItemReadDto = i.Item.ToReadDto(),
                 IsPacked = i.IsPacked,
             }).ToList();
 
             return Ok(items);
         }
-        // GET: /api/trips/{tripId}/items
+
+        // GET: /api/trips/{tripId}/tripItems{tripItemId}
         [HttpGet("{tripId}/tripItems/{tripItemId}")]
         public async Task<ActionResult<List<TripItemReadDto>>> GetTripItem(int tripId, int tripItemId)
         {
@@ -68,6 +70,7 @@ namespace QuokkaPack.API.Controllers
             return Ok(result);
         }
 
+        //POST: /api/trips/{tripId}/tripItems
         [HttpPost("{tripId}/tripItems")]
         public async Task<IActionResult> AddItemToTrip(int tripId, [FromBody] TripItemCreateDto tripItemDto)
         {
@@ -104,10 +107,9 @@ namespace QuokkaPack.API.Controllers
             {
                 Message = $"Item with ID {item.Id} is already part of Trip {trip.Id}."
             });
-
         }
 
-        // DELETE: /api/trips/5/items/10
+        // DELETE: /api/trips/5/tripItems/{itemId}
         [HttpDelete("{tripId}/tripItems/{tripItemId}")]
         public async Task<IActionResult> RemoveItemFromTrip(int tripId, int tripItemId)
         {
@@ -124,7 +126,8 @@ namespace QuokkaPack.API.Controllers
 
             return NoContent();
         }
-        // PUT: /api/trips/{tripId}/items/{itemId}
+
+        // PUT: /api/trips/{tripId}/tripItems/{itemId}
         [HttpPut("{tripId}/tripItems/{tripItemId}")]
         public async Task<IActionResult> UpdateTripItem(int tripId, int tripItemId, [FromBody] TripItemEditDto tripItemDto)
         {
@@ -141,6 +144,25 @@ namespace QuokkaPack.API.Controllers
             tripItem.IsPacked = tripItemDto.IsPacked;
             await _context.SaveChangesAsync();
 
+            return NoContent();
+        }
+
+        // PUT: /api/trips/{tripId}/tripItems/batch
+        [HttpPut("{tripId}/tripItems/batch")]
+        public async Task<IActionResult> UpdateTripItems(int tripId, [FromBody] List<TripItemEditDto> tripItemDtos)
+        {
+            var user = await _userResolver.GetOrCreateAsync(User);
+            var trip = await _context.Trips.Include(t => t.TripItems).FirstOrDefaultAsync(t => t.Id == tripId && t.MasterUserId == user.Id);
+            if (trip == null) return BadRequest();
+
+            var tripItemDict = trip.TripItems.ToDictionary(i => i.Id);
+            foreach (var dto in tripItemDtos)
+            {
+                if (tripItemDict.TryGetValue(dto.Id, out var tripItem))
+                    tripItem.IsPacked = dto.IsPacked;
+            }
+
+            await _context.SaveChangesAsync();
             return NoContent();
         }
 
