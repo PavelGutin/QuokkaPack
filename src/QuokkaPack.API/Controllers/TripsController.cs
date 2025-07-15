@@ -26,7 +26,6 @@ namespace QuokkaPack.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TripReadDto>>> GetTrips()
         {
-            //TODO: return a DTO
             return await _context.Trips
                 .AsNoTracking()
                 .Select(trip => trip.ToReadDto())
@@ -53,16 +52,25 @@ namespace QuokkaPack.API.Controllers
         {
             var user = await _userResolver.GetOrCreateAsync(User);
 
-            // Create the base trip
             var trip = tripDto.ToTrip(); // this should exclude category binding
             trip.MasterUserId = user.Id;
 
-            // Fetch categories that match the provided IDs and belong to the user
             var categories = await _context.Categories
+                .Include(c => c.Items)
                 .Where(c => tripDto.CategoryIds.Contains(c.Id) && c.MasterUserId == user.Id)
                 .ToListAsync();
-
             trip.Categories = categories;
+
+            var tripItems = categories.SelectMany(c => c.Items)
+                .Select(item => new TripItem()
+                {
+                    Trip = trip,
+                    Item = item,
+                    IsPacked = false,
+                })
+                .ToList();
+
+            trip.TripItems = tripItems;
 
             _context.Trips.Add(trip);
             await _context.SaveChangesAsync();

@@ -8,6 +8,7 @@ namespace QuokkaPack.Shared.Mappings
     {
         public static Item ToItem(this ItemCreateDto dto)
         {
+            throw new NotImplementedException("Fix this category mapping");
             return new Item
             {
                 Name = dto.Name,
@@ -24,9 +25,22 @@ namespace QuokkaPack.Shared.Mappings
                 Id = item.Id,
                 Name = item.Name,
                 Notes = item.Notes,
-                IsEssential = item.IsEssential//,
-                //Categories = item.Categories
+                IsEssential = item.IsEssential,
+                Categories = item.Categories.Select(category => category.ToReadDtoSimple()).ToList()
             };
         }
+
+        public static ItemReadDtoSimple ToReadDtoSimple(this Item item)
+        {
+            return new ItemReadDtoSimple
+            {
+                Id = item.Id,
+                Name = item.Name,
+                Notes = item.Notes,
+                IsEssential = item.IsEssential
+            };
+        }
+
+        
     }
 }

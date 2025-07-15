@@ -2,33 +2,43 @@
 @model QuokkaPack.RazorPages.Pages.Trips.EditTripItemsModel
 @{
     ViewData["Title"] = "Edit Trip Items";
+
+    var groupedItems = Model.ExistingItems
+        .GroupBy(i => i.ItemReadDto.Categories.First().Name)
+        .OrderBy(g => g.Key);
 }
 
-<h2>Edit Trip Items</h2>
+<div class="container mt-4">
+    <h2 class="mb-4">Edit Trip Items</h2>
 
-<form method="post" asp-page-handler="UpdatePackedStatus">
-    <input type="hidden" asp-for="TripId" />
+    <form method="post" asp-page-handler="UpdatePackedStatus">
+        <input type="hidden" asp-for="TripId" />
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Packed</th>
-                <th>Item Name</th>
-            </tr>
-        </thead>
-        <tbody>
-            @for (int i = 0; i < Model.ExistingItems.Count; i++)
-            {
-                <tr>
-                    <td>
-                        <input type="hidden" name="UpdatedItems[@i].Id" value="@Model.ExistingItems[i].Id" />
-                        <input type="checkbox" name="UpdatedItems[@i].IsPacked" value="true" @(Model.ExistingItems[i].IsPacked ? "checked" : "") />
-                    </td>
-                    <td>@Model.ExistingItems[i].ItemReadDto.Name</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+        @foreach (var categoryGroup in groupedItems)
+        {
+            <div class="mb-4">
+                <h5 class="text-muted">@categoryGroup.Key</h5>
+                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-3">
+                    @for (int i = 0; i < categoryGroup.Count(); i++)
+                    {
+                        var item = categoryGroup.ElementAt(i);
+                        var index = Model.ExistingItems.IndexOf(item);
+                        var checkboxId = $"item_{item.Id}";
 
-    <button type="submit" class="btn btn-primary">Update Packed Status</button>
-</form>
+                        <div class="col">
+                            <div class="card h-100">
+                                <label class="card-body d-flex align-items-center cursor-pointer" for="@checkboxId">
+                                    <input type="hidden" name="UpdatedItems[@index].Id" value="@item.Id" />
+                                    <input class="form-check-input me-2" type="checkbox" id="@checkboxId" name="UpdatedItems[@index].IsPacked" value="true" @(item.IsPacked ? "checked" : "") />
+                                    <span>@item.ItemReadDto.Name</span>
+                                </label>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        <button type="submit" class="btn btn-primary mt-3">Update Packed Status</button>
+    </form>
+</div>

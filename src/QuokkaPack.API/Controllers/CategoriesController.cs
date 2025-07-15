@@ -25,7 +25,9 @@ namespace QuokkaPack.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CategoryReadDto>>> GetCategories()
         {
-            var categories = await _context.Categories.ToListAsync();
+            var categories = await _context.Categories
+                .Include(category => category.Items)
+                .ToListAsync();
             return categories.Select(c => c.ToReadDto()).ToList();
         }
 

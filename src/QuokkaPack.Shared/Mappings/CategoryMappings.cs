@@ -1,4 +1,5 @@
 ﻿using QuokkaPack.Shared.DTOs.CategoryDTOs;
+using QuokkaPack.Shared.DTOs.ItemDTOs;
 using QuokkaPack.Shared.Models;
 
 namespace QuokkaPack.Shared.Mappings;
@@ -29,7 +30,22 @@ public static class CategoryMappings
             Id = category.Id,
             Name = category.Name,
             Description = category.Description,
+            IsDefault = category.IsDefault,
+            Items = category.Items.Select(item => item.ToReadDtoSimple())
+        };
+    }
+
+    // Don't populate items to avoid circular references in some cases
+    public static CategoryReadDtoSimple ToReadDtoSimple(this Category category)
+    {
+        return new CategoryReadDtoSimple
+        {
+            Id = category.Id,
+            Name = category.Name,
+            Description = category.Description,
             IsDefault = category.IsDefault
         };
     }
+
+    
 }

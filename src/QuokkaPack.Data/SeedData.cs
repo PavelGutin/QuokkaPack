@@ -70,7 +70,7 @@ public static class SeedData
 
         var tripDestinations = new[] { "Yellowstone National Park", "Barcelona, Spain", "Tokyo, Japan" };
         var trips = new List<Trip>();
-        var today = DateTime.Today;
+        var today = DateOnly.FromDateTime(DateTime.Now);
 
         for (int i = 0; i < 3; i++)
         {

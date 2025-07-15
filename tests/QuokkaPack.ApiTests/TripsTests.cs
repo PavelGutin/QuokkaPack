@@ -38,8 +38,8 @@ namespace QuokkaPack.ApiTests.Controllers
             { 
                 CategoryIds = new List<int>(), 
                 Destination = "Test Trip", 
-                StartDate = DateTime.Parse("2025/01/01"), 
-                EndDate = DateTime.Parse("2025/02/01")
+                StartDate = DateOnly.FromDateTime(DateTime.Parse("2025/01/01")),
+                EndDate = DateOnly.FromDateTime(DateTime.Parse("2025/02/01"))
             };
             var response = await _client.PostAsJsonAsync("/api/trips", trip);
             response.StatusCode.Should().Be(HttpStatusCode.Created);
@@ -96,8 +96,8 @@ namespace QuokkaPack.ApiTests.Controllers
         private Trip CreateTrip(Guid masterUserId) => new Trip
         {
             Destination = "SeededTrip",
-            StartDate = DateTime.Parse("2025/01/01"),
-            EndDate = DateTime.Parse("2025/02/01"),
+            StartDate = DateOnly.FromDateTime(DateTime.Parse("2025/01/01")),
+            EndDate = DateOnly.FromDateTime(DateTime.Parse("2025/02/01")),
             MasterUserId = masterUserId
         };
     }

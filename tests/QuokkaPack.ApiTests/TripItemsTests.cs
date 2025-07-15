@@ -149,8 +149,8 @@ namespace QuokkaPack.ApiTests.Controllers
             return new Trip
             {
                 Destination = "Test Trip",
-                StartDate = DateTime.Parse("2025/01/01"),
-                EndDate = DateTime.Parse("2025/02/01"),
+                StartDate = DateOnly.FromDateTime(DateTime.Parse("2025/01/01")),
+                EndDate = DateOnly.FromDateTime(DateTime.Parse("2025/02/01")),
                 MasterUserId = masterUserId
             };
         }

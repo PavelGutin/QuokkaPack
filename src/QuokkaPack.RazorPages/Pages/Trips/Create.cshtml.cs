@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Identity.Abstractions;
 
@@ -46,7 +47,7 @@ namespace QuokkaPack.RazorPages.Pages.Trips
 
             Trip.CategoryIds = SelectedCategoryIds;
 
-            await _downstreamApi.PostForUserAsync(
+            var response = await _downstreamApi.PostForUserAsync<TripCreateDto, TripReadDto>(
                 "DownstreamApi",
                 Trip,
                 options =>
@@ -54,8 +55,8 @@ namespace QuokkaPack.RazorPages.Pages.Trips
                     options.RelativePath = "/api/trips";
                 });
 
-
-            return RedirectToPage("./Index");
+            //TODO: Handle response errors
+            return RedirectToPage("./EditTripItems", new { tripId = response.Id });
         }
     }
 }

@@ -10,8 +10,8 @@ namespace QuokkaPack.Shared.DTOs.Trip
     {
         public int Id { get; set; }
         public string Destination { get; set; } = string.Empty;
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
+        public DateOnly StartDate { get; set; }
+        public DateOnly EndDate { get; set; }
 
         public List<string> Categories { get; set; } = [];
     }
