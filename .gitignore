@@ -369,3 +369,4 @@ FodyWeavers.xsd
 /src/QuokkaPack.API/quokkapack.db
 /src/QuokkaPack.API/quokkapack.db-shm
 /src/QuokkaPack.API/quokkapack.db-wal
+/.env
