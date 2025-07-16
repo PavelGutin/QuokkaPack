@@ -56,6 +56,16 @@ builder.Services.Configure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationSch
 builder.Services.AddScoped<IUserLoginInitializer, UserLoginInitializer>();
 builder.Services.AddScoped<IClaimsTransformation, ClaimsTransformer>();
 
+builder.Services.AddRazorPages(options =>
+{
+    options.Conventions.AuthorizeFolder("/", policy: null);
+    options.Conventions.ConfigureFilter(new AuthorizeForScopesAttribute
+    {
+        ScopeKeySection = "DownstreamApi:Scopes"
+    });
+})
+.AddMicrosoftIdentityUI();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -70,8 +80,24 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.Use(async (context, next) =>
+{
+    try
+    {
+        await next();
+    }
+    catch (MicrosoftIdentityWebChallengeUserException)
+    {
+        await context.ChallengeAsync(); // triggers auth redirect
+    }
+});
+
 app.MapStaticAssets();
-app.MapRazorPages().WithStaticAssets();
+app.MapRazorPages()
+    .RequireAuthorization()
+    .WithStaticAssets();
 app.MapControllers();
+
+
 
 app.Run();

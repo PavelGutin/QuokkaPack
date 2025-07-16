@@ -1,13 +1,11 @@
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Identity.Abstractions;
-using Microsoft.Identity.Web;
-using System.Net;
 
 namespace QuokkaPack.RazorPages.Pages
 {
-    [AuthorizeForScopes(ScopeKeySection = "DownstreamApi:Scopes")]
+    [AllowAnonymous]
+    //[AuthorizeForScopes(ScopeKeySection = "DownstreamApi:Scopes")]
     public class IndexModel : PageModel
     {
         private readonly IDownstreamApi _downstreamApi;
@@ -22,26 +20,25 @@ namespace QuokkaPack.RazorPages.Pages
         public async Task OnGet()
         {
             ViewData["ApiResult"] = "Hello There";
+            //using var response = await _downstreamApi
+            //    .CallApiForUserAsync(
+            //    "DownstreamApi", 
+            //    options =>
+            //    {
+            //        options.RelativePath = "WeatherForecast"; 
+            //    })
+            //    .ConfigureAwait(false); 
 
-            using var response = await _downstreamApi
-                .CallApiForUserAsync(
-                "DownstreamApi", 
-                options =>
-                {
-                    options.RelativePath = "WeatherForecast"; 
-                })
-                .ConfigureAwait(false); 
-
-            if (response.StatusCode == System.Net.HttpStatusCode.OK)
-            {
-                var apiResult = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                ViewData["ApiResult"] = apiResult;
-            }
-            else
-            {
-                var error = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                throw new HttpRequestException($"Invalid status code in the HttpResponseMessage: {response.StatusCode}: {error}");
-            }
+            //if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            //{
+            //    var apiResult = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            //    ViewData["ApiResult"] = apiResult;
+            //}
+            //else
+            //{
+            //    var error = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            //    throw new HttpRequestException($"Invalid status code in the HttpResponseMessage: {response.StatusCode}: {error}");
+            //}
         }
     }
 }

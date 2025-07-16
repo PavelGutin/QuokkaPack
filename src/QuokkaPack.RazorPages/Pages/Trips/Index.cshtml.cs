@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Identity.Abstractions;
+using Microsoft.Identity.Web;
 using QuokkaPack.Data.Models;
 
 namespace QuokkaPack.RazorPages.Pages.Trips
