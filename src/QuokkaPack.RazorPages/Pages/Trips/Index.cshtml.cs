@@ -1,6 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.Identity.Abstractions;
-using Microsoft.Identity.Web;
 using QuokkaPack.Data.Models;
 using QuokkaPack.RazorPages.Tools;
 
