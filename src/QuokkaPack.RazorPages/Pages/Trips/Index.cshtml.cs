@@ -2,23 +2,24 @@
 using Microsoft.Identity.Abstractions;
 using Microsoft.Identity.Web;
 using QuokkaPack.Data.Models;
+using QuokkaPack.RazorPages.Tools;
 
 namespace QuokkaPack.RazorPages.Pages.Trips
 {
     public class IndexModel : PageModel
     {
-        private readonly IDownstreamApi _downstreamApi;
+        private readonly IApiService _api;
 
-        public IndexModel(IDownstreamApi downstreamApi)
+        public IndexModel(IApiService api)
         {
-            _downstreamApi = downstreamApi; ;
+            _api = api;
         }
 
         public IList<Trip> Trips { get; set; } = [];
 
         public async Task OnGetAsync()
         {
-            Trips = await _downstreamApi.CallApiForUserAsync<IList<Trip>>(
+            Trips = await _api.CallApiForUserAsync<IList<Trip>>(
                 "DownstreamApi",
                 options => options.RelativePath = "/api/trips"
             ) ?? [];

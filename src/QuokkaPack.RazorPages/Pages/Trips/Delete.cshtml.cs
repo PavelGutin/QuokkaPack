@@ -5,17 +5,18 @@ using QuokkaPack.Data.Models;
 using QuokkaPack.Shared.DTOs.Trip;
 using System.Net;
 using Microsoft.Identity.Web;
+using QuokkaPack.RazorPages.Tools;
 
 namespace QuokkaPack.RazorPages.Pages.Trips
 {
     public class DeleteModel : PageModel
     {
-        private readonly IDownstreamApi _downstreamApi;
+        private readonly IApiService _api;
         private readonly ILogger<DeleteModel> _logger;
 
-        public DeleteModel(IDownstreamApi downstreamApi, ILogger<DeleteModel> logger)
+        public DeleteModel(IApiService api, ILogger<DeleteModel> logger)
         {
-            _downstreamApi = downstreamApi;
+            _api = api;
             _logger = logger;
         }
 
@@ -29,7 +30,7 @@ namespace QuokkaPack.RazorPages.Pages.Trips
 
             try
             {
-                var trip = await _downstreamApi.CallApiForUserAsync<TripReadDto>(
+                var trip = await _api.CallApiForUserAsync<TripReadDto>(
                     "DownstreamApi",
                     options => options.RelativePath = $"/api/trips/{id}");
 
@@ -53,7 +54,7 @@ namespace QuokkaPack.RazorPages.Pages.Trips
 
             try
             {
-                await _downstreamApi.DeleteForUserAsync<int>(
+                await _api.DeleteForUserAsync<int>(
                     "DownstreamApi",
                     id.Value,
                     options =>

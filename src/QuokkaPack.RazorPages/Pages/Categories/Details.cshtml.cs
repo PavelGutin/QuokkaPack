@@ -1,18 +1,19 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Identity.Abstractions;
+using QuokkaPack.RazorPages.Tools;
 using QuokkaPack.Shared.DTOs.CategoryDTOs;
 
 namespace QuokkaPack.RazorPages.Pages.Categories
 {
     public class DetailsModel : PageModel
     {
-        private readonly IDownstreamApi _downstreamApi;
+        private readonly IApiService _api;
         private readonly ILogger<DeleteModel> _logger;
 
-        public DetailsModel(IDownstreamApi downstreamApi, ILogger<DeleteModel> logger)
+        public DetailsModel(IApiService api, ILogger<DeleteModel> logger)
         {
-            _downstreamApi = downstreamApi;
+            _api = api;
             _logger = logger;
         }
 
@@ -25,7 +26,7 @@ namespace QuokkaPack.RazorPages.Pages.Categories
 
             try
             {
-                var category = await _downstreamApi.CallApiForUserAsync<CategoryReadDto>(
+                var category = await _api.CallApiForUserAsync<CategoryReadDto>(
                     "DownstreamApi",
                     options => options.RelativePath = $"/api/categories/{id}");
 

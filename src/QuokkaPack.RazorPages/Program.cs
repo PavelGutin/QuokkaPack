@@ -1,12 +1,13 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
-using Microsoft.Identity.Web;
-using Microsoft.Identity.Web.UI;
-using QuokkaPack.RazorPages.UserLogin;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Identity.Web;
+using Microsoft.Identity.Web.UI;
 using QuokkaPack.Data;
+using QuokkaPack.RazorPages.Tools;
+using QuokkaPack.RazorPages.UserLogin;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,6 +36,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("AppDbContext") ?? throw new InvalidOperationException("Connection string 'AppDbContext' not found.")));
 
 builder.Services.AddHttpClient();
+
+builder.Services.AddHttpContextAccessor(); // Needed for IHttpContextAccessor
+builder.Services.AddScoped<IApiService, ApiService>();
 
 builder.Services.Configure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, options =>
 {
@@ -80,17 +84,17 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.Use(async (context, next) =>
-{
-    try
-    {
-        await next();
-    }
-    catch (MicrosoftIdentityWebChallengeUserException)
-    {
-        await context.ChallengeAsync(); // triggers auth redirect
-    }
-});
+//app.Use(async (context, next) =>
+//{
+//    try
+//    {
+//        await next();
+//    }
+//    catch (MicrosoftIdentityWebChallengeUserException)
+//    {
+//        await context.ChallengeAsync(); // triggers auth redirect
+//    }
+//});
 
 app.MapStaticAssets();
 app.MapRazorPages()

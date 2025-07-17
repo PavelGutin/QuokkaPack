@@ -1,18 +1,19 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Identity.Abstractions;
+using QuokkaPack.RazorPages.Tools;
 using QuokkaPack.Shared.DTOs.TripItem;
 
 namespace QuokkaPack.RazorPages.Pages.Trips
 {
     public class EditTripItemsModel : PageModel
     {
-        private readonly IDownstreamApi _downstreamApi;
+        private readonly IApiService _api;
         private readonly ILogger<EditTripItemsModel> _logger;
 
-        public EditTripItemsModel(IDownstreamApi downstreamApi, ILogger<EditTripItemsModel> logger)
+        public EditTripItemsModel(IApiService api, ILogger<EditTripItemsModel> logger)
         {
-            _downstreamApi = downstreamApi;
+            _api = api;
             _logger = logger;
         }
 
@@ -31,7 +32,7 @@ namespace QuokkaPack.RazorPages.Pages.Trips
         {
             try
             {
-                var items = await _downstreamApi.CallApiForUserAsync<List<TripItemReadDto>>(
+                var items = await _api.CallApiForUserAsync<List<TripItemReadDto>>(
                     "DownstreamApi",
                     options => options.RelativePath = $"/api/trips/{TripId}/tripItems");
 
@@ -49,7 +50,7 @@ namespace QuokkaPack.RazorPages.Pages.Trips
         {
             try
             {
-                await _downstreamApi.PutForUserAsync<List<TripItemReadDto>, object>(
+                await _api.PutForUserAsync<List<TripItemReadDto>, object>(
                     "DownstreamApi",
                     UpdatedItems,
                     options => options.RelativePath = $"/api/trips/{TripId}/tripItems/batch");

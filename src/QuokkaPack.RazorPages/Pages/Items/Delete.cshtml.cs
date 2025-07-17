@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Abstractions;
 using QuokkaPack.Data;
+using QuokkaPack.RazorPages.Tools;
 using QuokkaPack.Shared.DTOs.CategoryDTOs;
 using QuokkaPack.Shared.DTOs.ItemDTOs;
 using QuokkaPack.Shared.Models;
@@ -15,12 +16,12 @@ namespace QuokkaPack.RazorPages.Pages.Items
 {
     public class DeleteModel : PageModel
     {
-        private readonly IDownstreamApi _downstreamApi;
+        private readonly IApiService _api;
         private readonly ILogger<DeleteModel> _logger;
 
-        public DeleteModel(IDownstreamApi downstreamApi, ILogger<DeleteModel> logger)
+        public DeleteModel(IApiService api, ILogger<DeleteModel> logger)
         {
-            _downstreamApi = downstreamApi;
+            _api = api;
             _logger = logger;
         }
 
@@ -34,7 +35,7 @@ namespace QuokkaPack.RazorPages.Pages.Items
 
             try
             {
-                var item = await _downstreamApi.CallApiForUserAsync<ItemReadDto>(
+                var item = await _api.CallApiForUserAsync<ItemReadDto>(
                     "DownstreamApi",
                     options => options.RelativePath = $"/api/items/{id}");
 
@@ -58,7 +59,7 @@ namespace QuokkaPack.RazorPages.Pages.Items
 
             try
             {
-                await _downstreamApi.DeleteForUserAsync<int>(
+                await _api.DeleteForUserAsync<int>(
                     "DownstreamApi",
                     id.Value,
                     options =>

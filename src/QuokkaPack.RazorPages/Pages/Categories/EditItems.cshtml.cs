@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Identity.Abstractions;
+using QuokkaPack.RazorPages.Tools;
 using QuokkaPack.Shared.DTOs.ItemDTOs;
 using QuokkaPack.Shared.DTOs.TripItem;
 
@@ -8,12 +9,12 @@ namespace QuokkaPack.RazorPages.Pages.Categories
 {
     public class EditItemsModel : PageModel
     {
-        private readonly IDownstreamApi _downstreamApi;
+        private readonly IApiService _api;
         private readonly ILogger<EditItemsModel> _logger;
 
-        public EditItemsModel(IDownstreamApi downstreamApi, ILogger<EditItemsModel> logger)
+        public EditItemsModel(IApiService api, ILogger<EditItemsModel> logger)
         {
-            _downstreamApi = downstreamApi;
+            _api = api;
             _logger = logger;
         }
 
@@ -29,7 +30,7 @@ namespace QuokkaPack.RazorPages.Pages.Categories
         {
             try
             {
-                var items = await _downstreamApi.CallApiForUserAsync<List<ItemReadDto>>(
+                var items = await _api.CallApiForUserAsync<List<ItemReadDto>>(
                     "DownstreamApi",
                     options => options.RelativePath = $"/api/categories/{CategoryId}/items");
 
@@ -52,12 +53,12 @@ namespace QuokkaPack.RazorPages.Pages.Categories
 
             try
             {
-                var createdItem = await _downstreamApi.PostForUserAsync<ItemCreateDto, ItemReadDto>(
+                var createdItem = await _api.PostForUserAsync<ItemCreateDto, ItemReadDto>(
                     "DownstreamApi",
                     NewItem,
                     options => options.RelativePath = "/api/items");
 
-                await _downstreamApi.PostForUserAsync<object>(
+                await _api.PostForUserAsync<object>(
                     "DownstreamApi",
                     null,
                     options => options.RelativePath = $"/api/categories/{CategoryId}/items/{createdItem.Id}");
@@ -75,7 +76,7 @@ namespace QuokkaPack.RazorPages.Pages.Categories
         {
             try
             {
-                await _downstreamApi.DeleteForUserAsync(
+                await _api.DeleteForUserAsync(
                     "DownstreamApi",
                     itemId,
                     options => options.RelativePath = $"/api/categories/{CategoryId}/items/{itemId}");

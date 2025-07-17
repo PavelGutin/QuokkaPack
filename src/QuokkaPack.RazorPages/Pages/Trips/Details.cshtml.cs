@@ -1,18 +1,19 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Identity.Abstractions;
+using QuokkaPack.RazorPages.Tools;
 using QuokkaPack.Shared.DTOs.Trip;
 
 namespace QuokkaPack.RazorPages.Pages.Trips
 {
     public class DetailsModel : PageModel
     {
-        private readonly IDownstreamApi _downstreamApi;
+        private readonly IApiService _api;
         private readonly ILogger<DeleteModel> _logger;
 
-        public DetailsModel(IDownstreamApi downstreamApi, ILogger<DeleteModel> logger)
+        public DetailsModel(IApiService api, ILogger<DeleteModel> logger)
         {
-            _downstreamApi = downstreamApi;
+            _api = api;
             _logger = logger;
         }
 
@@ -25,7 +26,7 @@ namespace QuokkaPack.RazorPages.Pages.Trips
 
             try
             {
-                var trip = await _downstreamApi.CallApiForUserAsync<TripReadDto>(
+                var trip = await _api.CallApiForUserAsync<TripReadDto>(
                     "DownstreamApi",
                     options => options.RelativePath = $"/api/trips/{id}");
 

@@ -1,18 +1,19 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Identity.Abstractions;
+using QuokkaPack.RazorPages.Tools;
 using QuokkaPack.Shared.DTOs.ItemDTOs;
 
 namespace QuokkaPack.RazorPages.Pages.Items
 {
     public class EditModel : PageModel
     {
-        private readonly IDownstreamApi _downstreamApi;
+        private readonly IApiService _api;
         private readonly ILogger<DeleteModel> _logger;
 
-        public EditModel(IDownstreamApi downstreamApi, ILogger<DeleteModel> logger)
+        public EditModel(IApiService api, ILogger<DeleteModel> logger)
         {
-            _downstreamApi = downstreamApi;
+            _api = api;
             _logger = logger;
         }
 
@@ -26,7 +27,7 @@ namespace QuokkaPack.RazorPages.Pages.Items
 
             try
             {
-                var item = await _downstreamApi.CallApiForUserAsync<ItemEditDto>(
+                var item = await _api.CallApiForUserAsync<ItemEditDto>(
                     "DownstreamApi",
                     options => options.RelativePath = $"/api/items/{id}");
 
@@ -53,7 +54,7 @@ namespace QuokkaPack.RazorPages.Pages.Items
             }
             try
             {
-                await _downstreamApi.PutForUserAsync(
+                await _api.PutForUserAsync(
                     "DownstreamApi",
                     Item,
                     options =>

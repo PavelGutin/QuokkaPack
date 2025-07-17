@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Identity.Abstractions;
+using QuokkaPack.RazorPages.Tools;
 
 namespace QuokkaPack.RazorPages.Pages
 {
@@ -8,13 +9,13 @@ namespace QuokkaPack.RazorPages.Pages
     //[AuthorizeForScopes(ScopeKeySection = "DownstreamApi:Scopes")]
     public class IndexModel : PageModel
     {
-        private readonly IDownstreamApi _downstreamApi;
+        private readonly IApiService _api;
         private readonly ILogger<IndexModel> _logger;
 
-        public IndexModel(ILogger<IndexModel> logger, IDownstreamApi downstreamApi)
+        public IndexModel(ILogger<IndexModel> logger, IApiService api)
         {
             _logger = logger;
-            _downstreamApi = downstreamApi; ;
+            _api = api; ;
         }
 
         public async Task OnGet()

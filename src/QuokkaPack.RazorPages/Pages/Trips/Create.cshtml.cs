@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Identity.Abstractions;
-
+using QuokkaPack.RazorPages.Tools;
 using QuokkaPack.Shared.DTOs.Trip;
 using QuokkaPack.Shared.Models;
 
@@ -10,7 +10,7 @@ namespace QuokkaPack.RazorPages.Pages.Trips
 {
     public class CreateModel : PageModel
     {
-        private readonly IDownstreamApi _downstreamApi;
+        private readonly IApiService _api;
         public List<Category> AllCategories { get; set; } = [];
         [BindProperty]
         public TripCreateDto Trip { get; set; } = default!;
@@ -18,14 +18,14 @@ namespace QuokkaPack.RazorPages.Pages.Trips
         [BindProperty]
         public List<int> SelectedCategoryIds { get; set; } = [];
 
-        public CreateModel(IDownstreamApi downstreamApi)
+        public CreateModel(IApiService api)
         {
-            _downstreamApi = downstreamApi;
+            _api = api;
         }
 
         public async Task<IActionResult> OnGetAsync()
         {
-            AllCategories = await _downstreamApi.CallApiForUserAsync<List<Category>>(
+            AllCategories = await _api.CallApiForUserAsync<List<Category>>(
                 "DownstreamApi",
                 options => options.RelativePath = "/api/categories"
             ) ?? [];
@@ -47,7 +47,7 @@ namespace QuokkaPack.RazorPages.Pages.Trips
 
             Trip.CategoryIds = SelectedCategoryIds;
 
-            var response = await _downstreamApi.PostForUserAsync<TripCreateDto, TripReadDto>(
+            var response = await _api.PostForUserAsync<TripCreateDto, TripReadDto>(
                 "DownstreamApi",
                 Trip,
                 options =>

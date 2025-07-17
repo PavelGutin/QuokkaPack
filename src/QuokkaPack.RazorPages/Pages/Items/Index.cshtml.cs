@@ -1,16 +1,17 @@
 ﻿using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Identity.Abstractions;
+using QuokkaPack.RazorPages.Tools;
 using QuokkaPack.Shared.Models;
 
 namespace QuokkaPack.RazorPages.Pages.Items
 {
     public class IndexModel : PageModel
     {
-        private readonly IDownstreamApi _downstreamApi;
+        private readonly IApiService _api;
 
-        public IndexModel(IDownstreamApi downstreamApi)
+        public IndexModel(IApiService api)
         {
-            _downstreamApi = downstreamApi; ;
+            _api = api; ;
         }
 
         public IList<Item> Items { get;set; } = default!;
@@ -18,7 +19,7 @@ namespace QuokkaPack.RazorPages.Pages.Items
         public async Task OnGetAsync()
         {
             //TODO: replace with DTOs. Do this everywhere.
-            Items = await _downstreamApi.CallApiForUserAsync<IList<Item>>(
+            Items = await _api.CallApiForUserAsync<IList<Item>>(
                 "DownstreamApi",
                 options => options.RelativePath = "/api/items"
             ) ?? [];

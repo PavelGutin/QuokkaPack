@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Identity.Abstractions;
 using QuokkaPack.Data;
+using QuokkaPack.RazorPages.Tools;
 using QuokkaPack.Shared.DTOs.ItemDTOs;
 using QuokkaPack.Shared.Models;
 using System;
@@ -14,11 +15,11 @@ namespace QuokkaPack.RazorPages.Pages.Items
 {
     public class CreateModel : PageModel
     {
-        private readonly IDownstreamApi _downstreamApi;
+        private readonly IApiService _api;
 
-        public CreateModel(IDownstreamApi downstreamApi)
+        public CreateModel(IApiService api)
         {
-            _downstreamApi = downstreamApi;
+            _api = api;
         }
 
         public IActionResult OnGet()
@@ -37,7 +38,7 @@ namespace QuokkaPack.RazorPages.Pages.Items
                 return Page();
             }
 
-            await _downstreamApi.PostForUserAsync(
+            await _api.PostForUserAsync(
                 "DownstreamApi",
                 Item,
                 options =>

@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Abstractions;
 using QuokkaPack.Data;
 using QuokkaPack.Data.Models;
+using QuokkaPack.RazorPages.Tools;
 using QuokkaPack.Shared.DTOs.ItemDTOs;
 using QuokkaPack.Shared.DTOs.Trip;
 using QuokkaPack.Shared.Models;
@@ -16,12 +17,12 @@ namespace QuokkaPack.RazorPages.Pages.Items
 {
     public class DetailsModel : PageModel
     {
-        private readonly IDownstreamApi _downstreamApi;
+        private readonly IApiService _api;
         private readonly ILogger<DeleteModel> _logger;
 
-        public DetailsModel(IDownstreamApi downstreamApi, ILogger<DeleteModel> logger)
+        public DetailsModel(IApiService api, ILogger<DeleteModel> logger)
         {
-            _downstreamApi = downstreamApi;
+            _api = api;
             _logger = logger;
         }
 
@@ -34,7 +35,7 @@ namespace QuokkaPack.RazorPages.Pages.Items
 
             try
             {
-                var item = await _downstreamApi.CallApiForUserAsync<ItemReadDto>(
+                var item = await _api.CallApiForUserAsync<ItemReadDto>(
                     "DownstreamApi",
                     options => options.RelativePath = $"/api/items/{id}");
 
