@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Identity.Abstractions;
 using Microsoft.Identity.Web;
 
@@ -19,9 +20,10 @@ namespace QuokkaPack.RazorPages.Tools
         public async Task<T?> CallApiForUserAsync<T>(string serviceName, Action<DownstreamApiOptions> configureOptions) where T : class
         {
             //try
-            {
+            //{
                 return await _downstreamApi.CallApiForUserAsync<T>(serviceName, configureOptions);
-            }
+            //}
+
             //catch (MicrosoftIdentityWebChallengeUserException)
             //{
             //    var context = _httpContextAccessor.HttpContext;

@@ -11,7 +11,7 @@ namespace QuokkaPack.API.Controllers
 {
     [Authorize]
     [ApiController]
-    [Route("api/trips")]
+    [Route("api/trips/{tripId}/tripItems")]
     public class TripItemsController : ControllerBase
     {
         private readonly AppDbContext _context;
@@ -25,7 +25,7 @@ namespace QuokkaPack.API.Controllers
 
 
         // GET: /api/trips/{tripId}/tripItems
-        [HttpGet("{tripId}/tripItems")]
+        [HttpGet()]
         public async Task<ActionResult<List<TripItemReadDto>>> GetTripItems(int tripId)
         {
             var user = await _userResolver.GetOrCreateAsync(User);
@@ -50,7 +50,7 @@ namespace QuokkaPack.API.Controllers
         }
 
         // GET: /api/trips/{tripId}/tripItems{tripItemId}
-        [HttpGet("{tripId}/tripItems/{tripItemId}")]
+        [HttpGet("{tripItemId}")]
         public async Task<ActionResult<List<TripItemReadDto>>> GetTripItem(int tripId, int tripItemId)
         {
             var user = await _userResolver.GetOrCreateAsync(User);
@@ -72,13 +72,16 @@ namespace QuokkaPack.API.Controllers
         }
 
         //POST: /api/trips/{tripId}/tripItems
-        [HttpPost("{tripId}/tripItems")]
+        [HttpPost()]
         public async Task<IActionResult> AddItemToTrip(int tripId, [FromBody] TripItemCreateDto tripItemDto)
         {
             var user = await _userResolver.GetOrCreateAsync(User);
 
             //TODO: the AI slop code has masterUserID here, but that seems redundant. Be sure to test with multiple users
-            var trip = await _context.Trips.FirstOrDefaultAsync(trip => trip.Id == tripId);
+            var trip = await _context.Trips
+                .Include(trip => trip.TripItems)
+                .ThenInclude(tripItem => tripItem.Item)
+                .FirstOrDefaultAsync(trip => trip.Id == tripId);
             var item = await _context.Items.FirstOrDefaultAsync(item => item.Id == tripItemDto.ItemId);
 
             if (trip == null || item == null)
@@ -103,15 +106,15 @@ namespace QuokkaPack.API.Controllers
                 };
                 return CreatedAtAction(nameof(GetTripItem), new { tripId, tripItemId = tripItem.Id }, result);
             }
-
-            return Conflict(new
-            {
-                Message = $"Item with ID {item.Id} is already part of Trip {trip.Id}."
-            });
+            return NoContent();
+            //return Conflict(new
+            //{
+            //    Message = $"Item with ID {item.Id} is already part of Trip {trip.Id}."
+            //});
         }
 
-        // DELETE: /api/trips/5/tripItems/{itemId}
-        [HttpDelete("{tripId}/tripItems/{tripItemId}")]
+        // DELETE: /api/trips/{tripId}/tripItems/{itemId}
+        [HttpDelete("{tripItemId}")]
         public async Task<IActionResult> RemoveItemFromTrip(int tripId, int tripItemId)
         {
             var user = await _userResolver.GetOrCreateAsync(User);
@@ -129,7 +132,7 @@ namespace QuokkaPack.API.Controllers
         }
 
         // PUT: /api/trips/{tripId}/tripItems/{itemId}
-        [HttpPut("{tripId}/tripItems/{tripItemId}")]
+        [HttpPut("{tripItemId}")]
         public async Task<IActionResult> UpdateTripItem(int tripId, int tripItemId, [FromBody] TripItemEditDto tripItemDto)
         {
             var user = await _userResolver.GetOrCreateAsync(User);
@@ -149,7 +152,7 @@ namespace QuokkaPack.API.Controllers
         }
 
         // PUT: /api/trips/{tripId}/tripItems/batch
-        [HttpPut("{tripId}/tripItems/batch")]
+        [HttpPut("batch")]
         public async Task<IActionResult> UpdateTripItems(int tripId, [FromBody] List<TripItemEditDto> tripItemDtos)
         {
             var user = await _userResolver.GetOrCreateAsync(User);

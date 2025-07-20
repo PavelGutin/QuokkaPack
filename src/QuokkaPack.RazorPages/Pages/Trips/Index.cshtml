@@ -38,9 +38,8 @@
                 @Html.DisplayFor(modelItem => item.Destination)
             </td>
             <td>
-                <a asp-page="./EditTripItems" asp-route-tripId="@item.Id">Edit Items</a> |
+                <a asp-page="./Pack" asp-route-id="@item.Id">Pack</a> |
                 <a asp-page="./Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-page="./Details" asp-route-id="@item.Id">Details</a> |
                 <a asp-page="./Delete" asp-route-id="@item.Id">Delete</a>
             </td>
         </tr>
