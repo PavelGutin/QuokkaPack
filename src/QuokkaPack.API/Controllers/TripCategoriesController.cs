@@ -27,7 +27,10 @@ namespace QuokkaPack.API.Controllers
         {
             var user = await _userResolver.GetOrCreateAsync(User);
 
-            var trip = await _context.Trips.Include(t => t.TripItems).FirstOrDefaultAsync(t => t.Id == tripId && t.MasterUserId == user.Id);
+            var trip = await _context.Trips
+                .Include(t => t.TripItems)
+                .ThenInclude(tripItem => tripItem.Item)
+                .FirstOrDefaultAsync(t => t.Id == tripId && t.MasterUserId == user.Id);
             var items = await _context.Items
                 .Include(i => i.Categories)
                 .Where(i => i.Categories.Any(c => c.Id == categoryId))

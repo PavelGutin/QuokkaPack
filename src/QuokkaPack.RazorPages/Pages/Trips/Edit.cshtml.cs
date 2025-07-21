@@ -4,6 +4,7 @@ using QuokkaPack.RazorPages.Tools;
 using QuokkaPack.Shared.DTOs.CategoryDTOs;
 using QuokkaPack.Shared.DTOs.Trip;
 using QuokkaPack.Shared.DTOs.TripItem;
+using QuokkaPack.Shared.Models;
 
 namespace QuokkaPack.RazorPages.Pages.Trips
 {
@@ -29,6 +30,8 @@ namespace QuokkaPack.RazorPages.Pages.Trips
         public List<TripItemReadDto> UpdatedItems { get; set; } = [];
         [BindProperty]
         public TripItemCreateDto NewTripItem { get; set; } = new();
+        [BindProperty]
+        public TripEditDto TripEdit { get; set; } = new();
 
 
         public async Task<IActionResult> OnGetAsync()
@@ -65,77 +68,36 @@ namespace QuokkaPack.RazorPages.Pages.Trips
             }
         }
 
-        public async Task<IActionResult> OnPostUpdatePackedStatusAsync()
+        public async Task<IActionResult> OnPostUpdateTripAsync(int tripId, TripEditDto trip)
         {
-            try
-            {
-                await _api.PutForUserAsync<List<TripItemReadDto>, object>(
-                    "DownstreamApi",
-                    UpdatedItems,
-                    options => options.RelativePath = $"/api/trips/{Id}/tripItems/batch");
-
-                return RedirectToPage("EditTripItems", new { Id });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to update packed status for Trip {TripId}", Id);
-                return StatusCode(500);
-            }
-        }
-
-        public async Task<IActionResult> OnPostAddAsync()
-        {
-            throw new NotImplementedException();
-            /*
             if (!ModelState.IsValid)
             {
-                return await OnGetAsync();
+                return Page();
             }
-
             try
             {
-                var createdItem = await _downstreamApi.PostForUserAsync<TripItemCreateDto, ItemReadDto>(
+                trip.Id = tripId; //TODO: Fix this, I shouldn't have to do this nonsense 
+                await _api.PutForUserAsync(
                     "DownstreamApi",
-                    NewTripItem,
-                    options => options.RelativePath = "/api/items");
-
-                await _downstreamApi.PostForUserAsync<object>(
-                    "DownstreamApi",
-                    null,
-                    options => options.RelativePath = $"/api/trips/{TripId}/items/{createdItem.Id}");
-
-                return RedirectToPage("EditTripItems", new { TripId });
+                    trip,
+                    options =>
+                    {
+                        options.RelativePath = $"/api/trips/{tripId}";
+                    });
+            }
+            catch (HttpRequestException ex)
+            {
+                _logger.LogError(ex, "HTTP request failed when updating trip {TripId}", tripId);
+                return StatusCode(500);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to add item to Trip {TripId}", TripId);
+                _logger.LogError(ex, "Unexpected error updating trip {TripId}", tripId);
                 return StatusCode(500);
             }
-            */
+
+            return RedirectToPage("./Index");
         }
-
-        //public async Task<IActionResult> OnPostDeleteAsync(int itemId)
-        //{
-        //    throw new NotImplementedException();
-        //    /*
-        //    try
-        //    {
-        //        await _downstreamApi.DeleteForUserAsync(
-        //            "DownstreamApi",
-        //            itemId,
-        //            options => options.RelativePath = $"/api/trips/{TripId}/items/{itemId}");
-
-        //        return RedirectToPage("EditTripItems", new { TripId });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.LogError(ex, "Failed to delete item {ItemId} from Trip {TripId}", itemId, TripId);
-        //        return StatusCode(500);
-        //    }
-        //    */
-        //}
-
-
         public async Task<IActionResult> OnPostDeleteItemAsync(int tripId, int itemId)
         {
             try
@@ -168,6 +130,25 @@ namespace QuokkaPack.RazorPages.Pages.Trips
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to add item {ItemId} from Trip {TripId}", itemId, tripId);
+                return StatusCode(500);
+            }
+        }
+
+
+        public async Task<IActionResult> OnPostAddCategoryAsync(int tripId, int categoryId)
+        {
+            try
+            {
+                await _api.PostForUserAsync(
+                    "DownstreamApi",
+                    categoryId,
+                    options => options.RelativePath = $"/api/trips/{tripId}/categories");
+
+                return RedirectToPage("Edit", new { id = tripId });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to add category {categoryId} from Trip {tripId}", categoryId, tripId);
                 return StatusCode(500);
             }
         }

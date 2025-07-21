@@ -64,7 +64,7 @@ namespace QuokkaPack.RazorPages.Pages.Trips
                     UpdatedItems,
                     options => options.RelativePath = $"/api/trips/{Id}/tripItems/batch");
 
-                return RedirectToPage("EditTripItems", new { Id });
+                return RedirectToPage("Pack", new { Id });
             }
             catch (Exception ex)
             {

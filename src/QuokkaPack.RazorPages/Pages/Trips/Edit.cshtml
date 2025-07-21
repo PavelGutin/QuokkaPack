@@ -10,9 +10,12 @@
 
 <div class="container mt-4">
     <div class="p-3 rounded bg-light border">
-        <form method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <form method="post" 
+            asp-page-handler="UpdateTrip"
+            asp-route-tripId="@Model.Trip.Id">
 
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input asp-for="TripEdit.Id" type="hidden" />
             <!-- Destination row -->
             <div class="row mb-3">
                 <div class="col-md-2 d-flex align-items-center">
@@ -44,6 +47,8 @@
 
             <div class="text-end">
                 <button type="submit" class="btn btn-primary">Update Trip</button>
+                <a asp-page="/Trips/Pack" asp-route-id="@Model.Trip.Id" class="btn btn-outline-success ms-2">Back to Packing</a>
+
             </div>
         </form>
     </div>
@@ -140,10 +145,31 @@
         <div class="col">
             <div class="card h-100">
                 <div class="card-header d-flex align-items-center justify-content-between">
-                    <label class="form-check-label fw-bold mb-0">Excluded categories</label>
+                    <label class="form-check-label fw-bold mb-0">Availalbe categories</label>
                 </div>
                 <div class="card-body">
-                    aaa
+                    @{
+                        var categoryNames = Model.ExistingItems.Select(i => i.ItemReadDto.Categories.First().Name).Distinct();
+                        foreach (var availableCategory in Model.AllCategories.Where(c => !categoryNames.Contains(c.Name)).ToList())
+                        {
+                            <form method="post"
+                                  asp-page-handler="AddCategory"
+                                  asp-route-categoryId="@availableCategory.Id"
+                                  asp-route-tripId="@Model.Trip.Id"
+                                  class="ms-2">
+                                <div class="col d-flex align-items-start justify-content-between">
+                                    <div class="form-check">
+                                        <button type="submit" class="btn btn-sm" title="Add Category">
+                                            <i class="bi bi-plus-circle-fill delete-icon"></i>
+                                        </button>
+                                        <label class="form-check-label text-body" style="">
+                                            @availableCategory.Name
+                                        </label>
+                                    </div>
+                                </div>
+                            </form>
+                        }
+                    }
                 </div>
             </div>
         </div>
