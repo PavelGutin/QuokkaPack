@@ -1,8 +1,12 @@
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Identity.Client;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
 using QuokkaPack.Data;
@@ -83,6 +87,20 @@ app.UseHttpsRedirection();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseExceptionHandler(new ExceptionHandlerOptions
+{
+    ExceptionHandler = async ctx => {
+        var feature = ctx.Features.Get<IExceptionHandlerFeature>();
+        if (feature?.Error is MsalUiRequiredException
+            or { InnerException: MsalUiRequiredException }
+            or { InnerException.InnerException: MsalUiRequiredException })
+        {
+            ctx.Response.Cookies.Delete($"{CookieAuthenticationDefaults.CookiePrefix}{CookieAuthenticationDefaults.AuthenticationScheme}");
+            ctx.Response.Redirect(ctx.Request.GetEncodedPathAndQuery());
+        }
+    }
+});
 
 //app.Use(async (context, next) =>
 //{

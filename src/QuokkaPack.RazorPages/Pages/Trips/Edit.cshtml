@@ -4,7 +4,7 @@
     ViewData["Title"] = "Edit Trip Items";
 
     var groupedItems = Model.ExistingItems
-        .GroupBy(i => i.ItemReadDto.Categories.First().Name)
+        .GroupBy(i => i.ItemReadDto.Category.Name)
         .OrderBy(g => g.Key);
 }
 
@@ -60,7 +60,7 @@
         @foreach (var categoryGroup in groupedItems)
         {
             var categoryName = categoryGroup.Key;
-            var categoryId = categoryGroup.First().ItemReadDto.Categories.First().Id;
+            var categoryId = categoryGroup.First().ItemReadDto.Category.Id;
 
             <div class="col">
                 <div class="card h-100">
@@ -149,7 +149,7 @@
                 </div>
                 <div class="card-body">
                     @{
-                        var categoryNames = Model.ExistingItems.Select(i => i.ItemReadDto.Categories.First().Name).Distinct();
+                        var categoryNames = Model.ExistingItems.Select(i => i.ItemReadDto.Category.Name).Distinct();
                         foreach (var availableCategory in Model.AllCategories.Where(c => !categoryNames.Contains(c.Name)).ToList())
                         {
                             <form method="post"

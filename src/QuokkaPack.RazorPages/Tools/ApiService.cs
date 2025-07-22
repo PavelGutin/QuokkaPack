@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.Identity.Abstractions;
+﻿using Microsoft.Identity.Abstractions;
 using Microsoft.Identity.Web;
 
 namespace QuokkaPack.RazorPages.Tools
@@ -17,6 +15,7 @@ namespace QuokkaPack.RazorPages.Tools
             _httpContextAccessor = httpContextAccessor;
         }
 
+        [AuthorizeForScopes(ScopeKeySection = "bac7197e-bcf0-4ef6-864b-35c576fe01d8:access_as_user")]
         public async Task<T?> CallApiForUserAsync<T>(string serviceName, Action<DownstreamApiOptions> configureOptions) where T : class
         {
             //try
@@ -75,9 +74,9 @@ namespace QuokkaPack.RazorPages.Tools
         public async Task PostForUserAsync<TInput>(string serviceName, TInput input, Action<DownstreamApiOptions> configureOptions)
         {
             //try
-            {
+            //{
                 await _downstreamApi.PostForUserAsync(serviceName, input, configureOptions);
-            }
+            //}
             //catch (MicrosoftIdentityWebChallengeUserException)
             //{
             //    var context = _httpContextAccessor.HttpContext;

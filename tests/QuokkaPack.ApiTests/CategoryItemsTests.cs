@@ -21,7 +21,7 @@ namespace QuokkaPack.ApiTests.Controllers
         public async Task GetAll_ShouldReturnOk()
         {
             var item = await SeedCategoryAndItemAsync();
-            var response = await _client.GetAsync(BuildCategoryItemUrl(item.Categories.First().Id));
+            var response = await _client.GetAsync(BuildCategoryItemUrl(item.Category.Id));
             response.StatusCode.Should().Be(HttpStatusCode.OK);
         }
 
@@ -37,9 +37,9 @@ namespace QuokkaPack.ApiTests.Controllers
         {
             var item = await SeedCategoryAndItemAsync();
 
-            var postData = new { categoryId = item.Categories.First().Id, itemId = item.Id };
+            var postData = new { categoryId = item.Category.Id, itemId = item.Id };
             var response = await _client.PostAsJsonAsync(
-                BuildCategoryItemUrl(item.Categories.First().Id, item.Id), postData);
+                BuildCategoryItemUrl(item.Category.Id, item.Id), postData);
 
             response.StatusCode.Should().Be(HttpStatusCode.Created);
         }
@@ -55,7 +55,7 @@ namespace QuokkaPack.ApiTests.Controllers
         public async Task Delete_ShouldReturnNoContent_WhenValid()
         {
             var item = await SeedCategoryAndItemAsync();
-            var deleteResponse = await _client.DeleteAsync(BuildCategoryItemUrl(item.Categories.First().Id, item.Id));
+            var deleteResponse = await _client.DeleteAsync(BuildCategoryItemUrl(item.Category.Id, item.Id));
             deleteResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
         }
 
@@ -73,7 +73,7 @@ namespace QuokkaPack.ApiTests.Controllers
         {
             var category = CreateCategory(_scope.MasterUser.Id);
             var item = CreateItem(_scope.MasterUser.Id);
-            item.Categories.Add(category);
+            item.Category = category;
             _scope.Db.Items.Add(item);
             await _scope.Db.SaveChangesAsync();
             return item;

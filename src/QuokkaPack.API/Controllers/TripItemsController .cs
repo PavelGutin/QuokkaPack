@@ -33,7 +33,7 @@ namespace QuokkaPack.API.Controllers
             var trip = await _context.Trips
                 .Include(trip => trip.TripItems)
                 .ThenInclude(TripItem => TripItem.Item)
-                .ThenInclude(item => item.Categories)
+                .ThenInclude(item => item.Category)
                 .FirstOrDefaultAsync(c => c.Id == tripId && c.MasterUserId == user.Id);
 
             if (trip == null)

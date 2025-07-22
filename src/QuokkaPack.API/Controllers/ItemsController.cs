@@ -27,6 +27,7 @@ namespace QuokkaPack.API.Controllers
         public async Task<ActionResult<IEnumerable<ItemReadDto>>> GetItems()
         {
             var items = await _context.Items
+                .Include(item => item.Category) 
                 .AsNoTracking()
                 .Select(item => item.ToReadDto())
                 .ToListAsync();
@@ -50,7 +51,7 @@ namespace QuokkaPack.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<ItemReadDto>> CreateItem(ItemCreateDto itemDto)
+        public async Task<ActionResult<ItemReadDto>> CreateItem([FromBody] ItemCreateDto itemDto)
         {
             var item = itemDto.ToItem();
             var user = await _userResolver.GetOrCreateAsync(User);
@@ -82,7 +83,7 @@ namespace QuokkaPack.API.Controllers
             item.Name = dto.Name;
             item.Notes = dto.Notes;
             item.IsEssential = dto.IsEssential;
-            item.Categories = dto.Categories;
+            item.Category = dto.Category;
 
             try
             {

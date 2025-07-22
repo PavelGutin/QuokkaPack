@@ -14,6 +14,6 @@ namespace QuokkaPack.Shared.DTOs.ItemDTOs
         public string Name { get; set; } = default!;
         public string? Notes { get; set; }
         public bool IsEssential { get; set; } = false;
-        public ICollection<CategoryReadDtoSimple> Categories { get; set; } = [];
+        public CategoryReadDtoSimple Category { get; set; } = default!;
     }
 }

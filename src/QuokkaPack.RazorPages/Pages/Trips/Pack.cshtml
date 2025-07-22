@@ -4,7 +4,7 @@
     ViewData["Title"] = "Edit Trip Items";
 
     var groupedItems = Model.ExistingItems
-        .GroupBy(i => i.ItemReadDto.Categories.First().Name)
+        .GroupBy(i => i.ItemReadDto.Category.Name)
         .OrderBy(g => g.Key);
 }
 

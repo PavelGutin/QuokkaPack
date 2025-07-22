@@ -30,7 +30,7 @@ namespace QuokkaPack.API.Controllers
 
             var category = await _context.Categories
                 .Include(c => c.Items)
-                .ThenInclude(i => i.Categories)
+                .ThenInclude(i => i.Category)
                 .FirstOrDefaultAsync(c => c.Id == categoryId && c.MasterUserId == user.Id);
 
             if (category == null)
@@ -60,7 +60,7 @@ namespace QuokkaPack.API.Controllers
                 .Include(c => c.Items)
                 .FirstOrDefaultAsync(c => c.Id == categoryId && c.MasterUserId == user.Id);
             var item = await _context.Items
-                .Include(i => i.Categories)
+                .Include(i => i.Category)
                 .FirstOrDefaultAsync(i => i.Id == itemId && i.MasterUserId == user.Id);
 
             if (category == null || item == null)

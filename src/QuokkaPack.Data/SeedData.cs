@@ -60,7 +60,7 @@ public static class SeedData
                     IsEssential = rand.NextDouble() < 0.5,
                     MasterUserId = masterUserId
                 };
-                item.Categories.Add(category);
+                item.Category = category;
                 category.Items.Add(item);
                 items.Add(item);
             }

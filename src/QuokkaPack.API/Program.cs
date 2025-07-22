@@ -29,8 +29,23 @@ public class Program
         }
         builder.Services.AddScoped<IUserResolver, UserResolver>();
 
-        var app = builder.Build();
+        builder.Services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(policy =>
+            {
+                policy.WithOrigins("https://localhost:7203") // Adjust to match your UI
+                      .AllowAnyHeader()
+                      .AllowAnyMethod()
+                      .AllowCredentials();
+            });
+        });
 
+        
+
+        var app = builder.Build();
+        
+        app.UseRouting();
+        app.UseCors();
 
         using (var scope = app.Services.CreateScope())
         {

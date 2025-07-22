@@ -5,44 +5,106 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
+<h1>Master List</h1>
 
-<p>
-    <a asp-page="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Items[0].Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Items[0].Notes)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Items[0].IsEssential)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-    @foreach (var item in Model.Items) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Notes)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IsEssential)
-            </td>
-            <td>
-                <a asp-page="./Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-page="./Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-page="./Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+
+<div class="row row-cols-1 row-cols-md-2 g-4">
+
+    <div class="col">
+        <!-- Add New Category Form -->
+        <div class="card h-100 border-success">
+            <div class="card-header bg-success text-white fw-bold">
+                Add New Category
+            </div>
+            <div class="card-body">
+                <form method="post" asp-page-handler="AddCategory">
+                    <div class="mb-3">
+                        <label for="categoryName" class="form-label">Category Name</label>
+                        <input type="text" class="form-control" id="categoryName" name="categoryName" required />
+                    </div>
+                    <div class="form-check mb-3">
+                        <input type="checkbox" class="form-check-input" id="isDefault" name="isDefault" />
+                        <label class="form-check-label" for="isDefault">Essential by default</label>
+                    </div>
+                    <button type="submit" class="btn btn-success">Add Category</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col">
+        <!-- Add New Item Form -->
+        <div class="card h-100 border-primary">
+            <div class="card-header bg-primary text-white fw-bold">
+                Add New Item
+            </div>
+            <div class="card-body">
+                <form method="post" asp-page-handler="AddItem">
+                    <div class="mb-3">
+                        <label for="itemName" class="form-label">Item Name</label>
+                        <input type="text" class="form-control" id="itemName" name="itemName" required />
+                    </div>
+                    <div class="form-check mb-3">
+                        <input type="checkbox" class="form-check-input" id="isEssential" name="isEssential" />
+                        <label class="form-check-label" for="isEssential">Essential</label>
+                    </div>
+                    <div class="mb-3">
+                        <label for="categoryId" class="form-label">Category</label>
+                        <select class="form-select" id="categoryId" name="categoryId" required>
+                            <option disabled selected value="">-- Select Category --</option>
+                            @foreach (var category in Model.Categories)
+                            {
+                                <option value="@category.Id">@category.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Item</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+
+    @foreach (var category in Model.Categories.OrderBy(c => c.Name))
+    {
+        var categoryItems = Model.Items.Where(item => item.Category.Id == category.Id).ToList();
+
+        <div class="col">
+            <div class="card h-100 @(categoryItems.Count == 0 ? "border-secondary" : "")">
+                <div class="card-header d-flex align-items-center">
+                    <label class="form-check-label fw-bold mb-0">@category.Name</label>
+                </div>
+                <div class="card-body">
+                    @if (categoryItems.Any())
+                    {
+                        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-2">
+                            @foreach (var item in categoryItems)
+                            {
+                                <form method="post"
+                                      asp-page-handler="DeleteItem"
+                                      asp-route-itemId="@item.Id"
+                                      class="ms-2"
+                                      onsubmit="return confirm('Are you sure you want to delete this item?');">
+                                    <div class="col">
+                                        <div class="form-check">
+                                            <button type="submit" class="btn btn-sm" title="Delete Item">
+                                                <i class="bi bi-trash delete-icon"></i>
+                                            </button>
+                                            <label class="form-check-label">@item.Name</label>
+                                        </div>
+                                    </div>
+                                </form>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted fst-italic">No items in this category.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+
+</div>

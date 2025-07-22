@@ -32,8 +32,8 @@ namespace QuokkaPack.API.Controllers
                 .ThenInclude(tripItem => tripItem.Item)
                 .FirstOrDefaultAsync(t => t.Id == tripId && t.MasterUserId == user.Id);
             var items = await _context.Items
-                .Include(i => i.Categories)
-                .Where(i => i.Categories.Any(c => c.Id == categoryId))
+                .Include(i => i.Category)
+                .Where(i => i.Category.Id == categoryId)
                 .ToListAsync();
 
             if (trip == null || items.Count == 0)
@@ -71,13 +71,13 @@ namespace QuokkaPack.API.Controllers
             var trip = await _context.Trips
                 .Include(t => t.TripItems)
                     .ThenInclude(ti => ti.Item)
-                        .ThenInclude(i => i.Categories)
+                        .ThenInclude(i => i.Category)
                 .FirstOrDefaultAsync(t => t.Id == tripId && t.MasterUserId == user.Id);
 
             if (trip == null) return NotFound();
 
             var toRemove = trip.TripItems
-                .Where(ti => ti.Item.Categories.Any(c => c.Id == categoryId))
+                .Where(ti => ti.Item.Category.Id == categoryId)
                 .ToList();
 
             _context.TripItems.RemoveRange(toRemove);
@@ -106,7 +106,7 @@ namespace QuokkaPack.API.Controllers
             var trip = await _context.Trips
                 .Include(t => t.TripItems)
                     .ThenInclude(ti => ti.Item)
-                        .ThenInclude(i => i.Categories)
+                        .ThenInclude(i => i.Category)
                 .FirstOrDefaultAsync(t => t.Id == tripId && t.MasterUserId == user.Id);
 
             if (trip == null) return NotFound();
@@ -114,8 +114,8 @@ namespace QuokkaPack.API.Controllers
             var existingItemIds = trip.TripItems.Select(ti => ti.Item.Id).ToHashSet();
 
             var categoryItems = await _context.Items
-                .Include(i => i.Categories)
-                .Where(i => i.Categories.Any(c => c.Id == categoryId))
+                .Include(i => i.Category)
+                .Where(i => i.Category.Id == categoryId)
                 .ToListAsync();
 
             foreach (var item in categoryItems)
