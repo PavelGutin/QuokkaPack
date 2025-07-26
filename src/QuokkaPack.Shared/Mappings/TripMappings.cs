@@ -21,8 +21,7 @@ namespace QuokkaPack.Shared.Mappings
                 Id = trip.Id,
                 Destination = trip.Destination,
                 StartDate = trip.StartDate,
-                EndDate = trip.EndDate,
-                Categories = trip.Categories.Select(c => c.Name).ToList()
+                EndDate = trip.EndDate
             };
         }
     }

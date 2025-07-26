@@ -7,9 +7,9 @@ using QuokkaPack.Data.Models;
 
 namespace QuokkaPack.API.Controllers
 {
-    [Authorize]
+    [Authorize(AuthenticationSchemes = "Bearer")] //TODO: Figure out why I need to specify "Bearer" here
     [ApiController]
-    [Route("api/trips/{tripId}/categories")]
+    [Route("api/Trips/{tripId}/Categories")]
     public class TripCategoriesController : ControllerBase
     {
         private readonly AppDbContext _context;
@@ -28,24 +28,14 @@ namespace QuokkaPack.API.Controllers
             var user = await _userResolver.GetOrCreateAsync(User);
 
             var trip = await _context.Trips
-                .Include(t => t.TripItems)
-                .ThenInclude(tripItem => tripItem.Item)
                 .FirstOrDefaultAsync(t => t.Id == tripId && t.MasterUserId == user.Id);
-            var items = await _context.Items
-                .Include(i => i.Category)
-                .Where(i => i.Category.Id == categoryId)
+
+            var tripItems = await _context.Items
+                .Where(item => item.CategoryId == categoryId)
+                .Select(item => new TripItem() { ItemId = item.Id, TripId = tripId, IsPacked = false })
                 .ToListAsync();
 
-            if (trip == null || items.Count == 0)
-                return NotFound();
-
-            foreach (var item in items)
-            {
-                if (!trip.TripItems.Any(ti => ti.Item.Id == item.Id))
-                {
-                    trip.TripItems.Add(new TripItem { Item = item, IsPacked = false });
-                }
-            }
+            _context.TripItems.AddRange(tripItems);
 
             await _context.SaveChangesAsync();
             return NoContent();
@@ -67,6 +57,7 @@ namespace QuokkaPack.API.Controllers
         public async Task<IActionResult> RemoveCategoryFromTrip(int tripId, int categoryId)
         {
             var user = await _userResolver.GetOrCreateAsync(User);
+
 
             var trip = await _context.Trips
                 .Include(t => t.TripItems)
@@ -101,33 +92,34 @@ namespace QuokkaPack.API.Controllers
         [HttpPut("{categoryId}/reset")]
         public async Task<IActionResult> ResetCategoryInTrip(int tripId, int categoryId)
         {
-            var user = await _userResolver.GetOrCreateAsync(User);
+            throw new NotImplementedException();
+            //var user = await _userResolver.GetOrCreateAsync(User);
 
-            var trip = await _context.Trips
-                .Include(t => t.TripItems)
-                    .ThenInclude(ti => ti.Item)
-                        .ThenInclude(i => i.Category)
-                .FirstOrDefaultAsync(t => t.Id == tripId && t.MasterUserId == user.Id);
+            //var trip = await _context.Trips
+            //    .Include(t => t.TripItems)
+            //        .ThenInclude(ti => ti.Item)
+            //            .ThenInclude(i => i.Category)
+            //    .FirstOrDefaultAsync(t => t.Id == tripId && t.MasterUserId == user.Id);
 
-            if (trip == null) return NotFound();
+            //if (trip == null) return NotFound();
 
-            var existingItemIds = trip.TripItems.Select(ti => ti.Item.Id).ToHashSet();
+            //var existingItemIds = trip.TripItems.Select(ti => ti.Item.Id).ToHashSet();
 
-            var categoryItems = await _context.Items
-                .Include(i => i.Category)
-                .Where(i => i.Category.Id == categoryId)
-                .ToListAsync();
+            //var categoryItems = await _context.Items
+            //    .Include(i => i.Category)
+            //    .Where(i => i.Category.Id == categoryId)
+            //    .ToListAsync();
 
-            foreach (var item in categoryItems)
-            {
-                if (!existingItemIds.Contains(item.Id))
-                {
-                    trip.TripItems.Add(new TripItem { Item = item, IsPacked = false });
-                }
-            }
+            //foreach (var item in categoryItems)
+            //{
+            //    if (!existingItemIds.Contains(item.Id))
+            //    {
+            //        trip.TripItems.Add(new TripItem { Item = item, IsPacked = false });
+            //    }
+            //}
 
-            await _context.SaveChangesAsync();
-            return NoContent();
+            //await _context.SaveChangesAsync();
+            //return NoContent();
         }
     }
 }

@@ -8,5 +8,5 @@ public class CategoryReadDto
     public string Name { get; set; } = default!;
     public string? Description { get; set; }
     public bool IsDefault { get; set; } = false;
-    public required IEnumerable<ItemReadDtoSimple> Items { get; set; }
+    //public required IEnumerable<ItemReadDtoSimple> Items { get; set; }
 }

@@ -11,8 +11,6 @@ namespace QuokkaPack.Shared.Mappings
             return new Item
             {
                 Name = dto.Name,
-                Notes = dto.Notes,
-                IsEssential = dto.IsEssential,
                 CategoryId = dto.CategoryId
             };
         }
@@ -23,8 +21,6 @@ namespace QuokkaPack.Shared.Mappings
             {
                 Id = item.Id,
                 Name = item.Name,
-                Notes = item.Notes,
-                IsEssential = item.IsEssential,
                 Category = item?.Category?.ToReadDtoSimple()
             };
         }
@@ -34,9 +30,7 @@ namespace QuokkaPack.Shared.Mappings
             return new ItemReadDtoSimple
             {
                 Id = item.Id,
-                Name = item.Name,
-                Notes = item.Notes,
-                IsEssential = item.IsEssential
+                Name = item.Name
             };
         }
 

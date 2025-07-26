@@ -2,111 +2,94 @@
 using QuokkaPack.Data.Models;
 using QuokkaPack.Shared.Models;
 
-namespace QuokkaPack.Data.Seeding;
-
-public static class SeedData
+namespace QuokkaPack.Data
 {
-    public static async Task InitializeAsync(AppDbContext context)
+    public static class SeedData
     {
-        if (await context.MasterUsers.AnyAsync())
-            return; // Already seeded
-
-        var masterUserId = Guid.NewGuid();
-        var rand = new Random();
-
-        var user = new MasterUser
+        public static void Populate(ModelBuilder modelBuilder)
         {
-            Id = masterUserId,
-            CreatedAt = DateTime.UtcNow,
-            Logins = new List<UserLogin>
+            var masterUserId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
+            var masterUser = new MasterUser
             {
-                new UserLogin
-                {
-                    Provider = "entra",
-                    ProviderUserId = "3ad08e2d-78a3-404b-8665-bd6fdab60859",
-                    Issuer = "https://login.microsoftonline.com/c1532d29-6f77-4b68-a33c-b769515dfd69/v2.0"
-                }
-            }
-        };
-
-        var categoriesSeed = new Dictionary<string, List<string>>
-        {
-            ["Photography"] = new() { "DSLR Camera", "Tripod", "SD Cards", "Lens Cleaner", "Camera Charger", "Backup Battery" },
-            ["Beach"] = new() { "Towel", "Sunscreen", "Beach Tent", "Cooler", "Flip Flops", "Swimsuit", "Beach Chair", "Snorkel Set" },
-            ["Hiking"] = new() { "Hiking Boots", "Backpack", "Trail Map", "Water Bottle", "Snacks", "Rain Jacket" },
-            ["Camping"] = new() { "Tent", "Sleeping Bag", "Camping Stove", "Lantern", "Bug Spray", "Matches", "First Aid Kit" },
-            ["Work Trip"] = new() { "Laptop", "Charger", "Notebook", "Business Cards", "Dress Shoes", "Travel Mouse" }
-        };
-
-        var categories = new List<Category>();
-        var items = new List<Item>();
-
-        foreach (var (categoryName, itemNames) in categoriesSeed)
-        {
-            var category = new Category
-            {
-                Name = categoryName,
-                Description = $"Items for {categoryName.ToLower()}",
-                IsDefault = true,
-                MasterUserId = masterUserId
+                Id = masterUserId,
+                CreatedAt = new DateTime(2025, 1, 1)
             };
 
-            foreach (var itemName in itemNames)
+            var categories = new[]
             {
-                var item = new Item
+            new Category { Id = 1, Name = "Toiletries", MasterUserId = masterUserId },
+            new Category { Id = 2, Name = "Clothing", MasterUserId = masterUserId },
+            new Category { Id = 3, Name = "Electronics", MasterUserId = masterUserId },
+            new Category { Id = 4, Name = "Outdoor Gear", MasterUserId = masterUserId },
+            new Category { Id = 5, Name = "Snacks", MasterUserId = masterUserId },
+            new Category { Id = 6, Name = "Documents", MasterUserId = masterUserId }
+        };
+
+            var items = new List<Item>();
+            int itemId = 1;
+
+            void AddItems(int categoryId, params string[] itemNames)
+            {
+                items.AddRange(itemNames.Select(name => new Item
                 {
-                    Name = itemName,
-                    Notes = "",
-                    IsEssential = rand.NextDouble() < 0.5,
+                    Id = itemId++,
+                    Name = name,
+                    CategoryId = categoryId,
                     MasterUserId = masterUserId
-                };
-                item.Category = category;
-                category.Items.Add(item);
-                items.Add(item);
+                }));
             }
 
-            categories.Add(category);
-        }
+            AddItems(1, "Toothbrush", "Toothpaste", "Shampoo", "Deodorant", "Razor", "Face Wash", "Floss");
+            AddItems(2, "T-shirts", "Jeans", "Sweater", "Raincoat", "Socks", "Underwear", "Pajamas", "Hat");
+            AddItems(3, "Phone Charger", "Power Bank", "Headphones", "Laptop", "Kindle", "USB Cable");
+            AddItems(4, "Hiking Boots", "Tent", "Sleeping Bag", "Flashlight", "Water Bottle", "Backpack");
+            AddItems(5, "Granola Bars", "Trail Mix", "Jerky", "Fruit Snacks", "Protein Bars");
+            AddItems(6, "Passport", "Boarding Pass", "Travel Insurance", "Itinerary", "ID Card");
 
-        var tripDestinations = new[] { "Yellowstone National Park", "Barcelona, Spain", "Tokyo, Japan" };
-        var trips = new List<Trip>();
-        var today = DateOnly.FromDateTime(DateTime.Now);
-
-        for (int i = 0; i < 3; i++)
-        {
-            var trip = new Trip
+            var trips = new[]
             {
-                Destination = tripDestinations[i],
-                StartDate = today.AddDays((i + 1) * 15),
-                EndDate = today.AddDays((i + 1) * 15 + 7),
-                MasterUserId = masterUserId,
-                Categories = new List<Category>(),
-                TripItems = new List<TripItem>()
-            };
+            new Trip { Id = 1, Destination = "Tokyo", StartDate = new DateOnly(2025, 4, 10), EndDate = new DateOnly(2025, 4, 24), MasterUserId = masterUserId },
+            new Trip { Id = 2, Destination = "Yosemite", StartDate = new DateOnly(2025, 6, 1), EndDate = new DateOnly(2025, 6, 8), MasterUserId = masterUserId },
+            new Trip { Id = 3, Destination = "Paris", StartDate = new DateOnly(2025, 7, 15), EndDate = new DateOnly(2025, 7, 30), MasterUserId = masterUserId },
+            new Trip { Id = 4, Destination = "Banff", StartDate = new DateOnly(2025, 9, 10), EndDate = new DateOnly(2025, 9, 20), MasterUserId = masterUserId },
+            new Trip { Id = 5, Destination = "New York City", StartDate = new DateOnly(2025, 12, 20), EndDate = new DateOnly(2025, 12, 27), MasterUserId = masterUserId },
+        };
 
-            var selectedCategories = categories.OrderBy(_ => rand.Next()).Take(3).ToList();
-            foreach (var cat in selectedCategories)
+            var random = new Random();
+            var tripItems = new List<TripItem>();
+            int tripItemId = 1;
+
+            foreach (var trip in trips)
             {
-                trip.Categories.Add(cat);
-                foreach (var item in cat.Items)
+                // Pick the first 3–5 categories by ID (deterministic)
+                var tripCategoryIds = categories
+                    .OrderBy(c => c.Id) // predictable order
+                    .Skip(trip.Id % 2)  // vary trips a little
+                    .Take(3 + (trip.Id % 3)) // 3–5 categories
+                    .Select(c => c.Id)
+                    .ToList();
+
+                foreach (var catId in tripCategoryIds)
                 {
-                    if (!trip.TripItems.Any(i => i.Item.Name == item.Name)) // prevent dupes
+                    var catItems = items.Where(i => i.CategoryId == catId);
+                    foreach (var item in catItems)
                     {
-                        trip.TripItems.Add(new TripItem() { Item = item, IsPacked = false});
+                        tripItems.Add(new TripItem
+                        {
+                            Id = tripItemId++,
+                            TripId = trip.Id,
+                            ItemId = item.Id,
+                            IsPacked = (item.Id + trip.Id) % 2 == 0 // deterministic pattern
+                        });
                     }
                 }
-
             }
 
-            trips.Add(trip);
+            modelBuilder.Entity<MasterUser>().HasData(masterUser);
+            modelBuilder.Entity<Category>().HasData(categories);
+            modelBuilder.Entity<Item>().HasData(items);
+            modelBuilder.Entity<Trip>().HasData(trips);
+            modelBuilder.Entity<TripItem>().HasData(tripItems);
         }
-
-
-        await context.MasterUsers.AddAsync(user);
-        await context.Categories.AddRangeAsync(categories);
-        await context.Items.AddRangeAsync(items);
-        await context.Trips.AddRangeAsync(trips);
-
-        await context.SaveChangesAsync();
     }
 }

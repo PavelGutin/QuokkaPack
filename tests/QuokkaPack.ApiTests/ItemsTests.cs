@@ -62,9 +62,7 @@ namespace QuokkaPack.ApiTests.Controllers
             var itemEditDto = new ItemEditDto() 
             { 
                 Id = item.Id, 
-                Name = item.Name + " updated", 
-                Notes = item.Notes + " updated", 
-                IsEssential = !item.IsEssential
+                Name = item.Name + " updated"
             };
             var putResponse = await _client.PutAsJsonAsync($"/api/items/{item.Id}", itemEditDto);
             putResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
@@ -96,8 +94,6 @@ namespace QuokkaPack.ApiTests.Controllers
         private Item CreateItem(Guid masterUserId) => new Item
         {
             Name = "SeededItem",
-            Notes = "Seeded for testing",
-            IsEssential = false,
             MasterUserId = masterUserId
         };
     }

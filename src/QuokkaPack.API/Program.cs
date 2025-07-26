@@ -1,85 +1,75 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Identity.Web;
+using QuokkaPack.API.Extensions;
 using QuokkaPack.API.Services;
 using QuokkaPack.Data;
-using QuokkaPack.Data.Seeding;
+using System.IdentityModel.Tokens.Jwt;
 
-namespace QuokkaPack.API;
+JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
-public class Program
+var builder = WebApplication.CreateBuilder(args);
+
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(connectionString));
+builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
+builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+    .AddEntityFrameworkStores<AppDbContext>()
+    .AddDefaultTokenProviders();
+
+builder.Services.AddControllers();
+// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+builder.Services.AddOpenApi();
+
+builder.Services.AddJwtAuthentication(builder.Configuration);
+builder.Services.AddScoped<IUserResolver, UserResolver>();
+
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
 {
-    public static async Task Main(string[] args)
-    {
-        var builder = WebApplication.CreateBuilder(args);
-
-        // Add services to the container.
-        builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
-
-        builder.Services.AddControllers();
-        // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-        builder.Services.AddOpenApi();
-
-        //TODO: This should not be here. Figure out a way to remove it
-        if (!builder.Environment.IsEnvironment("Testing"))
-        {
-            builder.Services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
-        }
-        builder.Services.AddScoped<IUserResolver, UserResolver>();
-
-        builder.Services.AddCors(options =>
-        {
-            options.AddDefaultPolicy(policy =>
-            {
-                policy.WithOrigins("https://localhost:7203") // Adjust to match your UI
-                      .AllowAnyHeader()
-                      .AllowAnyMethod()
-                      .AllowCredentials();
-            });
-        });
-
-        
-
-        var app = builder.Build();
-        
-        app.UseRouting();
-        app.UseCors();
-
-        using (var scope = app.Services.CreateScope())
-        {
-            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            var env = scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>();
-
-
-            if (env.IsDevelopment())
-            {
-                var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-
-                if (db.Database.IsRelational()) // prevents crash when using InMemory
-                {
-                    db.Database.Migrate();
-                    await SeedData.InitializeAsync(context); // await the async method
-                }
-            }
-        }
-
-        // Configure the HTTP request pipeline.
-        if (app.Environment.IsDevelopment())
-        {
-            app.MapOpenApi();
-        }
-
-        //app.UseHttpsRedirection();
-
-        app.UseAuthentication();
-
-        app.UseAuthorization();
-
-        app.MapControllers();
-
-        app.Run();
-
-    }
+    app.MapOpenApi();
 }
+
+app.UseHttpsRedirection();
+app.UseRouting();
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapControllers();
+
+
+
+
+//app.UseEndpoints(endpoints =>
+//{
+//    endpoints.MapControllers();
+
+//    foreach (var endpoint in endpoints.DataSources.SelectMany(ds => ds.Endpoints))
+//    {
+//        if (endpoint is RouteEndpoint routeEndpoint)
+//        {
+//            var pattern = routeEndpoint.RoutePattern.RawText;
+//            var methodMetadata = routeEndpoint.Metadata
+//                .OfType<HttpMethodMetadata>()
+//                .FirstOrDefault();
+
+//            var methods = methodMetadata != null
+//                ? string.Join(", ", methodMetadata.HttpMethods)
+//                : "N/A";
+
+//            Console.WriteLine($"Mapped endpoint: {methods} {pattern}");
+//        }
+//        else
+//        {
+//            Console.WriteLine($"Mapped endpoint (non-route): {endpoint.DisplayName}");
+//        }
+//    }
+//});
+
+
+
+app.Run();

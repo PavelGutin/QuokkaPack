@@ -9,7 +9,7 @@ using QuokkaPack.Shared.Mappings;
 
 namespace QuokkaPack.API.Controllers
 {
-    [Authorize]
+    [Authorize(AuthenticationSchemes = "Bearer")]
     [ApiController]
     [Route("api/[controller]")]
     public class TripsController : ControllerBase
@@ -23,10 +23,22 @@ namespace QuokkaPack.API.Controllers
             _context = context;
         }
 
+
+
+        [HttpGet("ping")]
+        [AllowAnonymous]
+        public IActionResult Ping()
+        {
+            return Ok(new { message = "pong" });
+        }
+
+
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TripReadDto>>> GetTrips()
         {
+            var user = await _userResolver.GetOrCreateAsync(User);
             return await _context.Trips
+                .Where(trip => trip.MasterUserId == user.Id)
                 .AsNoTracking()
                 .Select(trip => trip.ToReadDto())
                 .ToListAsync();
@@ -38,7 +50,7 @@ namespace QuokkaPack.API.Controllers
             var user = await _userResolver.GetOrCreateAsync(User);
 
             var trip = await _context.Trips
-                .Include(t => t.Categories)
+                //.Include(t => t.Categories)
                 .FirstOrDefaultAsync(t => t.Id == id && t.MasterUserId == user.Id);
 
             if (trip == null)
@@ -56,12 +68,11 @@ namespace QuokkaPack.API.Controllers
             trip.MasterUserId = user.Id;
 
             var categories = await _context.Categories
-                .Include(c => c.Items)
                 .Where(c => tripDto.CategoryIds.Contains(c.Id) && c.MasterUserId == user.Id)
                 .ToListAsync();
-            trip.Categories = categories;
 
-            var tripItems = categories.SelectMany(c => c.Items)
+            var tripItems = _context.Items
+                .Where(item => tripDto.CategoryIds.Contains(item.CategoryId))
                 .Select(item => new TripItem()
                 {
                     Trip = trip,
@@ -69,10 +80,7 @@ namespace QuokkaPack.API.Controllers
                     IsPacked = false,
                 })
                 .ToList();
-
-            trip.TripItems = tripItems;
-
-            _context.Trips.Add(trip);
+            _context.TripItems.AddRange(tripItems);
             await _context.SaveChangesAsync();
 
             try

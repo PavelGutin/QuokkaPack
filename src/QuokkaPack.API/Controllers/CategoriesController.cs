@@ -8,7 +8,7 @@ using QuokkaPack.Shared.Mappings;
 
 namespace QuokkaPack.API.Controllers
 {
-    [Authorize]
+    [Authorize(AuthenticationSchemes = "Bearer")]
     [ApiController]
     [Route("api/[controller]")]
     public class CategoriesController : ControllerBase
@@ -26,7 +26,7 @@ namespace QuokkaPack.API.Controllers
         public async Task<ActionResult<IEnumerable<CategoryReadDto>>> GetCategories()
         {
             var categories = await _context.Categories
-                .Include(category => category.Items)
+                //.Include(category => category.Items)
                 .ToListAsync();
             return categories.Select(c => c.ToReadDto()).ToList();
         }
@@ -73,7 +73,6 @@ namespace QuokkaPack.API.Controllers
 
             // TODO: Replace with mapper or extension
             category.Name = dto.Name;
-            category.Description = dto.Description;
             category.IsDefault = dto.IsDefault;
 
             try

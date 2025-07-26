@@ -11,7 +11,6 @@ public static class CategoryMappings
         return new Category
         {
             Name = dto.Name,
-            Description = dto.Description,
             IsDefault = dto.IsDefault
         };
     }
@@ -19,7 +18,6 @@ public static class CategoryMappings
     public static void UpdateFromDto(this Category category, CategoryEditDto dto)
     {
         category.Name = dto.Name;
-        category.Description = dto.Description;
         category.IsDefault = dto.IsDefault;
     }
 
@@ -29,9 +27,8 @@ public static class CategoryMappings
         {
             Id = category.Id,
             Name = category.Name,
-            Description = category.Description,
-            IsDefault = category.IsDefault,
-            Items = category.Items.Select(item => item.ToReadDtoSimple())
+            IsDefault = category.IsDefault//,
+            //Items = category.Items.Select(item => item.ToReadDtoSimple())
         };
     }
 
@@ -42,7 +39,6 @@ public static class CategoryMappings
         {
             Id = category.Id,
             Name = category.Name,
-            Description = category.Description,
             IsDefault = category.IsDefault
         };
     }

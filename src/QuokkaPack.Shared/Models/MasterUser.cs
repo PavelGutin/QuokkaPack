@@ -1,4 +1,5 @@
-﻿using QuokkaPack.Data.Models;
+﻿using Microsoft.AspNetCore.Identity;
+using QuokkaPack.Data.Models;
 
 namespace QuokkaPack.Shared.Models
 {
@@ -6,8 +7,11 @@ namespace QuokkaPack.Shared.Models
     {
         public Guid Id { get; set; } = Guid.NewGuid();
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-        public ICollection<UserLogin> Logins { get; set; } = new List<UserLogin>();
+        public string? IdentityUserId { get; set; }
+        public IdentityUser? IdentityUser { get; set; }
+        public ICollection<AppUserLogin> Logins { get; set; } = new List<AppUserLogin>();
         public ICollection<Trip> Trips { get; set; } = new List<Trip>();
+        public ICollection<Item> Items { get; set; } = new List<Item>();
+        public ICollection<Category> Categories { get; set; } = new List<Category>();
     }
 }

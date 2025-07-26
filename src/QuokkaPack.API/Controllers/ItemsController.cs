@@ -5,11 +5,10 @@ using QuokkaPack.API.Services;
 using QuokkaPack.Data;
 using QuokkaPack.Shared.DTOs.ItemDTOs;
 using QuokkaPack.Shared.Mappings;
-using QuokkaPack.Shared.Models;
 
 namespace QuokkaPack.API.Controllers
 {
-    [Authorize]
+    [Authorize(AuthenticationSchemes = "Bearer")] //TODO: Figure out why I need to specify "Bearer" here
     [ApiController]
     [Route("api/[controller]")]
     public class ItemsController : ControllerBase
@@ -81,8 +80,6 @@ namespace QuokkaPack.API.Controllers
 
             //TODO: Use automapper or an extension method to map DTO to entity
             item.Name = dto.Name;
-            item.Notes = dto.Notes;
-            item.IsEssential = dto.IsEssential;
             item.Category = dto.Category;
 
             try

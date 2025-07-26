@@ -82,7 +82,6 @@ namespace QuokkaPack.ApiTests.Controllers
         private static Category CreateCategory(Guid masterUserId) => new Category
         {
             Name = "SeededCategory",
-            Description = "Seeded for testing",
             IsDefault = false,
             MasterUserId = masterUserId
         };
@@ -90,8 +89,6 @@ namespace QuokkaPack.ApiTests.Controllers
         private static Item CreateItem(Guid masterUserId) => new Item
         {
             Name = "SeededItem",
-            Notes = "Seeded for testing",
-            IsEssential = false,
             MasterUserId = masterUserId
         };
     }

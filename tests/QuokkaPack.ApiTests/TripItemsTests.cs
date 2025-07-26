@@ -160,8 +160,6 @@ namespace QuokkaPack.ApiTests.Controllers
             return new Item
             {
                 Name = "Test Item",
-                Notes = "Testing item creation",
-                IsEssential = false,
                 MasterUserId = masterUserId
             };
         }

@@ -86,7 +86,6 @@ namespace QuokkaPack.ApiTests.Controllers
             return new Category
             {
                 Name = "Test Category",
-                Description = "This is a test category",
                 MasterUserId = masterUserId,
                 IsDefault = false
             };
