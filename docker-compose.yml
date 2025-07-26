@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: QuokkaPack.API/Dockerfile
+    ports:
+      - "5001:8080"  # Internal only
+    environment:
+      - ASPNETCORE_URLS=http://+:8080
+
+  web:
+    build:
+      context: .
+      dockerfile: QuokkaPack.RazorPages/Dockerfile
+    ports:
+      - "5000:80"
+    depends_on:
+      - api
+    environment:
+      - ASPNETCORE_URLS=http://+:80

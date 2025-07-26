@@ -1,7 +1,6 @@
 using QuokkaPack.API.Extensions;
 using QuokkaPack.Razor.Tools;
 using QuokkaPack.RazorPages.Tools;
-using System.IdentityModel.Tokens.Jwt;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +25,10 @@ builder.Services.AddHttpClient("QuokkaApi", client =>
 builder.Services.AddJwtAuthentication(builder.Configuration);
 
 var app = builder.Build();
+
+var environment = builder.Environment.EnvironmentName;
+builder.Configuration.AddJsonFile("appsettings.json", optional: false)
+                     .AddJsonFile($"appsettings.{environment}.json", optional: true);
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
