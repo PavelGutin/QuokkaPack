@@ -18,6 +18,17 @@
       "dotnetRunMessages": true,
       "applicationUrl": "https://localhost:7279;http://localhost:5142"
     },
+
+    "BareMetal HTTPS": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "dotnetRunMessages": true,
+      "applicationUrl": "https://localhost:7279;http://localhost:5142"
+    },
+
     "Container (Dockerfile)": {
       "commandName": "Docker",
       "launchBrowser": true,

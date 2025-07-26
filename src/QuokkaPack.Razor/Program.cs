@@ -27,8 +27,8 @@ builder.Services.AddJwtAuthentication(builder.Configuration);
 var app = builder.Build();
 
 var environment = builder.Environment.EnvironmentName;
-builder.Configuration.AddJsonFile("appsettings.json", optional: false)
-                     .AddJsonFile($"appsettings.{environment}.json", optional: true);
+//builder.Configuration.AddJsonFile("appsettings.json", optional: false)
+//                     .AddJsonFile($"appsettings.{environment}.json", optional: true);
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

@@ -77,6 +77,7 @@ public class AuthController : ControllerBase
 
     private string GenerateJwtToken(IdentityUser user)
     {
+
         // Look up the MasterUser linked to this IdentityUser
         var masterUserId = _context.MasterUsers
             .Where(mu => mu.IdentityUserId == user.Id)
@@ -92,7 +93,10 @@ public class AuthController : ControllerBase
             new Claim(JwtRegisteredClaimNames.Email, user.Email!)
         };
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:Secret"]!));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:Secret"]!))
+        {
+            KeyId = "quokka-secret" // <- Arbitrary but consistent string
+        };
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(
@@ -102,6 +106,8 @@ public class AuthController : ControllerBase
             expires: DateTime.UtcNow.AddHours(2),
             signingCredentials: creds
         );
+
+        token.Header["kid"] = key.KeyId;
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }

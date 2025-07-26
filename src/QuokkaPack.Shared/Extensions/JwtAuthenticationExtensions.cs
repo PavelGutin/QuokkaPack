@@ -16,14 +16,18 @@ namespace QuokkaPack.API.Extensions
             services.AddAuthentication("Bearer")
                 .AddJwtBearer("Bearer", options =>
                 {
+                    var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Secret"]!))
+                    {
+                        KeyId = "quokka-secret"
+                    };
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateIssuer = true,
                         ValidateAudience = true,
                         ValidIssuer = jwtSettings["Issuer"],
                         ValidAudience = jwtSettings["Audience"],
-                        IssuerSigningKey = new SymmetricSecurityKey(
-                            Encoding.UTF8.GetBytes(jwtSettings["Secret"]!))
+                        IssuerSigningKey = key,
+                        ValidateIssuerSigningKey = true
                     };
                     options.MapInboundClaims = false;
 
