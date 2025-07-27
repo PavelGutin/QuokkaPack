@@ -24,7 +24,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\QuokkaPack.Data\QuokkaPack.Data.csproj" />
-    <ProjectReference Include="..\QuokkaPack.Razor\QuokkaPack.Razor.csproj" />
   </ItemGroup>
 
 </Project>

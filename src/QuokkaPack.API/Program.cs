@@ -9,10 +9,9 @@ JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
 var builder = WebApplication.CreateBuilder(args);
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(connectionString));
-builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? 
+    throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
 
 builder.Services.AddIdentity<IdentityUser, IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>()
@@ -24,6 +23,12 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddScoped<IUserResolver, UserResolver>();
+
+
+if (builder.Environment.IsEnvironment("Docker"))
+{
+    builder.WebHost.UseUrls("http://0.0.0.0:80");
+}
 
 var app = builder.Build();
 
@@ -41,35 +46,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-
-
-
-//app.UseEndpoints(endpoints =>
-//{
-//    endpoints.MapControllers();
-
-//    foreach (var endpoint in endpoints.DataSources.SelectMany(ds => ds.Endpoints))
-//    {
-//        if (endpoint is RouteEndpoint routeEndpoint)
-//        {
-//            var pattern = routeEndpoint.RoutePattern.RawText;
-//            var methodMetadata = routeEndpoint.Metadata
-//                .OfType<HttpMethodMetadata>()
-//                .FirstOrDefault();
-
-//            var methods = methodMetadata != null
-//                ? string.Join(", ", methodMetadata.HttpMethods)
-//                : "N/A";
-
-//            Console.WriteLine($"Mapped endpoint: {methods} {pattern}");
-//        }
-//        else
-//        {
-//            Console.WriteLine($"Mapped endpoint (non-route): {endpoint.DisplayName}");
-//        }
-//    }
-//});
-
-
+Console.WriteLine($"QuokkaPack.API running in environment: {app.Environment.EnvironmentName}");
 
 app.Run();
