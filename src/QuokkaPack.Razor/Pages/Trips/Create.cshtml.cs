@@ -56,7 +56,7 @@ namespace QuokkaPack.RazorPages.Pages.Trips
                 });
 
             //TODO: Handle response errors
-            return RedirectToPage("./EditTripItems", new { tripId = response.Id });
+            return RedirectToPage("./Edit", new { tripId = response.Id });
         }
     }
 }

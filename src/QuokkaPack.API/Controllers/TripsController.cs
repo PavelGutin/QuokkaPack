@@ -126,13 +126,18 @@ namespace QuokkaPack.API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTrip(int id)
         {
-            var trip = await _context.Trips.FindAsync(id);
+            var trip = await _context.Trips
+                 .Include(t => t.TripItems)
+                 .FirstOrDefaultAsync(t => t.Id == id);
+
             if (trip == null)
             {
                 return NotFound();
             }
 
+            _context.TripItems.RemoveRange(trip.TripItems);
             _context.Trips.Remove(trip);
+
             await _context.SaveChangesAsync();
 
             return NoContent();

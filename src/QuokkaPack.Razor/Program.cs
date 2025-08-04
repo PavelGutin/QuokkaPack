@@ -3,18 +3,13 @@ using QuokkaPack.API.Extensions;
 using QuokkaPack.Razor.Extensions;
 using QuokkaPack.Razor.Tools;
 using QuokkaPack.RazorPages.Tools;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
-
 
 StaticWebAssetsLoader.UseStaticWebAssets(
     builder.Environment,
     builder.Configuration);
-
-//var environment = builder.Environment.EnvironmentName;
-//builder.Configuration
-//    .AddJsonFile("appsettings.json", optional: false)
-//    .AddJsonFile($"appsettings.{environment}.json", optional: true);
 
 builder.Services.AddRazorPages();
 builder.Services.AddHttpContextAccessor();
@@ -32,8 +27,13 @@ builder.Services.AddHttpClient("QuokkaApi", client =>
 });
 
 
+builder.Host.UseSerilog((ctx, lc) => lc
+    .ReadFrom.Configuration(ctx.Configuration)
+);
+
 
 builder.Services.AddJwtAuthentication(builder.Configuration);
+
 
 var app = builder.Build();
 

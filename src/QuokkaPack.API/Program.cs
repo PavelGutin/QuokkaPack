@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using QuokkaPack.API.Extensions;
 using QuokkaPack.API.Services;
 using QuokkaPack.Data;
+using Serilog;
 using System.IdentityModel.Tokens.Jwt;
 
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
@@ -21,13 +22,13 @@ builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
+builder.Host.UseSerilog((ctx, lc) => lc
+    .ReadFrom.Configuration(ctx.Configuration)
+);
+
 builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddScoped<IUserResolver, UserResolver>();
 
-//if (builder.Environment.IsEnvironment("Development"))
-//{
-//    builder.WebHost.UseUrls("http://0.0.0.0:80");
-//}
 
 var app = builder.Build();
 
@@ -38,6 +39,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseSerilogRequestLogging();
+
 app.UseRouting();
 
 app.UseAuthentication();
