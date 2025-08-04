@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Hosting.StaticWebAssets;
 using QuokkaPack.API.Extensions;
+using QuokkaPack.Razor.Extensions;
 using QuokkaPack.Razor.Tools;
 using QuokkaPack.RazorPages.Tools;
 
@@ -20,7 +21,10 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IApiService, ApiService>();
 builder.Services.AddSession();
 
-var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"];
+var apiBaseUrl = builder.Configuration["DownstreamApi:BaseUrl"];
+
+
+
 
 builder.Services.AddHttpClient("QuokkaApi", client =>
 {
@@ -33,6 +37,7 @@ builder.Services.AddJwtAuthentication(builder.Configuration);
 
 var app = builder.Build();
 
+app.UseRedirectToSetupIfNeeded(apiBaseUrl);
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

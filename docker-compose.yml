@@ -6,7 +6,12 @@ services:
     ports:
       - "7100:80"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Docker
+      - ASPNETCORE_ENVIRONMENT=Development
+      - JwtSettings__Secret=${JWT_SECRET}
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=QuokkaPackDb;User Id=sa;Password=YourStrongPassword123!;TrustServerCertificate=True;
+    command: ["dotnet", "QuokkaPack.API.dll", "--urls", "http://0.0.0.0:80"]
+    depends_on:
+      - sqlserver
 
   quokkapack.razor:
     build:
@@ -15,5 +20,22 @@ services:
     ports:
       - "7200:80"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Docker
-      - DownstreamApi__BaseUrl=http://quokkapack.api
+      - ASPNETCORE_ENVIRONMENT=Development
+      - JwtSettings__Secret=${JWT_SECRET}
+      - DownstreamApi__BaseUrl=http://quokkapack.api:8080
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=QuokkaPackDb;User Id=sa;Password=YourStrongPassword123!;TrustServerCertificate=True;
+    depends_on:
+      - sqlserver
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      SA_PASSWORD: "YourStrongPassword123!"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sql_data:/var/opt/mssql
+
+volumes:
+  sql_data:

@@ -24,11 +24,10 @@ builder.Services.AddOpenApi();
 builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddScoped<IUserResolver, UserResolver>();
 
-
-if (builder.Environment.IsEnvironment("Docker"))
-{
-    builder.WebHost.UseUrls("http://0.0.0.0:80");
-}
+//if (builder.Environment.IsEnvironment("Development"))
+//{
+//    builder.WebHost.UseUrls("http://0.0.0.0:80");
+//}
 
 var app = builder.Build();
 
