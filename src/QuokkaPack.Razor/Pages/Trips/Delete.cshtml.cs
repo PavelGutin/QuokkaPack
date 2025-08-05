@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Identity.Abstractions;
-using QuokkaPack.Data.Models;
+
 using QuokkaPack.Shared.DTOs.Trip;
 using System.Net;
 using Microsoft.Identity.Web;

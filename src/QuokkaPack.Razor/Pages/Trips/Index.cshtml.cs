@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc.RazorPages;
-using QuokkaPack.Data.Models;
+
 using QuokkaPack.RazorPages.Tools;
 using QuokkaPack.Shared.DTOs.Trip;
 

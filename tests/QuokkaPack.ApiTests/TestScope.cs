@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using QuokkaPack.API.Services;
 using QuokkaPack.Data;
-using QuokkaPack.Data.Models;
+
 using QuokkaPack.Shared.Models;
 using System.Security.Claims;
 

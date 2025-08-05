@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using QuokkaPack.Data.Models;
+
 using QuokkaPack.Shared.Models;
 
 namespace QuokkaPack.Data

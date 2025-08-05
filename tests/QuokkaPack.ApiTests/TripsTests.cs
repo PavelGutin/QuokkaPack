@@ -1,6 +1,7 @@
 using FluentAssertions;
-using QuokkaPack.Data.Models;
+
 using QuokkaPack.Shared.DTOs.Trip;
+using QuokkaPack.Shared.Models;
 using System.Net;
 using System.Net.Http.Json;
 

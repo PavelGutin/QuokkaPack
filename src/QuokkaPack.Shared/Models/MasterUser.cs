@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using QuokkaPack.Data.Models;
+
 
 namespace QuokkaPack.Shared.Models
 {

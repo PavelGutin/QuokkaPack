@@ -1,16 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Identity.Abstractions;
-using QuokkaPack.Data;
 using QuokkaPack.RazorPages.Tools;
-using QuokkaPack.Shared.DTOs.CategoryDTOs;
 using QuokkaPack.Shared.DTOs.ItemDTOs;
-using QuokkaPack.Shared.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace QuokkaPack.RazorPages.Pages.Items
 {

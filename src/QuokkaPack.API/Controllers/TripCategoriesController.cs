@@ -3,7 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QuokkaPack.API.Services;
 using QuokkaPack.Data;
-using QuokkaPack.Data.Models;
+using QuokkaPack.Shared.Models;
+
 
 namespace QuokkaPack.API.Controllers
 {

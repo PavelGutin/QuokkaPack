@@ -1,6 +1,4 @@
-﻿using QuokkaPack.Shared.Models;
-
-namespace QuokkaPack.Data.Models
+﻿namespace QuokkaPack.Shared.Models
 {
     public class TripItem
     {

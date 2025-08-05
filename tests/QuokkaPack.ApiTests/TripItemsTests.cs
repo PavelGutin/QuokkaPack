@@ -1,5 +1,5 @@
 using FluentAssertions;
-using QuokkaPack.Data.Models;
+
 using QuokkaPack.Shared.DTOs.TripItem;
 using QuokkaPack.Shared.Models;
 using System.Net;
