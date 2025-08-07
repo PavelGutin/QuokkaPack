@@ -1,5 +1,3 @@
-
-
 namespace QuokkaPack.Shared.Models;
 
 public class Category

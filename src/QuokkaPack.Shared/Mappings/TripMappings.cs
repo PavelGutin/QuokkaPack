@@ -1,5 +1,4 @@
-﻿
-using QuokkaPack.Shared.DTOs.Trip;
+﻿using QuokkaPack.Shared.DTOs.Trip;
 using QuokkaPack.Shared.Models;
 
 namespace QuokkaPack.Shared.Mappings

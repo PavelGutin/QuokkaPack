@@ -1,0 +1,97 @@
+﻿@page "/account/login"
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Components.Authorization
+@using QuokkaPack.Blazor.Providers
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+@inject AuthenticationStateProvider AuthProvider
+
+<h3>Login</h3>
+
+@if (!string.IsNullOrEmpty(ErrorMessage))
+{
+    <div class="alert alert-danger">@ErrorMessage</div>
+}
+
+<EditForm Model="@Input" OnValidSubmit="@HandleLogin">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label>Email</label>
+        <InputText @bind-Value="Input.Email" class="form-control" />
+        <ValidationMessage For="@(() => Input.Email)" />
+    </div>
+
+    <div class="mb-3">
+        <label>Password</label>
+        <InputText @bind-Value="Input.Password" type="password" class="form-control" />
+        <ValidationMessage For="@(() => Input.Password)" />
+    </div>
+
+    <div class="mb-3 form-check">
+        <InputCheckbox @bind-Value="Input.RememberMe" class="form-check-input" />
+        <label class="form-check-label">Remember Me</label>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Login</button>
+</EditForm>
+
+@code {
+    private InputModel Input { get; set; } = new();
+    private string? ErrorMessage;
+
+    private async Task HandleLogin()
+    {
+        ErrorMessage = null;
+
+        try
+        {
+            var response = await Http.PostAsJsonAsync("/api/auth/login", Input);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                ErrorMessage = "Invalid email or password.";
+                return;
+            }
+
+            var result = await response.Content.ReadFromJsonAsync<LoginResponse>();
+
+            if (string.IsNullOrEmpty(result?.Token))
+            {
+                ErrorMessage = "Login failed.";
+                return;
+            }
+
+            if (AuthProvider is ApiAuthenticationStateProvider apiAuth)
+            {
+                await apiAuth.MarkUserAsAuthenticated(result.Token);
+            }
+
+            Navigation.NavigateTo("/");
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Unexpected error: {ex.Message}";
+        }
+    }
+
+    public class InputModel
+    {
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; } = string.Empty;
+
+        [Required]
+        [DataType(DataType.Password)]
+        public string Password { get; set; } = string.Empty;
+
+        public bool RememberMe { get; set; }
+    }
+
+    public class LoginResponse
+    {
+        public string Token { get; set; } = string.Empty;
+    }
+}

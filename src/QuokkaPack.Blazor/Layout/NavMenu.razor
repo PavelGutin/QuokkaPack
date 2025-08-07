@@ -1,0 +1,75 @@
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@using QuokkaPack.Blazor.Providers
+@inject NavigationManager Navigation
+
+<AuthorizeView>
+    <Authorized>
+        <nav class="navbar navbar-dark">
+            <button class="navbar-toggler" @onclick="ToggleNavMenu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+        </nav>
+
+        <div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
+            <ul class="nav flex-column">
+                <li class="nav-item px-3">
+                    <NavLink class="nav-link" href="/master-list" Match="NavLinkMatch.All">
+                        <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Master List
+                    </NavLink>
+                </li>
+                <li class="nav-item px-3">
+                    <NavLink class="nav-link" href="/trips">
+                        <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Trips
+                    </NavLink>
+                </li>
+                <li class="nav-item px-3">
+                    <a href="#" class="nav-link" @onclick="Logout">
+                        <span class="bi bi-box-arrow-right" aria-hidden="true"></span> Logout
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </Authorized>
+
+    <NotAuthorized>
+        <nav class="navbar navbar-dark">
+            <button class="navbar-toggler" @onclick="ToggleNavMenu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+        </nav>
+
+        <div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
+            <ul class="nav flex-column">
+                <li class="nav-item px-3">
+                    <NavLink class="nav-link" href="/account/login">
+                        <span class="bi bi-lock-fill" aria-hidden="true"></span> Login
+                    </NavLink>
+                </li>
+            </ul>
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
+
+@inject AuthenticationStateProvider AuthProvider
+@inject NavigationManager Navigation
+
+@code {
+    private bool collapseNavMenu = true;
+
+    private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+
+    private async Task Logout()
+    {
+        if (AuthProvider is ApiAuthenticationStateProvider apiAuth)
+        {
+            await apiAuth.MarkUserAsLoggedOut();
+        }
+
+        Navigation.NavigateTo("/");
+    }
+}

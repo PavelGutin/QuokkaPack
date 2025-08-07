@@ -1,6 +1,4 @@
-﻿using QuokkaPack.Shared.Models;
-
-namespace QuokkaPack.Shared.DTOs.ItemDTOs
+﻿namespace QuokkaPack.Shared.DTOs.ItemDTOs
 {
     public class ItemCreateDto
     {

@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
-namespace QuokkaPack.API.Extensions
+namespace QuokkaPack.ServerCommon.Extensions
 {
     public static class JwtAuthenticationExtensions
     {

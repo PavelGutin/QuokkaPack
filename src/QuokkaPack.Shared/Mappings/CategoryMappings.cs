@@ -1,5 +1,4 @@
 ﻿using QuokkaPack.Shared.DTOs.CategoryDTOs;
-using QuokkaPack.Shared.DTOs.ItemDTOs;
 using QuokkaPack.Shared.Models;
 
 namespace QuokkaPack.Shared.Mappings;

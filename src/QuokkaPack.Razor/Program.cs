@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Hosting.StaticWebAssets;
-using QuokkaPack.API.Extensions;
 using QuokkaPack.Razor.Extensions;
 using QuokkaPack.Razor.Tools;
 using QuokkaPack.RazorPages.Tools;
+using QuokkaPack.ServerCommon.Extensions;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,9 +17,6 @@ builder.Services.AddScoped<IApiService, ApiService>();
 builder.Services.AddSession();
 
 var apiBaseUrl = builder.Configuration["DownstreamApi:BaseUrl"];
-
-
-
 
 builder.Services.AddHttpClient("QuokkaApi", client =>
 {

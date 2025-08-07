@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using QuokkaPack.Data;
 using QuokkaPack.Shared.Models;
@@ -32,7 +31,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginRequest request)
+    public async Task<IActionResult> Login([FromBody] LoginModel request)
     {
         var user = await _userManager.FindByNameAsync(request.Email);
         if (user == null)
@@ -113,11 +112,11 @@ public class AuthController : ControllerBase
     }
 
 
-    public class LoginRequest
-    {
-        public string Email { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
-    }
+    //public class LoginRequest
+    //{
+    //    public string Email { get; set; } = string.Empty;
+    //    public string Password { get; set; } = string.Empty;
+    //}
 
     public class RegisterRequest
     {

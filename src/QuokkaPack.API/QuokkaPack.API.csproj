@@ -28,6 +28,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\QuokkaPack.Data\QuokkaPack.Data.csproj" />
+    <ProjectReference Include="..\QuokkaPack.ServerCommon\QuokkaPack.ServerCommon.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Logs\" />
   </ItemGroup>
 
 </Project>

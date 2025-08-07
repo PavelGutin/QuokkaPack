@@ -1,14 +1,29 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using QuokkaPack.API.Extensions;
 using QuokkaPack.API.Services;
 using QuokkaPack.Data;
+using QuokkaPack.ServerCommon.Extensions;
 using Serilog;
 using System.IdentityModel.Tokens.Jwt;
 
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy
+            .WithOrigins(
+                "https://localhost:7045",         // Blazor dev server (bare metal)
+                "http://localhost:7200",          // Blazor in Docker (based on your docker-compose)
+                "http://quokkapack.blazor")       // Internal Docker hostname (if you're using it)
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials(); // If you ever use cookies/session auth
+    });
+});
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? 
     throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
@@ -44,11 +59,16 @@ app.UseSerilogRequestLogging();
 
 app.UseRouting();
 
+app.UseCors("AllowFrontend");
+
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
 
-Console.WriteLine($"QuokkaPack.API running in environment: {app.Environment.EnvironmentName}");
+//Console.WriteLine($"QuokkaPack.API running in environment: {app.Environment.EnvironmentName}");
+
+Log.Information("QuokkaPack.API started successfully.");
 
 app.Run();
+

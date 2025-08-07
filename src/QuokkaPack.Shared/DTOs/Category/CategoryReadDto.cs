@@ -1,6 +1,4 @@
-﻿using QuokkaPack.Shared.DTOs.ItemDTOs;
-
-namespace QuokkaPack.Shared.DTOs.CategoryDTOs;
+﻿namespace QuokkaPack.Shared.DTOs.CategoryDTOs;
 
 public class CategoryReadDto
 {
