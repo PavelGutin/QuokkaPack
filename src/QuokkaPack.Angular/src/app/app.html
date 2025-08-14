@@ -1,0 +1,36 @@
+<header>
+  <h1>🦘📦 Welcome to QuokkaPack</h1>
+
+  @if (!isLoggedIn) {
+    <!-- Logged out -->
+    <nav role="navigation" aria-label="Main">
+      <ul class="inline-list">
+        <li><a routerLink="/login">Login</a></li>
+      </ul>
+    </nav>
+  } @else {
+    <!-- Logged in -->
+    <nav role="navigation" aria-label="Main">
+      <ul class="inline-list">
+        <li><a routerLink="/">Home</a></li>
+
+        @if (!isLoggedIn) {
+          <li><a routerLink="/login">Login</a></li>
+        }
+
+        @if (isLoggedIn) {
+          <li><span>Hello {{ userName }}</span></li>
+          <li><a routerLink="/trips">Trips</a></li>
+          <li><a routerLink="/items">Items</a></li>
+          <li>
+            <button type="button" class="linklike" (click)="logout()">Logout</button>
+          </li>
+        }
+      </ul>
+    </nav>
+  }
+</header>
+
+<main>
+  <router-outlet></router-outlet>
+</main>
