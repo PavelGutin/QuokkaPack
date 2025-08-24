@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { Trips } from './trips';
+import { TripsGrid } from './trips-grid';
 
-describe('Trips', () => {
-  let component: Trips;
-  let fixture: ComponentFixture<Trips>;
+describe('TripsGrid', () => {
+  let component: TripsGrid;
+  let fixture: ComponentFixture<TripsGrid>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [Trips]
+      imports: [TripsGrid]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(Trips);
+    fixture = TestBed.createComponent(TripsGrid);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

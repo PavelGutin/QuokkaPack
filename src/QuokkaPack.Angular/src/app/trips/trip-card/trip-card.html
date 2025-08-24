@@ -1,0 +1,21 @@
+<article class="card" [attr.aria-labelledby]="'trip-' + trip.id + '-title'">
+  <header class="card-header">
+    <h2 class="dest" id="trip-{{ trip.id }}-title">{{ trip.destination }}</h2>
+    <p class="dates">
+      <time [attr.datetime]="iso(trip.startDate)">{{ fmt(trip.startDate) }}</time>
+      –
+      <time [attr.datetime]="iso(trip.endDate)">{{ fmt(trip.endDate) }}</time>
+    </p>
+  </header>
+
+  <p class="meta" aria-live="polite">
+    {{ categoryCount }} categor{{ categoryCount === 1 ? 'y' : 'ies' }}
+  </p>
+
+  <footer class="card-actions">
+    <button type="button" (click)="view.emit(trip.id)">View</button>
+    <button type="button" (click)="pack.emit(trip.id)">Pack</button>
+    <button type="button" (click)="edit.emit(trip.id)">Edit</button>
+    <button type="button" (click)="remove.emit(trip.id)">Delete</button>
+  </footer>
+</article>

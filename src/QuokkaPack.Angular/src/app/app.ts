@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { AuthService } from './core/auth.service';
+import { AuthService } from './core/auth/auth.service';
 
 @Component({
   selector: 'app-root',

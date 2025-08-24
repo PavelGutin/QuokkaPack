@@ -1,0 +1,13 @@
+<ul class="grid" role="list">
+  @for (t of trips; track t.id) {
+    <li role="listitem">
+      <app-trip-card
+        [trip]="t"
+        (view)="view.emit($event)"
+        (pack)="pack.emit($event)"
+        (edit)="edit.emit($event)"
+        (remove)="remove.emit($event)">
+      </app-trip-card>
+    </li>
+  }
+</ul>

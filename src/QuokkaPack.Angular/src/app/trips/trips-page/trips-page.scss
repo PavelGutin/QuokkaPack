@@ -1,0 +1,24 @@
+/* Minimal shell styles; expand as you like */
+:host { display: block; padding: 1.25rem; }
+
+.page-header {
+  display: flex; gap: .75rem; align-items: center; justify-content: space-between; flex-wrap: wrap; margin-bottom: 1rem;
+}
+.title { font-size: 1.75rem; font-weight: 600; margin: 0; }
+.actions { display: flex; gap: .5rem; }
+
+button {
+  appearance: none; border: 1px solid #ccc; background: #f8f8f8; padding: .45rem .75rem;
+  border-radius: .5rem; cursor: pointer; font: inherit; line-height: 1.2;
+}
+button:hover { background: #f0f0f0; }
+.btn-primary { border-color: #2b6cb0; background: #2b6cb0; color: white; }
+.btn-primary:hover { background: #245c96; }
+
+.loading { color: #444; font-style: italic; margin: .25rem 0 .5rem; }
+.error { color: #b00020; margin: .5rem 0 0; }
+.subtle { color: #666; }
+
+.empty {
+  border: 1px dashed #ccc; border-radius: .75rem; padding: 1rem; text-align: center; color: #666; background: #fafafa;
+}

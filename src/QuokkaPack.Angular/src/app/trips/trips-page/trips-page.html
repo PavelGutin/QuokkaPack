@@ -1,0 +1,27 @@
+<div class="page-header">
+  <h1 class="title">My Trips</h1>
+  <div class="actions">
+    <button class="btn-primary" (click)="addTrip()">Add Trip</button>
+  </div>
+</div>
+
+@if (loading) {
+  <p class="loading">Loading…</p>
+} @else if (error) {
+  <p class="error">{{ error }}</p>
+} @else if (trips.length) {
+  <app-trips-grid
+    [trips]="trips"
+    (view)="viewTrip($event)"
+    (pack)="packTrip($event)"
+    (edit)="editTrip($event)"
+    (remove)="deleteTrip($event)">
+  </app-trips-grid>
+} @else {
+  <div class="empty">
+    <div class="subtle">No trips yet.</div>
+    <div style="margin-top:.5rem;">
+      <button class="btn-primary" (click)="addTrip()">Add Trip</button>
+    </div>
+  </div>
+}
