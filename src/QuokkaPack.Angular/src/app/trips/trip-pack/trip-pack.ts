@@ -55,7 +55,7 @@ export type TripItemVM = {
   templateUrl: './trip-pack.html',
   styleUrls: ['./trip-pack.scss'],
 })
-export class TripPackComponent implements OnInit {
+export class TripPack implements OnInit {
   private route = inject(ActivatedRoute);
   private trips = inject(TripsService);
 

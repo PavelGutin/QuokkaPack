@@ -8,7 +8,10 @@ import {
   TripCreateDto,
   TripEditDto, 
   TripItemReadDto, 
-  TripItemEditDto
+  TripItemEditDto, 
+  ItemReadDto, 
+  CategoryReadDto, 
+  TripItemCreateDto
 } from '../../models/trip';
 
 @Injectable({ providedIn: 'root' })
@@ -57,6 +60,33 @@ export class TripsService {
   updatePackedStatus(tripId: number, items: TripItemEditDto[]): Observable<void> {
     return this.http.put<void>(`${this.base}/${tripId}/TripItems/batch`, items);
   }
+
+
+// --- New methods ---
+listAllItems() {
+  return this.http.get<ItemReadDto[]>('/api/items');
+}
+
+listAllCategories() {
+  return this.http.get<CategoryReadDto[]>('/api/categories');
+}
+
+addTripItem(tripId: number, dto: TripItemCreateDto) {
+  return this.http.post<TripItemReadDto>(`${this.base}/${tripId}/TripItems`, dto);
+}
+
+deleteTripItem(tripId: number, tripItemId: number) {
+  return this.http.delete<void>(`${this.base}/${tripId}/TripItems/${tripItemId}`);
+}
+
+addCategoryToTrip(tripId: number, categoryId: number) {
+  // Your Razor page posts the plain categoryId; mirror that
+  return this.http.post<void>(`${this.base}/${tripId}/Categories`, categoryId);
+}
+
+deleteCategoryFromTrip(tripId: number, categoryId: number) {
+  return this.http.delete<void>(`${this.base}/${tripId}/Categories/${categoryId}`);
+}  
 
 }
 

@@ -57,6 +57,6 @@ private fetchTrips() {
   viewTrip(id: number | string) { alert(`View Trip ${id} (stub)`); }
   //packTrip(id: number | string) { alert(`Pack Trip ${id} (stub)`); }
   packTrip(id: number | string) { this.router.navigate(['/trips', id, 'pack']); }
-  editTrip(id: number | string) { alert(`Edit Trip ${id} (stub)`); }
+  editTrip(id: number | string) { this.router.navigate(['/trips', id, 'edit']); }
   deleteTrip(id: number | string) { alert(`Delete Trip ${id} (stub)`); }
 }

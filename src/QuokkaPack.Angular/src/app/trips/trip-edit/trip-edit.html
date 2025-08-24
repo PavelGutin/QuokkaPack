@@ -1,1 +1,93 @@
-<p>trip-edit works!</p>
+<div class="page">
+    @if (loading()) {
+    <div class="loading">Loading…</div>
+    } @else {
+
+    @if (error()) {
+    <p class="error">{{ error() }}</p>
+    }
+
+    @if (trip(); as t) {
+    <header class="header">
+        <div>
+            <h2>Edit Trip: {{ t.destination }}</h2>
+            <a class="link" [routerLink]="['/trips', t.id, 'pack']">Go to Pack</a>
+        </div>
+        <button class="link" (click)="backToTrips()">Back to Trips</button>
+    </header>
+
+    <section class="card">
+        <h3>Trip Details</h3>
+        <div class="form-grid">
+            <label>
+                <span>Destination</span>
+                <input type="text" [(ngModel)]="destinationText" />
+            </label>
+
+            <label>
+                <span>Start Date</span>
+                <input type="date" [(ngModel)]="startDateText" />
+            </label>
+
+            <label>
+                <span>End Date</span>
+                <input type="date" [(ngModel)]="endDateText" />
+            </label>
+        </div>
+
+        <div class="actions">
+            <button (click)="saveTrip()" [disabled]="saving()">
+                {{ saving() ? 'Saving…' : 'Save Trip' }}
+            </button>
+        </div>
+    </section>
+
+    <section class="cols">
+        <div class="col card">
+            <h3>Items in Trip</h3>
+            <ul class="list">
+                @for (ti of tripItems(); track ti.id) {
+                <li class="row">
+                    <span class="name">{{ ti.itemReadDto?.name }}</span>
+                    <span class="sub">{{ ti.itemReadDto?.category?.name || 'Uncategorized' }}</span>
+                    <button class="danger tiny" (click)="deleteItem(ti.id)">Remove</button>
+                </li>
+                }
+            </ul>
+
+            <div class="addbar">
+                <select [(ngModel)]="selectedItemIdValue">
+                    <option [ngValue]="null">— Select item —</option>
+                    @for (it of availableItems(); track it.id) {
+                    <option [ngValue]="it.id">
+                        {{ it.name }} ({{ it.category?.name || 'Uncategorized' }})
+                    </option>
+                    }
+                </select>
+                <button (click)="addItem()" [disabled]="!selectedItemIdValue">Add Item</button>
+            </div>
+        </div>
+
+        <div class="col card">
+            <h3>Trip Categories</h3>
+
+            <ul class="list">
+                @for (c of (t.categories || []); track c.id) {
+                <li class="row">
+                    <span class="name">{{ c.name }}</span>
+                    <button class="danger tiny" (click)="deleteCategory(c.id)">Remove</button>
+                </li>
+                }
+            </ul>
+            <select [(ngModel)]="selectedCategoryIdValue">
+                <option [ngValue]="null">— Select category —</option>
+                @for (c of allCategories(); track c.id) {
+                <option [ngValue]="c.id">{{ c.name }}</option>
+                }
+            </select>
+            <button (click)="addCategory()" [disabled]="!selectedCategoryIdValue">Add Category</button>
+        </div>
+    </section>
+    }
+    }
+</div>
