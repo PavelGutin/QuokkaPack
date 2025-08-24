@@ -32,3 +32,16 @@ export interface Trip {
   endDate: string | Date;
   categories?: any[];
 }
+
+export interface TripItemReadDto {
+  id: number;
+  itemReadDto: { id: number; name: string; category: { id: number; name: string } };
+  quantity: number;
+  isPacked: boolean;
+  notes?: string | null;
+}
+
+export interface TripItemEditDto {
+  id: number;
+  isPacked: boolean;
+}

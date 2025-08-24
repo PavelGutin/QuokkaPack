@@ -6,7 +6,9 @@ import {
   Trip,              // domain model used by components
   TripReadDto,
   TripCreateDto,
-  TripEditDto
+  TripEditDto, 
+  TripItemReadDto, 
+  TripItemEditDto
 } from '../../models/trip';
 
 @Injectable({ providedIn: 'root' })
@@ -46,6 +48,16 @@ export class TripsService {
   remove(id: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/${id}`);
   }
+
+  getItems(tripId: number): Observable<TripItemReadDto[]> {
+    return this.http.get<TripItemReadDto[]>(`${this.base}/${tripId}/TripItems`);
+  }
+
+  /** PUT /api/Trips/{id}/TripItems/batch  (payload: TripItemEditDto[]) */
+  updatePackedStatus(tripId: number, items: TripItemEditDto[]): Observable<void> {
+    return this.http.put<void>(`${this.base}/${tripId}/TripItems/batch`, items);
+  }
+
 }
 
 /* ---------- module-private mapper (not exported) ---------- */

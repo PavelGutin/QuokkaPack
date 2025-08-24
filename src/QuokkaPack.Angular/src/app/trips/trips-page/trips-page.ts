@@ -4,6 +4,7 @@ import { TripsGrid } from '../trips-grid/trips-grid';
 import { Trip } from '../../core/models/trip'
 import { TripsService } from '../../core/features/trips/trips.service';
 import { finalize } from 'rxjs/operators';
+import { Router } from '@angular/router';
 
 @Component({
   standalone: true,
@@ -17,6 +18,7 @@ export class TripsPage implements OnInit {
   trips: Trip[] = [];
   loading = false;
   error = '';
+  private router = inject(Router);
 
   constructor() {}
 
@@ -27,7 +29,7 @@ export class TripsPage implements OnInit {
   }
 
 private fetchTrips() {
-    this.loading = true;
+    this.loading = true; 
     this.error = '';
     console.log('Fetching trips…');
 
@@ -53,7 +55,8 @@ private fetchTrips() {
   // Actions (stubbed; wire up routing later)
   addTrip() { alert('Add Trip (stub)'); }
   viewTrip(id: number | string) { alert(`View Trip ${id} (stub)`); }
-  packTrip(id: number | string) { alert(`Pack Trip ${id} (stub)`); }
+  //packTrip(id: number | string) { alert(`Pack Trip ${id} (stub)`); }
+  packTrip(id: number | string) { this.router.navigate(['/trips', id, 'pack']); }
   editTrip(id: number | string) { alert(`Edit Trip ${id} (stub)`); }
   deleteTrip(id: number | string) { alert(`Delete Trip ${id} (stub)`); }
 }
