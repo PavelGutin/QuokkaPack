@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TripsGrid } from '../trips-grid/trips-grid';
-import { Trip } from '../../core/models/trip'
+import { Trip, TripItemReadDto, ItemReadDto, CategoryReadDto, TripEditDto, TripItemCreateDto } from '../../core/models/api-types';
 import { TripsService } from '../../core/features/trips/trips.service';
 import { finalize } from 'rxjs/operators';
 import { Router } from '@angular/router';

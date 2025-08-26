@@ -17,7 +17,7 @@ namespace QuokkaPack.RazorPages.Pages.Trips
             _logger = logger;
         }
 
-        public TripReadDto Trip { get; set; } = default!;
+        public TripSummaryReadDto Trip { get; set; } = default!;
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
@@ -26,7 +26,7 @@ namespace QuokkaPack.RazorPages.Pages.Trips
 
             try
             {
-                var trip = await _api.CallApiForUserAsync<TripReadDto>(
+                var trip = await _api.CallApiForUserAsync<TripSummaryReadDto>(
                     "DownstreamApi",
                     options => options.RelativePath = $"/api/Trips/{id}");
 

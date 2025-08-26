@@ -47,7 +47,7 @@ namespace QuokkaPack.RazorPages.Pages.Trips
 
             Trip.CategoryIds = SelectedCategoryIds;
 
-            var response = await _api.PostForUserAsync<TripCreateDto, TripReadDto>(
+            var response = await _api.PostForUserAsync<TripCreateDto, TripSummaryReadDto>(
                 "DownstreamApi",
                 Trip,
                 options =>

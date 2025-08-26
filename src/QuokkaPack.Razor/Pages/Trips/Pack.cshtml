@@ -3,9 +3,18 @@
 @{
     ViewData["Title"] = "Edit Trip Items";
 
-    var groupedItems = Model.ExistingItems
-        .GroupBy(i => i.ItemReadDto.Category.Name)
+    // Group only items that are actually part of the trip (have a TripItemId)
+    var groupedItems = Model.Trip.Items
+        .Where(item => item.TripItemId != null)
+        .GroupBy(i => i.CategoryName)
         .OrderBy(g => g.Key);
+
+    // Map TripItemId -> index in UpdatedItems so we can render by category
+    // while still posting contiguous indices for model binding.
+    var indexById = Model.UpdatedItems
+        .Select((ti, i) => new { ti.Id, Index = i })
+        .Where(x => x.Id != 0) // safety
+        .ToDictionary(x => x.Id, x => x.Index);
 }
 
 <div class="container mt-4">
@@ -16,7 +25,7 @@
 
         <h2 class="mb-1">Packing for @Model.Trip.Destination</h2>
         <small class="text-muted">
-            [@Model.Trip.StartDate.ToString("MMM dd, yyyy") – @Model.Trip.EndDate.ToString("MMM dd, yyyy")]
+            [@Model.Trip.StartDate.ToString("MMM dd, yyyy") &ndash; @Model.Trip.EndDate.ToString("MMM dd, yyyy")]
         </small>
     </div>
 </div>
@@ -38,17 +47,29 @@
                         </div>
                         <div class="card-body">
                             <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-2">
-                                @for (int i = 0; i < categoryGroup.Count(); i++)
+                                @foreach (var item in categoryGroup)
                                 {
-                                    var item = categoryGroup.ElementAt(i);
-                                    var index = Model.ExistingItems.IndexOf(item);
-                                    var checkboxId = $"item_{item.Id}";
+                                    // Skip if we somehow didn't seed this item into UpdatedItems
+                                    if (item.TripItemId is null || !indexById.TryGetValue(item.TripItemId.Value, out var idx))
+                                    {
+                                        continue;
+                                    }
+
+                                    var checkboxId = $"item_{item.TripItemId}";
 
                                     <div class="col">
                                         <div class="form-check">
-                                            <input type="hidden" name="UpdatedItems[@index].Id" value="@item.Id" />
-                                            <input class="form-check-input" type="checkbox" id="@checkboxId" name="UpdatedItems[@index].IsPacked" value="true" @(item.IsPacked ? "checked" : "") />
-                                            <label class="form-check-label" for="@checkboxId">@item.ItemReadDto.Name</label>
+                                            <!-- Hidden id to bind TripItemId -->
+                                            <input asp-for="UpdatedItems[idx].Id" type="hidden" />
+
+                                            <!-- Checkbox binds to UpdatedItems[idx].Packed -->
+                                            <input class="form-check-input"
+                                                   asp-for="UpdatedItems[idx].IsPacked"
+                                                   id="@checkboxId" />
+
+                                            <label class="form-check-label" for="@checkboxId">
+                                                @item.Name
+                                            </label>
                                         </div>
                                     </div>
                                 }

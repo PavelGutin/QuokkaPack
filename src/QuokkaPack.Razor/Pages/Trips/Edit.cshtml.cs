@@ -19,20 +19,20 @@ namespace QuokkaPack.RazorPages.Pages.Trips
             _api = api;
             _logger = logger;
         }
-        public TripReadDto Trip { get; set; }
+        public TripDetailsReadDto Trip { get; set; }
 
         [BindProperty(SupportsGet = true)]
         public int Id { get; set; }
-        [BindProperty]
-        public List<TripItemReadDto> ExistingItems { get; set; } = [];
+        //[BindProperty]
+        //public List<TripItemReadDto> ExistingItems { get; set; } = [];
+
         [BindProperty]
         public TripItemCreateDto NewTripItem { get; set; } = new();
         [BindProperty]
         public TripEditDto TripEdit { get; set; } = new();
 
-        public List<CategoryReadDto> AllCategories { get; set; } = [];
-        public List<ItemReadDto> AllItems { get; set; } = [];
-
+        //public List<CategoryReadDto> AllCategories { get; set; } = [];
+        //public List<ItemReadDto> AllItems { get; set; } = [];
         public List<TripItemReadDto> UpdatedItems { get; set; } = [];
 
 
@@ -40,32 +40,12 @@ namespace QuokkaPack.RazorPages.Pages.Trips
         {
             try
             {
-                //TODO: Convert to use a single API call that returns both trip and items
-                //TODO: Factor out the API name so it's not hardcoded
-                var existingItems = await _api.CallApiForUserAsync<List<TripItemReadDto>>(
-                    "DownstreamApi",
-                    options => options.RelativePath = $"api/Trips/{Id}/tripItems");
-
-                var allItems = await _api.CallApiForUserAsync<List<ItemReadDto>>(
-                    "DownstreamApi",
-                    options => options.RelativePath = $"api/Items");
-
-                var trip = await _api.CallApiForUserAsync<TripReadDto>(
+                var trip = await _api.CallApiForUserAsync<TripDetailsReadDto>(
                     "DownstreamApi",
                     options => options.RelativePath = $"api/Trips/{Id}");
-
-                var categories = await _api.CallApiForUserAsync<List<CategoryReadDto>>(
-                    "DownstreamApi",
-                    options => options.RelativePath = $"api/Categories");
-
-
                 if (trip is null)
                     return NotFound();
-
                 Trip = trip;
-                ExistingItems = existingItems ?? [];
-                AllCategories = categories ?? [];
-                AllItems = allItems ?? [];
                 return Page();
 
             }

@@ -16,56 +16,49 @@ public class UserResolver : IUserResolver
 
     public async Task<MasterUser> GetOrCreateAsync(ClaimsPrincipal user)
     {
-        try
+        var subject = user.FindFirst("sub")?.Value;
+        var issuer = user.FindFirst("iss")?.Value;
+        var provider = GetProvider(issuer);
+        var email = user.FindFirst(ClaimTypes.Email)?.Value;
+        var displayName = user.Identity?.Name ?? "";
+
+        if (subject == null || provider == null)
+            throw new UnauthorizedAccessException("Missing required claims for identifying user.");
+
+        // Check if we already know this login
+        var login = await _db.AppUserLogins
+            .Include(x => x.MasterUser)
+            .FirstOrDefaultAsync(x => x.Provider == provider && x.ProviderUserId == subject);
+
+        if (login != null)
+            return login.MasterUser;
+
+        // Try to map directly to MasterUserId if provided
+        var masterUserIdClaim = user.FindFirst("master_user_id")?.Value;
+        MasterUser? masterUser = null;
+
+        if (Guid.TryParse(masterUserIdClaim, out var masterUserId))
         {
-            var subject = user.FindFirst("sub")?.Value;
-            var issuer = user.FindFirst("iss")?.Value;
-            var provider = GetProvider(issuer);
-            var email = user.FindFirst(ClaimTypes.Email)?.Value;
-            var displayName = user.Identity?.Name ?? "";
-
-            if (subject == null || provider == null)
-                throw new UnauthorizedAccessException("Missing required claims for identifying user.");
-
-            // Check if we already know this login
-            var login = await _db.AppUserLogins
-                .Include(x => x.MasterUser)
-                .FirstOrDefaultAsync(x => x.Provider == provider && x.ProviderUserId == subject);
-
-            if (login != null)
-                return login.MasterUser;
-
-            // Try to map directly to MasterUserId if provided
-            var masterUserIdClaim = user.FindFirst("master_user_id")?.Value;
-            MasterUser? masterUser = null;
-
-            if (Guid.TryParse(masterUserIdClaim, out var masterUserId))
-            {
-                masterUser = await _db.MasterUsers.FindAsync(masterUserId);
-            }
-
-            masterUser ??= new MasterUser();
-
-            login = new AppUserLogin
-            {
-                Provider = provider,
-                ProviderUserId = subject,
-                Issuer = issuer ?? "",
-                Email = email,
-                DisplayName = displayName,
-                MasterUser = masterUser
-            };
-
-            _db.AppUserLogins.Add(login);
-            await _db.SaveChangesAsync();
-
-            return masterUser;
+            masterUser = await _db.MasterUsers.FindAsync(masterUserId);
         }
-        catch (Exception ex)
+
+        masterUser ??= new MasterUser();
+
+        login = new AppUserLogin
         {
+            Provider = provider,
+            ProviderUserId = subject,
+            Issuer = issuer ?? "",
+            Email = email,
+            DisplayName = displayName,
+            MasterUser = masterUser
+        };
 
-            throw;
-        }
+        _db.AppUserLogins.Add(login);
+        await _db.SaveChangesAsync();
+
+        return masterUser;
+
     }
 
     private string? GetProvider(string? issuer)

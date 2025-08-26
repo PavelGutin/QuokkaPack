@@ -14,11 +14,11 @@ namespace QuokkaPack.RazorPages.Pages.Trips
             _api = api;
         }
 
-        public IList<TripReadDto> Trips { get; set; } = [];
+        public IList<TripSummaryReadDto> Trips { get; set; } = [];
 
         public async Task OnGetAsync()
         {
-            Trips = await _api.CallApiForUserAsync<IList<TripReadDto>>(
+            Trips = await _api.CallApiForUserAsync<IList<TripSummaryReadDto>>(
                 "DownstreamApi",
                 options => options.RelativePath = "api/Trips"
             ) ?? [];

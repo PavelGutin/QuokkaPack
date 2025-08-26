@@ -20,8 +20,7 @@ namespace QuokkaPack.RazorPages.Pages.Trips
         [BindProperty(SupportsGet = true)]
         public int Id { get; set; }
 
-        public List<TripItemReadDto> ExistingItems { get; set; } = [];
-        public TripReadDto Trip { get; set; }
+        public TripDetailsReadDto Trip { get; set; }
 
         [BindProperty]
         public List<TripItemEditDto> UpdatedItems { get; set; } = [];
@@ -33,18 +32,24 @@ namespace QuokkaPack.RazorPages.Pages.Trips
         {
             try
             {
-                var items = await _api.CallApiForUserAsync<List<TripItemReadDto>>(
-                    "DownstreamApi",
-                    options => options.RelativePath = $"/api/Trips/{Id}/TripItems");
-
-                var trip = await _api.CallApiForUserAsync<TripReadDto>(
+                var trip = await _api.CallApiForUserAsync<TripDetailsReadDto>(
                     "DownstreamApi",
                     options => options.RelativePath = $"/api/Trips/{Id}");
                 if (trip is null)
                     return NotFound();
 
                 Trip = trip;
-                ExistingItems = items ?? [];
+
+                // Seed the editable list for binding
+                UpdatedItems = Trip.Items
+                    .Where(i => i.TripItemId != null)
+                    .Select(i => new TripItemEditDto
+                    {
+                        Id = i.TripItemId!.Value,
+                        IsPacked = i.IsPacked ?? false
+                    })
+                    .ToList();
+
                 return Page();
 
             }

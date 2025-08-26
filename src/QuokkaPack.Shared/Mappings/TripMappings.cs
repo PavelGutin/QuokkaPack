@@ -14,9 +14,9 @@ namespace QuokkaPack.Shared.Mappings
                 Destination = dto.Destination
             };
         }
-        public static TripReadDto ToReadDto(this Trip trip)
+        public static TripSummaryReadDto ToReadDto(this Trip trip)
         {
-            return new TripReadDto
+            return new TripSummaryReadDto
             {
                 Id = trip.Id,
                 Destination = trip.Destination,

@@ -67,7 +67,7 @@ else
 }
 
 @code {
-    private List<TripReadDto>? trips;
+    private List<TripSummaryReadDto>? trips;
     private bool isLoading = true;
     private string? error;
 
@@ -78,7 +78,7 @@ else
         try
         {
             var api = HttpClientFactory.CreateClient("Api"); // uses BaseAddress + BearerTokenHandler
-            trips = await api.GetFromJsonAsync<List<TripReadDto>>("api/Trips");
+            trips = await api.GetFromJsonAsync<List<TripSummaryReadDto>>("api/Trips");
         }
         catch (Exception ex)
         {
@@ -91,10 +91,10 @@ else
     }
 
     // Helpers: keep tolerant to unknown/optional fields in TripReadDto
-    private static string TripTitle(TripReadDto t)
+    private static string TripTitle(TripSummaryReadDto t)
         => string.IsNullOrWhiteSpace(t?.Destination) ? "Untitled Trip" : t!.Destination!;
 
-    private static string TripDates(TripReadDto t)
+    private static string TripDates(TripSummaryReadDto t)
     {
         // Try to render date range if present; ignore if your DTO lacks these
         // Adjust to your actual types (DateOnly/DateTime?/string) as needed.

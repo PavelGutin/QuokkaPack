@@ -5,6 +5,7 @@ using QuokkaPack.API.Services;
 using QuokkaPack.Data;
 
 using QuokkaPack.Shared.DTOs.Trip;
+using QuokkaPack.Shared.DTOs.TripCatalogItem;
 using QuokkaPack.Shared.Mappings;
 using QuokkaPack.Shared.Models;
 
@@ -24,18 +25,8 @@ namespace QuokkaPack.API.Controllers
             _context = context;
         }
 
-
-
-        [HttpGet("ping")]
-        [AllowAnonymous]
-        public IActionResult Ping()
-        {
-            return Ok(new { message = "pong" });
-        }
-
-
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TripReadDto>>> GetTrips()
+        public async Task<ActionResult<IEnumerable<TripSummaryReadDto>>> GetTrips()
         {
             var user = await _userResolver.GetOrCreateAsync(User);
             return await _context.Trips
@@ -45,23 +36,67 @@ namespace QuokkaPack.API.Controllers
                 .ToListAsync();
         }
 
+        //[HttpGet("{id}")]
+        //public async Task<ActionResult<TripSummaryReadDto>> GetTrip(int id)
+        //{
+        //    var user = await _userResolver.GetOrCreateAsync(User);
+
+        //    var trip = await _context.Trips
+        //        //.Include(t => t.Categories)
+        //        .FirstOrDefaultAsync(t => t.Id == id && t.MasterUserId == user.Id);
+
+        //    if (trip == null)
+        //        return NotFound();
+
+        //    return trip.ToReadDto();
+        //}
+
         [HttpGet("{id}")]
-        public async Task<ActionResult<TripReadDto>> GetTrip(int id)
+        public async Task<ActionResult<TripDetailsReadDto>> GetTrip(int id)
         {
             var user = await _userResolver.GetOrCreateAsync(User);
 
             var trip = await _context.Trips
-                //.Include(t => t.Categories)
                 .FirstOrDefaultAsync(t => t.Id == id && t.MasterUserId == user.Id);
 
             if (trip == null)
                 return NotFound();
 
-            return trip.ToReadDto();
+            var items = await _context.Items
+                .AsNoTracking()
+                .Where(item => item.MasterUserId == user.Id)
+                .GroupJoin(
+                    _context.TripItems.Where(ti => ti.TripId == trip.Id),
+                    item => item.Id,
+                    tripItem => tripItem.ItemId,
+                    (item, tripItems) => new { item, tripItems }
+                )
+                .SelectMany(
+                    it => it.tripItems.DefaultIfEmpty(),
+                    (it, tripItem) => new TripCatalogItemReadDto
+                    {
+                        ItemId = it.item.Id,
+                        Name = it.item.Name,
+                        CategoryId = it.item.CategoryId,
+                        CategoryName = it.item.Category.Name,
+                        TripItemId = tripItem != null ? (int?)tripItem.Id : null,
+                        IsPacked = tripItem != null ? (bool?)tripItem.IsPacked : null
+                    }
+                )
+                .ToListAsync();
+
+            return new TripDetailsReadDto()
+            {
+                Id = trip.Id,
+                Destination = trip.Destination,
+                StartDate = trip.StartDate,
+                EndDate = trip.EndDate,
+                Items = items
+            };
         }
 
         [HttpPost]
-        public async Task<ActionResult<TripReadDto>> CreateTrip(TripCreateDto tripDto)
+        public async Task<ActionResult<TripSummaryReadDto>> CreateTrip(TripCreateDto tripDto)
         {
             var user = await _userResolver.GetOrCreateAsync(User);
 
