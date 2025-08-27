@@ -57,8 +57,13 @@ export class TripsService {
     return this.http.put<void>(`${this.base}/${tripId}/TripItems/batch`, items);
   }
 
-  setTripItemPacked(loadedForId: number, tripItemId: number, checked: boolean){
+  setTripItemPacked(tripId: number, tripItemId: number, checked: boolean){
+    console.log(`setTripItemPacked called with tripId=${tripId}, tripItemId=${tripItemId}, checked=${checked}`);
     return this.http.put<void>(`${this.base}/${tripItemId}/TripItems/batch`, '');
+  }
+
+  updateTripItem(tripId: number, tripItemId: number, tripItemEditDto: TripItemEditDto){
+    return this.http.put<void>(`${this.base}/${tripId}/TripItems/${tripItemId}`, tripItemEditDto);
   }
 
 // --- New methods ---

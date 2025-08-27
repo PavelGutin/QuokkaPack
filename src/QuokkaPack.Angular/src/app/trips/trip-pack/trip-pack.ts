@@ -18,6 +18,7 @@ import {
   TripEditDto,
   TripCatalogItemReadDto,
   TripItemCreateDto,
+  TripItemEditDto
 } from '../../core/models/api-types';
 
 @Component({
@@ -27,7 +28,7 @@ import {
   templateUrl: './trip-pack.html',
 })
 export class TripPack implements OnInit, OnChanges {
-  private trips = inject(TripsService);
+  private tripsService = inject(TripsService);
   private route = inject(ActivatedRoute);
 
   @Input({ required: false }) tripId?: number;
@@ -119,7 +120,7 @@ export class TripPack implements OnInit, OnChanges {
   private loadTrip(id: number) {
     this.loading.set(true);
     this.error.set('');
-    this.trips
+    this.tripsService
       .get(id)
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
@@ -149,7 +150,7 @@ export class TripPack implements OnInit, OnChanges {
 
     this.loading.set(true);
     this.error.set('');
-    this.trips
+    this.tripsService
       .update(dto)
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
@@ -171,7 +172,11 @@ export class TripPack implements OnInit, OnChanges {
     // also reflect on trip() for the disabled checkboxes in edit mode
     this.mutateTripItem(it.tripItemId, { isPacked: checked });
 
-    this.trips.setTripItemPacked(this.loadedForId, it.tripItemId, checked).subscribe({
+    const tripItemEditDto: TripItemEditDto = {
+      id: it.tripItemId,
+      isPacked: checked
+    };
+    this.tripsService.updateTripItem(this.loadedForId, it.tripItemId, tripItemEditDto).subscribe({
       next: () => { /* success, keep optimistic state */ },
       error: (e) => {
         // rollback
@@ -190,7 +195,7 @@ export class TripPack implements OnInit, OnChanges {
     const dto: TripItemCreateDto = { itemId: it.itemId, isPacked: false };
     this.loading.set(true);
     this.error.set('');
-    this.trips
+    this.tripsService
       .addTripItem(this.loadedForId, dto)
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
@@ -203,7 +208,7 @@ export class TripPack implements OnInit, OnChanges {
     if (this.loadedForId == null || it.tripItemId == null) return;
     this.loading.set(true);
     this.error.set('');
-    this.trips
+    this.tripsService
       .deleteTripItem(this.loadedForId, it.tripItemId)
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
