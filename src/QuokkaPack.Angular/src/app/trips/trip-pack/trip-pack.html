@@ -1,80 +1,101 @@
-<div class="page">
-  @if (loading()) {
-    <div class="loading">Loading…</div>
-  } @else {
-    @if (error()) {
-      <p class="error">{{ error() }}</p>
-    }
-
-    @if (trip(); as t) {
-      <header class="header">
-        <div>
-          <h2>Pack: {{ t.destination }}</h2>
-          <div class="dates">
-            <span>{{ t.startDate | date:'mediumDate' }}</span>
-            <span>—</span>
-            <span>{{ t.endDate   | date:'mediumDate' }}</span>
-          </div>
-        </div>
-
-        <nav class="header-actions">
-          <a [routerLink]="['/trips', t.id, 'edit']" class="link">Edit Trip</a>
-        </nav>
-      </header>
-    }
-
-    <div class="toolbar">
-    <input
-    type="search"
-    placeholder="Filter items…"
-    [(ngModel)]="filterText"
-    class="filter"
-    />
-      <button class="save" [disabled]="!anyDirty() || saving()" (click)="save()">
-        {{ saving() ? 'Saving…' : 'Update Packed Status' }}
-      </button>
+<div style="max-width: 800px; margin: 1rem auto; padding: 0 .5rem;">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:.75rem;">
+    <div>
+      <label style="margin-right:.5rem;">
+        <input type="radio" name="mode" [checked]="mode()==='pack'" (change)="setMode('pack')" />
+        Pack
+      </label>
+      <label>
+        <input type="radio" name="mode" [checked]="mode()==='edit'" (change)="setMode('edit')" />
+        Edit
+      </label>
     </div>
 
-    <section class="groups">
-      @for (group of grouped(); track group[0]) {
-        @let cat = group[0];
-        @let items = group[1];
+    @if (loading()) { <span>Loading…</span> }
+    @if (error()) { <span style="color:#a00;">{{ error() }}</span> }
+  </div>
 
-        <div class="group">
-          <div class="group-header">
-            <h3 class="cat">{{ cat }}</h3>
-            <div class="cat-actions">
-              <button class="tiny" (click)="toggleCategory(cat, true)">Pack all</button>
-              <button class="tiny" (click)="toggleCategory(cat, false)">Unpack all</button>
-            </div>
-          </div>
+  @if (trip(); as t) {
+    <section style="border:1px solid #ddd;border-radius:8px;padding:.75rem;margin-top:.75rem;">
 
-          <ul class="items">
-            @for (it of items; track it.id) {
-              <li class="item">
-                <label class="row">
-                  <input
-                    type="checkbox"
-                    [checked]="it.isPacked"
-                    (change)="togglePacked(it, $any($event.target).checked)"
-                  />
-                  <span class="name">{{ it.name }}</span>
-                  <span class="qty" title="Quantity">×{{ it.quantity }}</span>
-                  @if (it.dirty) {
-                    <span class="dot" title="Pending change"></span>
+      <!-- Header: readonly vs editable -->
+      @if (mode()==='edit' && edit) {
+        <div style="display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:.5rem;align-items:end;">
+          <label style="display:flex;flex-direction:column;gap:.25rem;">
+            Destination
+            <input type="text" [(ngModel)]="edit.destination" />
+          </label>
+          <label style="display:flex;flex-direction:column;gap:.25rem;">
+            Start
+            <input type="date" [(ngModel)]="edit.startDate" />
+          </label>
+          <label style="display:flex;flex-direction:column;gap:.25rem;">
+            End
+            <input type="date" [(ngModel)]="edit.endDate" />
+          </label>
+          <button type="button" (click)="saveTrip()" [disabled]="loading() || !canSave(edit)">Save</button>
+        </div>
+      } @else {
+        <div>
+          <h3 style="margin:.25rem 0;">{{ t.destination }}</h3>
+          <small>[{{ t.startDate }} – {{ t.endDate }}]</small>
+        </div>
+      }
+
+      <!-- Body -->
+      @if (mode()==='pack') {
+        <!-- Only items that are part of the trip, with live API updates on toggle -->
+        <div style="margin-top:.75rem;">
+          <div><strong>Mode:</strong> Pack</div>
+          <div style="margin-top:.5rem;">
+            @for (g of packGroups(); track g.category) {
+              <section style="margin:.5rem 0;">
+                <h4 style="margin:.25rem 0;">{{ g.category }} ({{ g.items.length }})</h4>
+                <ul style="margin:.25rem 0; padding-left:1rem;">
+                  @for (it of g.items; track it.tripItemId) {
+                    <li>
+                      <label>
+                        <input
+                          type="checkbox"
+                          [checked]="packedMap()[it.tripItemId!]"
+                          (change)="onPackedChange(it, $any($event.target).checked)"
+                        />
+                        {{ it.name }}
+                      </label>
+                    </li>
                   }
-                </label>
-              </li>
+                </ul>
+              </section>
             }
-          </ul>
+          </div>
+        </div>
+      } @else {
+        <!-- Edit mode: all items grouped by category -->
+        <div style="margin-top:.75rem;">
+          <div><strong>Mode:</strong> Edit</div>
+          <div style="margin-top:.5rem;">
+            @for (g of groups(); track g.category) {
+              <section style="margin:.5rem 0;">
+                <h4 style="margin:.25rem 0;">{{ g.category }} ({{ g.items.length }})</h4>
+                <ul style="margin:.25rem 0; padding-left:1rem;">
+                  @for (it of g.items; track it.itemId) {
+                    <li style="display:flex;align-items:center;gap:.5rem;">
+                      @if (it.tripItemId != null) {
+                        <input type="checkbox" [checked]="it.isPacked ?? false" disabled />
+                        <span>{{ it.name }}</span>
+                        <button type="button" (click)="removeFromTrip(it)" title="Remove from trip">🗑️</button>
+                      } @else {
+                        <span>{{ it.name }}</span>
+                        <button type="button" (click)="addToTrip(it)" title="Add to trip">➕</button>
+                      }
+                    </li>
+                  }
+                </ul>
+              </section>
+            }
+          </div>
         </div>
       }
     </section>
-
-    <div class="footer">
-      <button class="save wide" [disabled]="!anyDirty() || saving()" (click)="save()">
-        {{ saving() ? 'Saving…' : 'Update Packed Status' }}
-      </button>
-    </div>
   }
 </div>

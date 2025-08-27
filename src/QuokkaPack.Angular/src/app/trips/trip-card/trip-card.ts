@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Trip } from '../../core/models/trip'
+import { TripSummaryReadDto, TripItemReadDto, ItemReadDto, CategoryReadDto, TripEditDto, TripItemCreateDto } from '../../core/models/api-types';
 
 @Component({
   standalone: true,
@@ -11,16 +11,16 @@ import { Trip } from '../../core/models/trip'
   //changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TripCard {
-  @Input({ required: true }) trip!: Trip;
+  @Input({ required: true }) trip!: TripSummaryReadDto;
 
   @Output() view = new EventEmitter<number | string>();
   @Output() pack = new EventEmitter<number | string>();
   @Output() edit = new EventEmitter<number | string>();
   @Output() remove = new EventEmitter<number | string>();
 
-  get categoryCount(): number {
-    return this.trip?.categories?.length ?? 0;
-  }
+  // get categoryCount(): number {
+  //   return this.trip?.categories?.length ?? 0;
+  // }
 
   // Simple date helpers (keep same display as grid)
   fmt(raw: string | Date): string {

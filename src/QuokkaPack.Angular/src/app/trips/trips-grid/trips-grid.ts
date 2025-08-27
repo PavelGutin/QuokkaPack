@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Trip, TripItemReadDto, ItemReadDto, CategoryReadDto, TripEditDto, TripItemCreateDto } from '../../core/models/api-types';
+import { TripSummaryReadDto, TripItemReadDto, ItemReadDto, CategoryReadDto, TripEditDto, TripItemCreateDto } from '../../core/models/api-types';
 import { TripCard } from '../trip-card/trip-card';  
 
 @Component({
@@ -12,7 +12,7 @@ import { TripCard } from '../trip-card/trip-card';
   //changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TripsGrid {
-  @Input({ required: true }) trips: Trip[] = [];
+  @Input({ required: true }) trips: TripSummaryReadDto[] = [];
 
   @Output() view = new EventEmitter<number | string>();
   @Output() pack = new EventEmitter<number | string>();

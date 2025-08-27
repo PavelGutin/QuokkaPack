@@ -794,39 +794,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/Trips/ping": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/Trips": {
         parameters: {
             query?: never;
@@ -849,9 +816,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "text/plain": components["schemas"]["TripReadDto"][];
-                        "application/json": components["schemas"]["TripReadDto"][];
-                        "text/json": components["schemas"]["TripReadDto"][];
+                        "text/plain": components["schemas"]["TripSummaryReadDto"][];
+                        "application/json": components["schemas"]["TripSummaryReadDto"][];
+                        "text/json": components["schemas"]["TripSummaryReadDto"][];
                     };
                 };
             };
@@ -878,9 +845,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "text/plain": components["schemas"]["TripReadDto"];
-                        "application/json": components["schemas"]["TripReadDto"];
-                        "text/json": components["schemas"]["TripReadDto"];
+                        "text/plain": components["schemas"]["TripSummaryReadDto"];
+                        "application/json": components["schemas"]["TripSummaryReadDto"];
+                        "text/json": components["schemas"]["TripSummaryReadDto"];
                     };
                 };
             };
@@ -915,9 +882,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "text/plain": components["schemas"]["TripReadDto"];
-                        "application/json": components["schemas"]["TripReadDto"];
-                        "text/json": components["schemas"]["TripReadDto"];
+                        "text/plain": components["schemas"]["TripDetailsReadDto"];
+                        "application/json": components["schemas"]["TripDetailsReadDto"];
+                        "text/json": components["schemas"]["TripDetailsReadDto"];
                     };
                 };
             };
@@ -996,184 +963,207 @@ export interface components {
     schemas: {
         AppUserLogin: {
             /** Format: int32 */
-            id?: number;
-            provider?: string | null;
-            providerUserId?: string | null;
-            issuer?: string | null;
+            id: number;
+            provider: string;
+            providerUserId: string;
+            issuer: string;
             email?: string | null;
             displayName?: string | null;
             /** Format: uuid */
-            masterUserId?: string;
-            masterUser?: components["schemas"]["MasterUser"];
+            masterUserId: string;
+            masterUser: components["schemas"]["MasterUser"];
         };
         Category: {
             /** Format: int32 */
-            id?: number;
-            name?: string | null;
-            isDefault?: boolean;
+            id: number;
+            name: string;
+            isDefault: boolean;
             /** Format: uuid */
-            masterUserId?: string;
-            masterUser?: components["schemas"]["MasterUser"];
-            items?: components["schemas"]["Item"][] | null;
+            masterUserId: string;
+            masterUser: components["schemas"]["MasterUser"];
+            items: components["schemas"]["Item"][];
         };
         CategoryCreateDto: {
-            name?: string | null;
+            name: string;
             description?: string | null;
-            isDefault?: boolean;
+            isDefault: boolean;
         };
         CategoryEditDto: {
             /** Format: int32 */
-            id?: number;
-            name?: string | null;
+            id: number;
+            name: string;
             description?: string | null;
-            isDefault?: boolean;
+            isDefault: boolean;
         };
         CategoryReadDto: {
             /** Format: int32 */
-            id?: number;
-            name?: string | null;
+            id: number;
+            name: string;
             description?: string | null;
-            isDefault?: boolean;
+            isDefault: boolean;
         };
         CategoryReadDtoSimple: {
             /** Format: int32 */
-            id?: number;
-            name?: string | null;
+            id: number;
+            name: string;
             description?: string | null;
-            isDefault?: boolean;
+            isDefault: boolean;
         };
         Item: {
             /** Format: int32 */
-            id?: number;
-            name?: string | null;
+            id: number;
+            name: string;
             /** Format: uuid */
-            masterUserId?: string;
-            masterUser?: components["schemas"]["MasterUser"];
-            category?: components["schemas"]["Category"];
+            masterUserId: string;
+            masterUser: components["schemas"]["MasterUser"];
+            category: components["schemas"]["Category"];
             /** Format: int32 */
-            categoryId?: number;
-            tripItems?: components["schemas"]["TripItem"][] | null;
+            categoryId: number;
+            tripItems: components["schemas"]["TripItem"][];
         };
         ItemCreateDto: {
-            name?: string | null;
+            name: string;
             notes?: string | null;
-            isEssential?: boolean;
+            isEssential: boolean;
             /** Format: int32 */
-            categoryId?: number;
+            categoryId: number;
         };
         ItemEditDto: {
             /** Format: int32 */
-            id?: number;
-            name?: string | null;
+            id: number;
+            name: string;
             notes?: string | null;
-            isEssential?: boolean;
-            category?: components["schemas"]["Category"];
+            isEssential: boolean;
+            category: components["schemas"]["Category"];
         };
         ItemReadDto: {
             /** Format: int32 */
-            id?: number;
-            name?: string | null;
+            id: number;
+            name: string;
             notes?: string | null;
-            isEssential?: boolean;
-            category?: components["schemas"]["CategoryReadDtoSimple"];
+            isEssential: boolean;
+            category: components["schemas"]["CategoryReadDtoSimple"];
         };
+        /** @enum {string} */
+        ItemTripStatus: "Packed" | "Unpacked" | "AvailableToAdd";
         LoginModel: {
-            email?: string | null;
-            password?: string | null;
+            email: string;
+            password: string;
         };
         MasterUser: {
             /** Format: uuid */
-            id?: string;
+            id: string;
             /** Format: date-time */
-            createdAt?: string;
+            createdAt: string;
             identityUserId?: string | null;
-            logins?: components["schemas"]["AppUserLogin"][] | null;
-            trips?: components["schemas"]["Trip"][] | null;
-            items?: components["schemas"]["Item"][] | null;
-            categories?: components["schemas"]["Category"][] | null;
+            logins: components["schemas"]["AppUserLogin"][];
+            trips: components["schemas"]["Trip"][];
+            items: components["schemas"]["Item"][];
+            categories: components["schemas"]["Category"][];
         };
         RegisterRequest: {
-            email?: string | null;
-            password?: string | null;
+            email: string;
+            password: string;
         };
         SetupRequest: {
-            username?: string | null;
-            password?: string | null;
+            username: string;
+            password: string;
         };
         Trip: {
             /** Format: int32 */
-            id?: number;
+            id: number;
             /** Format: date */
-            startDate?: string;
+            startDate: string;
             /** Format: date */
-            endDate?: string;
-            destination?: string | null;
+            endDate: string;
+            destination: string;
             /** Format: uuid */
-            masterUserId?: string;
-            masterUser?: components["schemas"]["MasterUser"];
-            tripItems?: components["schemas"]["TripItem"][] | null;
+            masterUserId: string;
+            masterUser: components["schemas"]["MasterUser"];
+            tripItems: components["schemas"]["TripItem"][];
+        };
+        TripCatalogItemReadDto: {
+            /** Format: int32 */
+            itemId: number;
+            name: string;
+            /** Format: int32 */
+            categoryId: number;
+            categoryName: string;
+            /** Format: int32 */
+            tripItemId?: number | null;
+            isPacked?: boolean | null;
+            status: components["schemas"]["ItemTripStatus"];
         };
         TripCreateDto: {
             /** Format: date */
-            startDate?: string;
+            startDate: string;
             /** Format: date */
-            endDate?: string;
-            destination?: string | null;
-            categoryIds?: number[] | null;
+            endDate: string;
+            destination: string;
+            categoryIds: number[];
+        };
+        TripDetailsReadDto: {
+            /** Format: int32 */
+            id: number;
+            destination: string;
+            /** Format: date */
+            startDate: string;
+            /** Format: date */
+            endDate: string;
+            items: components["schemas"]["TripCatalogItemReadDto"][];
         };
         TripEditDto: {
             /** Format: int32 */
-            id?: number;
+            id: number;
             /** Format: date */
-            startDate?: string;
+            startDate: string;
             /** Format: date */
-            endDate?: string;
-            destination?: string | null;
+            endDate: string;
+            destination: string;
         };
         TripItem: {
             /** Format: int32 */
-            id?: number;
+            id: number;
             /** Format: int32 */
-            itemId?: number;
-            item?: components["schemas"]["Item"];
+            itemId: number;
+            item: components["schemas"]["Item"];
             /** Format: int32 */
-            tripId?: number;
-            trip?: components["schemas"]["Trip"];
-            isPacked?: boolean;
+            tripId: number;
+            trip: components["schemas"]["Trip"];
+            isPacked: boolean;
         };
         TripItemCreateDto: {
             /** Format: int32 */
-            itemId?: number;
-            isPacked?: boolean;
+            itemId: number;
+            isPacked: boolean;
         };
         TripItemEditDto: {
             /** Format: int32 */
-            id?: number;
-            isPacked?: boolean;
+            id: number;
+            isPacked: boolean;
         };
         TripItemReadDto: {
             /** Format: int32 */
-            id?: number;
-            itemReadDto?: components["schemas"]["ItemReadDto"];
-            isPacked?: boolean;
+            id: number;
+            itemReadDto: components["schemas"]["ItemReadDto"];
+            isPacked: boolean;
         };
-        TripReadDto: {
+        TripSummaryReadDto: {
             /** Format: int32 */
-            id?: number;
-            destination?: string | null;
+            id: number;
+            destination: string;
             /** Format: date */
-            startDate?: string;
+            startDate: string;
             /** Format: date */
-            endDate?: string;
-            categories?: string[] | null;
+            endDate: string;
         };
         WeatherForecast: {
             /** Format: date */
-            date?: string;
+            date: string;
             /** Format: int32 */
-            temperatureC?: number;
+            temperatureC: number;
             /** Format: int32 */
-            readonly temperatureF?: number;
+            readonly temperatureF: number;
             summary?: string | null;
         };
     };

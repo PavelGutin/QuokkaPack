@@ -6,6 +6,5 @@
         public string Destination { get; set; } = string.Empty;
         public DateOnly StartDate { get; set; }
         public DateOnly EndDate { get; set; }
-        //public List<string> Categories { get; set; } = [];
     }
 }

@@ -3,16 +3,16 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
 import {
-  Trip,              // domain model used by components
-  TripReadDto,
   TripCreateDto,
   TripEditDto, 
   TripItemReadDto, 
   TripItemEditDto, 
   ItemReadDto, 
   CategoryReadDto, 
-  TripItemCreateDto
-} from '../../models/trip';
+  TripItemCreateDto,
+  TripSummaryReadDto,
+  TripDetailsReadDto
+} from '../../../core/models/api-types';
 
 @Injectable({ providedIn: 'root' })
 export class TripsService {
@@ -20,25 +20,21 @@ export class TripsService {
   private base = '/api/trips';
 
   // GET api/Trips
-  list(): Observable<Trip[]> {
-    return this.http.get<TripReadDto[]>(this.base).pipe(
+  list(): Observable<TripSummaryReadDto[]> {
+    return this.http.get<TripSummaryReadDto[]>(this.base).pipe(
       map(dtos => (Array.isArray(dtos) ? dtos.map(tripFromDto) : []))
     );
   }
 
   // GET api/Trips/{id}
-  get(id: number): Observable<Trip> {
-    return this.http.get<TripReadDto>(`${this.base}/${id}`).pipe(
-      map(tripFromDto)
-    );
+  get(id: number): Observable<TripDetailsReadDto> {
+    return this.http.get<TripDetailsReadDto>(`${this.base}/${id}`);
   }
 
   // POST api/Trips
   // (request stays a DTO; response mapped to domain)
-  create(dto: TripCreateDto): Observable<Trip> {
-    return this.http.post<TripReadDto>(this.base, dto).pipe(
-      map(tripFromDto)
-    );
+  create(dto: TripCreateDto): Observable<TripCreateDto> {
+    return this.http.post<TripCreateDto>(this.base, dto);
   }
 
   // PUT api/Trips/{id}
@@ -61,6 +57,9 @@ export class TripsService {
     return this.http.put<void>(`${this.base}/${tripId}/TripItems/batch`, items);
   }
 
+  setTripItemPacked(loadedForId: number, tripItemId: number, checked: boolean){
+    return this.http.put<void>(`${this.base}/${tripItemId}/TripItems/batch`, '');
+  }
 
 // --- New methods ---
 listAllItems() {
@@ -91,13 +90,14 @@ deleteCategoryFromTrip(tripId: number, categoryId: number) {
 }
 
 /* ---------- module-private mapper (not exported) ---------- */
-
-function tripFromDto(dto: TripReadDto): Trip {
-  return {
-    id: dto.id,
-    destination: dto.destination,
-    startDate: new Date(dto.startDate),
-    endDate: new Date(dto.endDate),
-    categories: dto.categories ?? [], 
-  };
+//TODO: Remove this. Keeping for now to get out of refactoring hell 
+function tripFromDto(dto: TripSummaryReadDto): TripSummaryReadDto {
+  return dto;
+  // return {
+  //   id: dto.id,
+  //   destination: dto.destination,
+  //   startDate: new Date(dto.startDate),
+  //   endDate: new Date(dto.endDate),
+  //   //categories: dto.categories ?? [], 
+  // };
 }

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TripsService } from '../../core/features/trips/trips.service';
-import { Trip, TripItemReadDto, ItemReadDto, CategoryReadDto, TripEditDto, TripItemCreateDto } from '../../core/models/api-types';
+import { TripSummaryReadDto, TripItemReadDto, ItemReadDto, CategoryReadDto, TripEditDto, TripItemCreateDto } from '../../core/models/api-types';
 
 
 
@@ -17,14 +17,14 @@ import { Trip, TripItemReadDto, ItemReadDto, CategoryReadDto, TripEditDto, TripI
 export class TripEdit implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  private trips = inject(TripsService);
+  private tripService = inject(TripsService);
 
   loading = signal(true);
   saving = signal(false);
   error = signal<string>('');
 
   tripId = signal<number | null>(null);
-  trip = signal<Trip | null>(null);
+  trip = signal<TripSummaryReadDto | null>(null);
   tripItems = signal<TripItemReadDto[]>([]);
   allItems = signal<ItemReadDto[]>([]);
   allCategories = signal<CategoryReadDto[]>([]);
@@ -99,7 +99,7 @@ export class TripEdit implements OnInit {
     this.error.set('');
 
     // Load trip, trip items, all items, all categories in parallel-ish (simple chaining)
-    this.trips.get(id).subscribe({
+    this.tripService.get(id).subscribe({
       next: (t) => {
         this.trip.set(t);
         this.destination.set(t.destination ?? '');
@@ -109,17 +109,17 @@ export class TripEdit implements OnInit {
       error: (e) => this.error.set(e?.error || e?.message || 'Failed to load trip'),
     });
 
-    this.trips.getItems(id).subscribe({
+    this.tripService.getItems(id).subscribe({
       next: (items) => this.tripItems.set(items ?? []),
       error: (e) => this.error.set(e?.error || e?.message || 'Failed to load trip items'),
     });
 
-    this.trips.listAllItems().subscribe({
+    this.tripService.listAllItems().subscribe({
       next: (items) => this.allItems.set(items ?? []),
       error: (e) => this.error.set(e?.error || e?.message || 'Failed to load items list'),
     });
 
-    this.trips.listAllCategories().subscribe({
+    this.tripService.listAllCategories().subscribe({
       next: (cats) => this.allCategories.set(cats ?? []),
       error: (e) => this.error.set(e?.error || e?.message || 'Failed to load categories list'),
       complete: () => this.loading.set(false),
@@ -140,7 +140,7 @@ export class TripEdit implements OnInit {
     this.saving.set(true);
     this.error.set('');
 
-    this.trips.update(payload as any).subscribe({
+    this.tripService.update(payload as any).subscribe({
       next: () => { /* nothing else to do */ },
       error: (e) => this.error.set(e?.error || e?.message || 'Failed to update trip'),
       complete: () => this.saving.set(false),
@@ -153,10 +153,10 @@ export class TripEdit implements OnInit {
     if (!id || !itemId) return;
 
     const body: TripItemCreateDto = { itemId, isPacked: false };
-    this.trips.addTripItem(id, body).subscribe({
+    this.tripService.addTripItem(id, body).subscribe({
       next: (created) => {
         // Refresh trip items after add
-        this.trips.getItems(id).subscribe({
+        this.tripService.getItems(id).subscribe({
           next: (items) => this.tripItems.set(items ?? []),
           complete: () => this.selectedItemId.set(null),
         });
@@ -169,7 +169,7 @@ export class TripEdit implements OnInit {
     const id = this.tripId();
     if (!id) return;
 
-    this.trips.deleteTripItem(id, tripItemId).subscribe({
+    this.tripService.deleteTripItem(id, tripItemId).subscribe({
       next: () => {
         this.tripItems.set(this.tripItems().filter(ti => ti.id !== tripItemId));
       },
@@ -182,10 +182,10 @@ export class TripEdit implements OnInit {
     const catId = this.selectedCategoryId();
     if (!id || !catId) return;
 
-    this.trips.addCategoryToTrip(id, catId).subscribe({
+    this.tripService.addCategoryToTrip(id, catId).subscribe({
       next: () => {
         // Re-load trip to reflect categories
-        this.trips.get(id).subscribe({
+        this.tripService.get(id).subscribe({
           next: (t) => this.trip.set(t),
           complete: () => this.selectedCategoryId.set(null),
         });
@@ -195,20 +195,20 @@ export class TripEdit implements OnInit {
   }
 
   deleteCategory(categoryId: number) {
-    const id = this.tripId();
-    if (!id) return;
+    // const id = this.tripId();
+    // if (!id) return;
 
-    this.trips.deleteCategoryFromTrip(id, categoryId).subscribe({
-      next: () => {
-        // prune locally without a full reload
-        const t = this.trip();
-        if (t) {
-          const next = { ...t, categories: (t.categories ?? []).filter((c: any) => c.id !== categoryId) };
-          this.trip.set(next);
-        }
-      },
-      error: (e) => this.error.set(e?.error || e?.message || 'Failed to delete category'),
-    });
+    // this.tripService.deleteCategoryFromTrip(id, categoryId).subscribe({
+    //   next: () => {
+    //     // prune locally without a full reload
+    //     const t = this.trip();
+    //     if (t) {
+    //       const next = { ...t, categories: (t.categories ?? []).filter((c: any) => c.id !== categoryId) };
+    //       this.trip.set(next);
+    //     }
+    //   },
+    //   error: (e) => this.error.set(e?.error || e?.message || 'Failed to delete category'),
+    // });
   }
 
   backToTrips() {

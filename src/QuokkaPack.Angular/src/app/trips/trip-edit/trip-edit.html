@@ -48,8 +48,8 @@
             <ul class="list">
                 @for (ti of tripItems(); track ti.id) {
                 <li class="row">
-                    <span class="name">{{ ti.itemReadDto?.name }}</span>
-                    <span class="sub">{{ ti.itemReadDto?.category?.name || 'Uncategorized' }}</span>
+                    <span class="name">{{ ti.itemReadDto.name }}</span>
+                    <span class="sub">{{ ti.itemReadDto.category.name || 'Uncategorized' }}</span>
                     <button class="danger tiny" (click)="deleteItem(ti.id)">Remove</button>
                 </li>
                 }
@@ -60,7 +60,7 @@
                     <option [ngValue]="null">— Select item —</option>
                     @for (it of availableItems(); track it.id) {
                     <option [ngValue]="it.id">
-                        {{ it.name }} ({{ it.category?.name || 'Uncategorized' }})
+                        {{ it.name }} ({{ it.category.name || 'Uncategorized' }})
                     </option>
                     }
                 </select>
@@ -69,15 +69,15 @@
         </div>
 
         <div class="col card">
-            <h3>Trip Categories</h3>
+            <h3>Trip Categories [IN PROGRESS]</h3>
 
             <ul class="list">
-                @for (c of (t.categories || []); track c.id) {
+                <!-- @for (c of (t.categories || []); track c.id) {
                 <li class="row">
                     <span class="name">{{ c.name }}</span>
                     <button class="danger tiny" (click)="deleteCategory(c.id)">Remove</button>
                 </li>
-                }
+                } -->
             </ul>
             <select [(ngModel)]="selectedCategoryIdValue">
                 <option [ngValue]="null">— Select category —</option>

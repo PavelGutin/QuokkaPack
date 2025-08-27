@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TripsGrid } from '../trips-grid/trips-grid';
-import { Trip, TripItemReadDto, ItemReadDto, CategoryReadDto, TripEditDto, TripItemCreateDto } from '../../core/models/api-types';
+import { TripSummaryReadDto, TripItemReadDto, ItemReadDto, CategoryReadDto, TripEditDto, TripItemCreateDto } from '../../core/models/api-types';
 import { TripsService } from '../../core/features/trips/trips.service';
 import { finalize } from 'rxjs/operators';
 import { Router } from '@angular/router';
@@ -15,7 +15,7 @@ import { Router } from '@angular/router';
   //changeDetection: ChangeDetectionStrategy.OnPush,  //TODO: Bring this back and fix it
 })
 export class TripsPage implements OnInit {
-  trips: Trip[] = [];
+  trips: TripSummaryReadDto[] = [];
   loading = false;
   error = '';
   private router = inject(Router);

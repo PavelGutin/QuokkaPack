@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using QuokkaPack.API.Services;
+using QuokkaPack.API.Utils;
 using QuokkaPack.Data;
 using QuokkaPack.ServerCommon.Extensions;
 using Serilog;
@@ -40,7 +41,8 @@ builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    // good schema hints
+    c.SchemaFilter<NonNullableAsRequiredSchemaFilter>();
+    c.SupportNonNullableReferenceTypes(); // important for NRT -> required
     c.MapType<DateOnly>(() => new Microsoft.OpenApi.Models.OpenApiSchema { Type = "string", Format = "date" });
 });
 

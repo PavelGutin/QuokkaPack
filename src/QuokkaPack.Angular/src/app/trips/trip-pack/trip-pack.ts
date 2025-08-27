@@ -1,191 +1,240 @@
-import { Component, OnInit, inject, effect, signal, computed } from '@angular/core';
+import {
+  Component,
+  Input,
+  OnChanges,
+  OnInit,
+  SimpleChanges,
+  inject,
+  signal,
+  computed,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
+import { finalize } from 'rxjs/operators';
 import { TripsService } from '../../core/features/trips/trips.service';
-
-/** ——— DTOs inferred from your Razor code ——— */
-export interface CategoryDto {
-  id: number;
-  name: string;
-}
-
-export interface ItemReadDto {
-  id: number;
-  name: string;
-  category: CategoryDto;
-}
-
-export interface TripItemReadDto {
-  id: number;
-  itemReadDto: ItemReadDto;
-  quantity: number;
-  isPacked: boolean;
-  notes?: string | null;
-}
-
-export interface TripItemEditDto {
-  id: number;
-  isPacked: boolean;
-}
-
-/** Trip brief (already in your models/trip.ts but we keep a light copy here) */
-export interface TripReadDtoLite {
-  id: number;
-  destination: string;
-  startDate: string;
-  endDate: string;
-}
-
-/** View-model used by the template */
-export type TripItemVM = {
-  id: number;
-  name: string;
-  category: string;
-  quantity: number;
-  isPacked: boolean;
-  /** mark rows changed so we only send minimal batch payload */
-  dirty: boolean;
-};
+import {
+  TripDetailsReadDto,
+  TripEditDto,
+  TripCatalogItemReadDto,
+  TripItemCreateDto,
+} from '../../core/models/api-types';
 
 @Component({
-  standalone: true,
   selector: 'app-trip-pack',
-  imports: [CommonModule, FormsModule, RouterLink],
+  standalone: true,
+  imports: [CommonModule, FormsModule],
   templateUrl: './trip-pack.html',
-  styleUrls: ['./trip-pack.scss'],
 })
-export class TripPack implements OnInit {
-  private route = inject(ActivatedRoute);
+export class TripPack implements OnInit, OnChanges {
   private trips = inject(TripsService);
+  private route = inject(ActivatedRoute);
 
-  tripId = signal<number | null>(null);
-  loading = signal(true);
-  saving = signal(false);
+  @Input({ required: false }) tripId?: number;
+
+  mode = signal<'pack' | 'edit'>('pack');
+  trip = signal<TripDetailsReadDto | null>(null);
+  loading = signal<boolean>(false);
   error = signal<string>('');
+  private loadedForId: number | null = null;
 
-  // raw/loaders
-  trip = signal<TripReadDtoLite | null>(null);
-  items = signal<TripItemVM[]>([]);
+  // --- Edit buffer ---
+  edit: TripEditDto | null = null;
 
-  // simple text filter (optional)
-  filter = signal<string>('');
+  // --- Pack mode local state: tripItemId -> packed? ---
+  packedMap = signal<Record<number, boolean>>({});
 
-  // derived: group items by category name, sorted by category
-  grouped = computed(() => {
-    const f = this.filter().trim().toLowerCase();
-    const filtered = f
-      ? this.items().filter(i => i.name.toLowerCase().includes(f))
-      : this.items();
-
-    const map = new Map<string, TripItemVM[]>();
-    for (const it of filtered) {
-      if (!map.has(it.category)) map.set(it.category, []);
-      map.get(it.category)!.push(it);
+  // All items grouped by category (for EDIT mode)
+  groups = computed(() => {
+    const t = this.trip();
+    const by = new Map<string, TripCatalogItemReadDto[]>();
+    for (const it of t?.items ?? []) {
+      const key = it.categoryName ?? '(Uncategorized)';
+      if (!by.has(key)) by.set(key, []);
+      by.get(key)!.push(it);
     }
-    // sort categories + items by name
-    const entries = [...map.entries()]
+    return Array.from(by.entries())
       .sort((a, b) => a[0].localeCompare(b[0]))
-      .map(([cat, arr]) => [cat, arr.sort((x, y) => x.name.localeCompare(y.name))] as const);
-    return entries;
+      .map(([category, items]) => ({
+        category,
+        items: items.slice().sort((a, b) => a.name.localeCompare(b.name)),
+      }));
   });
 
-  // add a backing property
-  get filterText(): string {
-    return this.filter();
-  }
-  set filterText(value: string) {
-    this.filter.set(value);
-  }
-
+  // Only items that are part of the trip (for PACK mode)
+  packGroups = computed(() => {
+    const t = this.trip();
+    const by = new Map<string, TripCatalogItemReadDto[]>();
+    for (const it of t?.items ?? []) {
+      if (it.tripItemId == null) continue;
+      const key = it.categoryName ?? '(Uncategorized)';
+      if (!by.has(key)) by.set(key, []);
+      by.get(key)!.push(it);
+    }
+    return Array.from(by.entries())
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([category, items]) => ({
+        category,
+        items: items.slice().sort((a, b) => a.name.localeCompare(b.name)),
+      }));
+  });
 
   ngOnInit(): void {
-    const id = Number(this.route.snapshot.paramMap.get('id'));
-    if (!Number.isFinite(id)) {
-      this.error.set('Invalid trip id.');
-      this.loading.set(false);
-      return;
-    }
-    this.tripId.set(id);
-    this.load(id);
+    const idFromRoute = Number(this.route.snapshot.paramMap.get('id'));
+    const id = this.tripId ?? (Number.isFinite(idFromRoute) ? idFromRoute : undefined);
+    if (id) this.loadTrip(id);
   }
 
-  private load(id: number) {
+  ngOnChanges(changes: SimpleChanges): void {
+    if ('tripId' in changes && this.tripId && this.tripId !== this.loadedForId) {
+      this.loadTrip(this.tripId);
+    }
+  }
+
+  setMode(m: 'pack' | 'edit') {
+    this.mode.set(m); // no API
+    if (m === 'edit') this.seedEditBuffer();
+    if (m === 'pack') this.seedPackedMap();
+  }
+
+  private seedEditBuffer() {
+    const t = this.trip();
+    if (!t) return;
+    this.edit = {
+      id: t.id,
+      startDate: (t.startDate ?? '').slice(0, 10),
+      endDate: (t.endDate ?? '').slice(0, 10),
+      destination: t.destination ?? '',
+    };
+  }
+
+  private seedPackedMap() {
+    const map: Record<number, boolean> = {};
+    for (const it of this.trip()?.items ?? []) {
+      if (it.tripItemId != null) map[it.tripItemId] = !!it.isPacked;
+    }
+    this.packedMap.set(map);
+  }
+
+  private loadTrip(id: number) {
     this.loading.set(true);
     this.error.set('');
-
-    // load trip + items in parallel
-    this.trips.get(id).subscribe({
-      next: (t) => {
-        // keep a very small shape for header display
-        this.trip.set({
-          id: Number(t.id),
-          destination: t.destination,
-          startDate: (t as any).startDate?.toString?.() ?? t['startDate'] ?? '',
-          endDate: (t as any).endDate?.toString?.() ?? t['endDate'] ?? '',
-        });
-      },
-      error: (e) => {
-        this.error.set(e?.error || e?.message || 'Failed to load trip');
-      },
-    });
-
-    this.trips.getItems(id).subscribe({
-      next: (dtos: TripItemReadDto[]) => {
-        const vms: TripItemVM[] = (dtos ?? []).map(d => ({
-          id: d.id,
-          name: d.itemReadDto?.name ?? '(Unnamed)',
-          category: d.itemReadDto?.category?.name ?? '(Uncategorized)',
-          quantity: d.quantity ?? 1,
-          isPacked: !!d.isPacked,
-          dirty: false,
-        }));
-        this.items.set(vms);
-      },
-      error: (e) => this.error.set(e?.error || e?.message || 'Failed to load items'),
-      complete: () => this.loading.set(false),
-    });
+    this.trips
+      .get(id)
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: (t) => {
+          this.trip.set(t);
+          this.loadedForId = id;
+          if (this.mode() === 'edit') this.seedEditBuffer();
+          if (this.mode() === 'pack') this.seedPackedMap();
+        },
+        error: (e) => {
+          this.error.set(e?.error || e?.message || 'Failed to load trip');
+          this.trip.set(null);
+          this.loadedForId = null;
+        },
+      });
   }
 
-  togglePacked(item: TripItemVM, checked: boolean) {
-    item.isPacked = checked;
-    item.dirty = true;
-    // trigger signals update (replace array instance)
-    this.items.set([...this.items()]);
-  }
+  saveTrip() {
+    if (!this.edit) return;
+    const dto: TripEditDto = {
+      id: this.edit.id,
+      startDate: this.toYyyyMmDd(this.edit.startDate),
+      endDate: this.toYyyyMmDd(this.edit.endDate),
+      destination: (this.edit.destination ?? '').trim(),
+    };
+    if (!this.canSave(dto)) return;
 
-  toggleCategory(cat: string, packed: boolean) {
-    const updated = this.items().map(i => {
-      if (i.category === cat) {
-        return { ...i, isPacked: packed, dirty: true };
-      }
-      return i;
-    });
-    this.items.set(updated);
-  }
-
-  anyDirty = computed(() => this.items().some(i => i.dirty));
-
-  save() {
-    const id = this.tripId();
-    if (!id) return;
-
-    const payload: TripItemEditDto[] = this.items()
-      .filter(i => i.dirty)
-      .map(i => ({ id: i.id, isPacked: i.isPacked }));
-
-    if (payload.length === 0) return;
-
-    this.saving.set(true);
+    this.loading.set(true);
     this.error.set('');
+    this.trips
+      .update(dto)
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: () => this.loadTrip(dto.id),
+        error: (e) => this.error.set(e?.error || e?.message || 'Failed to save trip'),
+      });
+  }
 
-    this.trips.updatePackedStatus(id, payload).subscribe({
-      next: () => {
-        // clear dirty flags after successful save
-        this.items.set(this.items().map(i => ({ ...i, dirty: false })));
+  // --- PACK: checkbox change -> call API (optimistic, rollback on error) ---
+  onPackedChange(it: TripCatalogItemReadDto, checked: boolean) {
+    if (it.tripItemId == null || this.loadedForId == null) return;
+
+    // optimistic update
+    const prev = this.packedMap()[it.tripItemId] ?? false;
+    const map = { ...this.packedMap() };
+    map[it.tripItemId] = checked;
+    this.packedMap.set(map);
+
+    // also reflect on trip() for the disabled checkboxes in edit mode
+    this.mutateTripItem(it.tripItemId, { isPacked: checked });
+
+    this.trips.setTripItemPacked(this.loadedForId, it.tripItemId, checked).subscribe({
+      next: () => { /* success, keep optimistic state */ },
+      error: (e) => {
+        // rollback
+        const rollback = { ...this.packedMap() };
+        rollback[it.tripItemId!] = prev;
+        this.packedMap.set(rollback);
+        this.mutateTripItem(it.tripItemId!, { isPacked: prev });
+        this.error.set(e?.error || e?.message || 'Failed to update packed status');
       },
-      error: (e) => this.error.set(e?.error || e?.message || 'Failed to update packed status'),
-      complete: () => this.saving.set(false),
     });
+  }
+
+  // --- EDIT: add/remove items -> call API then refresh ---
+  addToTrip(it: TripCatalogItemReadDto) {
+    if (this.loadedForId == null) return;
+    const dto: TripItemCreateDto = { itemId: it.itemId, isPacked: false };
+    this.loading.set(true);
+    this.error.set('');
+    this.trips
+      .addTripItem(this.loadedForId, dto)
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: () => this.loadTrip(this.loadedForId!),
+        error: (e) => this.error.set(e?.error || e?.message || 'Failed to add item'),
+      });
+  }
+
+  removeFromTrip(it: TripCatalogItemReadDto) {
+    if (this.loadedForId == null || it.tripItemId == null) return;
+    this.loading.set(true);
+    this.error.set('');
+    this.trips
+      .deleteTripItem(this.loadedForId, it.tripItemId)
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: () => this.loadTrip(this.loadedForId!),
+        error: (e) => this.error.set(e?.error || e?.message || 'Failed to remove item'),
+      });
+  }
+
+  // --- small helper to update a single item inside trip() ---
+  private mutateTripItem(tripItemId: number, patch: Partial<TripCatalogItemReadDto>) {
+    const t = this.trip();
+    if (!t) return;
+    const items = t.items.slice();
+    const idx = items.findIndex(x => x.tripItemId === tripItemId);
+    if (idx >= 0) {
+      items[idx] = { ...items[idx], ...patch };
+      this.trip.set({ ...t, items });
+    }
+  }
+
+  // helpers
+  private toYyyyMmDd(s: string | undefined): string {
+    if (!s) return '';
+    return s.length >= 10 ? s.slice(0, 10) : s;
+  }
+  private isYyyyMmDd(s: string): boolean {
+    return /^\d{4}-\d{2}-\d{2}$/.test(s);
+  }
+  canSave(dto: TripEditDto): boolean {
+    if (!dto.destination) return false;
+    if (!this.isYyyyMmDd(dto.startDate) || !this.isYyyyMmDd(dto.endDate)) return false;
+    return dto.startDate <= dto.endDate;
   }
 }
