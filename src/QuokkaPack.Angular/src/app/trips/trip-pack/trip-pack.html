@@ -45,36 +45,129 @@
       <!-- Body -->
       @if (mode()==='pack') {
         <!-- Only items that are part of the trip, with live API updates on toggle -->
-        <div style="margin-top:.75rem;">
-          <div><strong>Mode:</strong> Pack</div>
-          <div style="margin-top:.5rem;">
-            @for (g of packGroups(); track g.category) {
-              <section style="margin:.5rem 0;">
-                <h4 style="margin:.25rem 0;">{{ g.category }} ({{ g.items.length }})</h4>
-                <ul style="margin:.25rem 0; padding-left:1rem;">
-                  @for (it of g.items; track it.tripItemId) {
-                    <li>
-                      <label>
-                        <input
-                          type="checkbox"
-                          [checked]="packedMap()[it.tripItemId!]"
-                          (change)="onPackedChange(it, $any($event.target).checked)"
-                        />
-                        {{ it.name }}
-                      </label>
-                    </li>
-                  }
-                </ul>
-              </section>
-            }
-          </div>
-        </div>
+<div style="margin-top:.75rem;">
+  <div><strong>Mode:</strong> Pack</div>
+
+  <!-- Card grid -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1rem;align-items:stretch; margin-top:.5rem;">
+
+    @for (g of packGroups(); track g.category) {
+      <!-- Card -->
+      <section style="border:1px solid #ddd;border-radius:6px;padding:.5rem;background:#fff;display:flex;flex-direction:column;">
+
+        <!-- Card header -->
+        <h4 style="margin:0 0 .5rem;border-bottom:1px solid #eee;padding:0 0 .25rem;font-size:1rem;font-weight:600;">
+          {{ g.category }} ({{ g.items.length }})
+        </h4>
+
+        <!-- Items (top-aligned; not stretched) --> 
+        <ul style="list-style:none; margin:.25rem 0 0; padding:0;"> 
+          @for (it of g.items; track it.tripItemId) {
+            <li style="margin:.25rem 0;">
+              <label style="display:grid;grid-template-columns:1.25rem 1fr;align-items:center;column-gap:.5rem;cursor:pointer;">
+                <input
+                  type="checkbox"
+                  [checked]="packedMap()[it.tripItemId!]"
+                  (change)="onPackedChange(it, $any($event.target).checked)"
+                  style="margin:0;padding:0;width:1rem;height:1rem;"
+                />
+                <span
+                  [style.textDecoration]="packedMap()[it.tripItemId!] ? 'line-through' : 'none'"
+                  [style.color]="packedMap()[it.tripItemId!] ? '#666' : 'inherit'"
+                  style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"
+                >
+                  {{ it.name }}
+                </span>
+              </label>
+            </li>
+          }
+        </ul>
+      </section>
+    }
+  </div>
+</div>
+
       } @else {
         <!-- Edit mode: all items grouped by category -->
         <div style="margin-top:.75rem;">
           <div><strong>Mode:</strong> Edit</div>
-          <div style="margin-top:.5rem;">
-            @for (g of groups(); track g.category) {
+
+
+
+
+<!-- Responsive card grid -->
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1rem;align-items:stretch;">
+
+  <!-- Category cards -->
+  @for (g of groupsInTrip(); track g.category) {
+    <div style="border:1px solid #ddd;border-radius:6px;padding:.5rem;background:#fff;display:flex;flex-direction:column;">
+      
+      <!-- Card header -->
+      <div style="font-weight:600;margin:0 0 .5rem;border-bottom:1px solid #eee;padding:0 0 .25rem;">
+        {{ g.category }} ({{ g.items.length }})
+      </div>
+
+      <!-- Items inside card (no flex:1, so they hug the top) -->
+      <div style="display:grid;grid-template-columns:2rem 1.25rem 1fr;row-gap:.25rem;column-gap:.25rem;align-items:center;">
+        @for (it of g.items; track it.itemId) {
+          @if (it.tripItemId != null) {
+            <button
+              type="button"
+              (click)="removeFromTrip(it)"
+              title="Remove from trip"
+              style="grid-column:1; padding:0; margin:0; border:none; background:none; line-height:1; width:1.25rem; height:1.25rem; display:grid; place-items:center; cursor:pointer;"
+            >🗑️</button>
+
+            <input
+              type="checkbox"
+              [checked]="it.isPacked ?? false"
+              disabled
+              style="grid-column:2; margin:0; padding:0; width:1rem; height:1rem;"
+            />
+
+            <span style="grid-column:3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+              {{ it.name }}
+            </span>
+          } @else {
+            <button
+              type="button"
+              (click)="addToTrip(it)"
+              title="Add to trip"
+              style="grid-column:1; padding:0; margin:0; border:none; background:none; line-height:1; width:1.25rem; height:1.25rem; display:grid; place-items:center; cursor:pointer;"
+            >➕</button>
+
+            <span
+              style="grid-column:3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-decoration:line-through;"
+            >
+              {{ it.name }}
+            </span>
+          }
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Available categories card -->
+  <div style="border:1px solid #ddd;border-radius:6px;padding:.5rem;background:#fff;display:flex;flex-direction:column;">
+    <div style="font-weight:600;margin:0 0 .5rem;border-bottom:1px solid #eee;padding:0 0 .25rem;">
+      Available categories
+    </div>
+
+    <div style="display:grid;grid-template-columns:1.25rem 1fr;row-gap:.25rem;column-gap:.25rem;align-items:center;">
+      @for (g of availableGroups(); track g.category) {
+        <span style="grid-column:1;display:grid;place-items:center;line-height:1;">⚫</span>
+        <span style="grid-column:2;">{{ g.category }} ({{ g.items.length }})</span>
+      }
+    </div>
+  </div>
+
+</div>
+
+
+
+
+          <!-- <div style="margin-top:.5rem;">
+            @for (g of groupsInTrip(); track g.category) {
               <section style="margin:.5rem 0;">
                 <h4 style="margin:.25rem 0;">{{ g.category }} ({{ g.items.length }})</h4>
                 <ul style="margin:.25rem 0; padding-left:1rem;">
@@ -93,7 +186,10 @@
                 </ul>
               </section>
             }
-          </div>
+            @for (g of availableGroups(); track g.category) {
+              <h5 style="margin:.25rem 0;">{{ g.category }} ({{ g.items.length }})</h5>
+            }
+          </div> -->
         </div>
       }
     </section>

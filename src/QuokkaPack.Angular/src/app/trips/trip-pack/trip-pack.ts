@@ -20,6 +20,12 @@ import {
   TripItemCreateDto,
   TripItemEditDto
 } from '../../core/models/api-types';
+type Group = {
+  categoryId?: number | null;
+  category: string;
+  items: TripCatalogItemReadDto[];
+  hasTripItems: boolean; // true if any item in this group has a non-null tripItemId
+};
 
 @Component({
   selector: 'app-trip-pack',
@@ -27,6 +33,8 @@ import {
   imports: [CommonModule, FormsModule],
   templateUrl: './trip-pack.html',
 })
+
+
 export class TripPack implements OnInit, OnChanges {
   private tripsService = inject(TripsService);
   private route = inject(ActivatedRoute);
@@ -45,40 +53,51 @@ export class TripPack implements OnInit, OnChanges {
   // --- Pack mode local state: tripItemId -> packed? ---
   packedMap = signal<Record<number, boolean>>({});
 
-  // All items grouped by category (for EDIT mode)
-  groups = computed(() => {
-    const t = this.trip();
-    const by = new Map<string, TripCatalogItemReadDto[]>();
-    for (const it of t?.items ?? []) {
-      const key = it.categoryName ?? '(Uncategorized)';
-      if (!by.has(key)) by.set(key, []);
-      by.get(key)!.push(it);
-    }
-    return Array.from(by.entries())
-      .sort((a, b) => a[0].localeCompare(b[0]))
-      .map(([category, items]) => ({
-        category,
-        items: items.slice().sort((a, b) => a.name.localeCompare(b.name)),
-      }));
-  });
 
-  // Only items that are part of the trip (for PACK mode)
-  packGroups = computed(() => {
-    const t = this.trip();
-    const by = new Map<string, TripCatalogItemReadDto[]>();
-    for (const it of t?.items ?? []) {
-      if (it.tripItemId == null) continue;
-      const key = it.categoryName ?? '(Uncategorized)';
-      if (!by.has(key)) by.set(key, []);
-      by.get(key)!.push(it);
+
+private baseGroups = computed<Group[]>(() => {
+  const t = this.trip();
+  const by = new Map<
+    string,
+    { categoryId?: number | null; category: string; items: TripCatalogItemReadDto[]; hasTripItems: boolean }
+  >();
+
+  for (const it of t?.items ?? []) {
+    const category = it.categoryName ?? '(Uncategorized)';
+    const key = `${it.categoryId ?? 'null'}|${category}`;
+
+    if (!by.has(key)) {
+      by.set(key, { categoryId: it.categoryId ?? null, category, items: [], hasTripItems: false });
     }
-    return Array.from(by.entries())
-      .sort((a, b) => a[0].localeCompare(b[0]))
-      .map(([category, items]) => ({
-        category,
-        items: items.slice().sort((a, b) => a.name.localeCompare(b.name)),
-      }));
-  });
+
+    const g = by.get(key)!;
+    g.items.push(it);
+    if (it.tripItemId != null) g.hasTripItems = true;
+  }
+
+  return Array.from(by.values())
+    .sort((a, b) => (a.category ?? '').localeCompare(b.category ?? ''))
+    .map(g => ({
+      categoryId: g.categoryId,
+      category: g.category,
+      hasTripItems: g.hasTripItems,
+      items: g.items.slice().sort((a, b) => a.name.localeCompare(b.name)),
+    }));
+});
+
+// Groups with at least one item in trip
+groupsInTrip = computed<Group[]>(() => this.baseGroups()
+  .filter(g => g.hasTripItems));
+
+// Groups where all items are not in trip
+availableGroups = computed<Group[]>(() => this.baseGroups()
+  .filter(g => !g.hasTripItems));
+
+packGroups = computed<Group[]>(() => this.baseGroups()
+  .map(g => ({...g,items: g.items.filter(it => it.tripItemId != null),}))
+  .filter(g => g.items.length > 0)
+);
+
 
   ngOnInit(): void {
     const idFromRoute = Number(this.route.snapshot.paramMap.get('id'));
