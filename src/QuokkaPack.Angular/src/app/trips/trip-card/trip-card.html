@@ -1,4 +1,13 @@
-<article class="card" [attr.aria-labelledby]="'trip-' + trip.id + '-title'">
+<article
+  class="card"
+  [attr.aria-labelledby]="'trip-' + trip.id + '-title'"
+  [attr.aria-label]="'Open packing view for ' + trip.destination"
+  role="button"
+  tabindex="0"
+  (click)="pack.emit(trip.id)"
+  (keydown.enter)="pack.emit(trip.id)"
+  (keydown.space)="pack.emit(trip.id)"
+>
   <header class="card-header">
     <h2 class="dest" id="trip-{{ trip.id }}-title">{{ trip.destination }}</h2>
     <p class="dates">
@@ -7,15 +16,4 @@
       <time [attr.datetime]="iso(trip.endDate)">{{ fmt(trip.endDate) }}</time>
     </p>
   </header>
-
-  <!-- <p class="meta" aria-live="polite">
-    {{ categoryCount }} categor{{ categoryCount === 1 ? 'y' : 'ies' }}
-  </p> -->
-
-  <footer class="card-actions">
-    <button type="button" (click)="view.emit(trip.id)">View</button>
-    <button type="button" (click)="pack.emit(trip.id)">Pack</button>
-    <button type="button" (click)="edit.emit(trip.id)">Edit</button>
-    <button type="button" (click)="remove.emit(trip.id)">Delete</button>
-  </footer>
 </article>

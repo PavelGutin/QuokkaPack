@@ -1,58 +1,35 @@
 .grid {
+  /* remove bullets & default padding from UL */
+  list-style: none;
+  padding: 0;
+  margin: .5rem 0 0;
+
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 1rem;
-  margin-top: .5rem;
+  align-items: stretch; /* make cells equal height */
 }
 
-.card {
-  border: 1px solid #e5e5e5;
+.grid > li {
+  margin: 0;              /* remove default LI spacing */
+  /* help the card fill its cell */
+  display: flex;
+}
+
+.grid > li app-trip-card {
+  flex: 1;                /* the component tag stretches */
+}
+
+/* Optional: subtle outline when the card inside is focused */
+.grid > li:focus-within {
+  outline: 2px solid rgba(121,166,255,.45);
+  outline-offset: 2px;
   border-radius: .75rem;
-  padding: .85rem .9rem;
-  background: white;
-  box-shadow: 0 1px 2px rgba(0,0,0,.04);
-  display: flex;
-  flex-direction: column;
-  gap: .6rem;
 }
 
-.card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: .5rem;
+/* Optional: slightly larger cards on wide viewports */
+@media (min-width: 1200px) {
+  .grid {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
 }
-
-.dest {
-  font-weight: 600;
-  font-size: 1.05rem;
-}
-
-.dates {
-  font-size: .925rem;
-  color: #444;
-}
-
-.meta {
-  font-size: .85rem;
-  color: #666;
-}
-
-.card-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: .5rem;
-  margin-top: .25rem;
-}
-
-button {
-  appearance: none;
-  border: 1px solid #ccc;
-  background: #f8f8f8;
-  padding: .45rem .75rem;
-  border-radius: .5rem;
-  cursor: pointer;
-  font: inherit;
-  line-height: 1.2;
-}
-button:hover { background: #f0f0f0; }

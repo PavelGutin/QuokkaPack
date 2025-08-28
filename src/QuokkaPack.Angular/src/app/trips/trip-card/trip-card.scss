@@ -1,54 +1,63 @@
+:host { display: block; padding: 1.25rem; }
+
+/* Clickable card */
 .card {
-  border: 1px solid #e5e5e5;
+  border: 1px solid #e2e2e2;
   border-radius: .75rem;
-  padding: .85rem .9rem;
-  background: white;
-  box-shadow: 0 1px 2px rgba(0,0,0,.04);
-  display: flex;
-  flex-direction: column;
-  gap: .6rem;
+  padding: 1rem;
+  background: #fff;
+  cursor: pointer;
+  transition: background-color .2s ease, box-shadow .2s ease, border-color .2s ease, transform .15s ease;
+  outline: none;
 }
 
+.card:hover {
+  background: #eef5ff;              /* stronger light blue tint */
+  border-color: #aac6ff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, .12);
+  transform: translateY(-2px);      /* subtle lift on hover */
+}
+
+.card:focus-visible {
+  background: #e0ecff;              /* slightly stronger for keyboard users */
+  border-color: #79a6ff;
+  box-shadow: 0 0 0 3px rgba(121,166,255,.35);
+}
+
+/* Header layout */
 .card-header {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
   gap: .5rem;
+  flex-wrap: wrap;
+  margin: 0;
 }
 
 .dest {
-  font-weight: 600;
-  font-size: 1.05rem;
   margin: 0;
+  font-size: 1.25rem;
+  line-height: 1.2;
+  font-weight: 600;
 }
 
 .dates {
-  font-size: .925rem;
-  color: #444;
   margin: 0;
-}
-
-.meta {
-  font-size: .85rem;
   color: #666;
-  margin: 0;
+  font-size: .95rem;
 }
 
-.card-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: .5rem;
-  margin-top: .25rem;
+/* Optional utility styles you already had; safe to keep */
+.page-header {
+  display: flex; gap: .75rem; align-items: center; justify-content: space-between; flex-wrap: wrap; margin-bottom: 1rem;
 }
+.title { font-size: 1.75rem; font-weight: 600; margin: 0; }
+.actions { display: flex; gap: .5rem; }
 
-button {
-  appearance: none;
-  border: 1px solid #ccc;
-  background: #f8f8f8;
-  padding: .45rem .75rem;
-  border-radius: .5rem;
-  cursor: pointer;
-  font: inherit;
-  line-height: 1.2;
+.loading { color: #444; font-style: italic; margin: .25rem 0 .5rem; }
+.error { color: #b00020; margin: .5rem 0 0; }
+.subtle { color: #666; }
+
+.empty {
+  border: 1px dashed #ccc; border-radius: .75rem; padding: 1rem; text-align: center; color: #666; background: #fafafa;
 }
-button:hover { background: #f0f0f0; }
