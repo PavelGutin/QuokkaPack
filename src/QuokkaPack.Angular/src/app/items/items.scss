@@ -38,7 +38,7 @@
   justify-content: space-between;
   gap: .5rem;
   padding: .6rem .75rem;
-  background: #f3f4f6; /* light header like Razor */
+  background: #f3f4f6;
   border-bottom: 1px solid #e5e7eb;
 
   h3 {
@@ -51,7 +51,7 @@
 
 .card-body {
   padding: .8rem;
-  flex: 1 1 auto; /* makes all cards equal height in a row */
+  flex: 1 1 auto;
 }
 
 /* Header tones for add cards */
@@ -88,6 +88,33 @@
 .grow { min-width: 0; } /* allow inputs to shrink gracefully */
 .inline { display: inline-flex; align-items: center; gap: .4rem; }
 
+/* Checkbox utility */
+.checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  white-space: nowrap;
+}
+.checkbox input[type="checkbox"] { margin: 0; }
+
+/* ✅ Add Category: switch just this row to flex to avoid overlap */
+.add-category .form-row {
+  display: flex;               /* override grid */
+  align-items: center;         /* vertically center all controls */
+  gap: .6rem;
+}
+.add-category .form-row .grow {
+  flex: 1 1 auto;              /* input expands */
+  min-width: 0;
+}
+.add-category .form-row label.checkbox {
+  flex: 0 0 auto;              /* don’t stretch */
+}
+.add-category .form-row .btn {
+  flex: 0 0 auto;
+}
+
+/* Inputs */
 input[type="text"], select {
   width: 100%;
   padding: .5rem .6rem;
@@ -144,8 +171,12 @@ input[type="text"]:focus, select:focus { border-color: #9ca3af; }
 .muted { color:#6b7280; }
 .fst-italic { font-style: italic; }
 
-/* Responsive: single column on narrow screens */
+/* Responsive */
 @media (max-width: 900px) {
   .grid-2 { grid-template-columns: 1fr; }
   .form-row { grid-template-columns: 1fr 1fr; }
+
+  /* keep Add Category tidy on mobile */
+  .add-category .form-row { flex-wrap: wrap; }
+  .add-category .form-row .btn { margin-left: auto; }
 }

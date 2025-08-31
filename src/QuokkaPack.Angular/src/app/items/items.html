@@ -4,6 +4,7 @@
   <div class="meta">{{ itemCount() }} items</div>
 </section>
 
+<!-- TODO: Fix this mess with a proper stylesheet -->
 <section class="grid-2">
   <!-- Add New Category -->
   <article class="card add add-category">
@@ -11,15 +12,27 @@
       <h3>Add New Category</h3>
     </header>
     <div class="card-body">
-      <form [formGroup]="addCategoryForm" (ngSubmit)="addCategory()" class="form-row">
-        <div class="grow">
-          <input type="text" formControlName="name" placeholder="Category Name" />
-        </div>
-        <label class="inline">
-          <input type="checkbox" formControlName="isDefault" />
-          <span>Default</span>
+      <form [formGroup]="addCategoryForm" (ngSubmit)="addCategory()"
+        style="display:flex;flex-wrap:nowrap;align-items:center;gap:0.5rem;margin:0;padding:0;">
+
+        <input type="text" formControlName="name" placeholder="Category Name"
+          style="flex:1 1 auto;min-width:0;box-sizing:border-box;padding:0.5rem 0.6rem;border:1px solid #ccc;border-radius:0.5rem;margin:0;" />
+
+        <label style="display:inline-flex;align-items:center;gap:0.35rem;flex:0 0 auto;margin:0;">
+          <input type="checkbox" formControlName="isDefault" style="margin:0;flex:0 0 auto;" />
+          <span style="white-space:nowrap;">Default</span>
         </label>
-        <button type="submit" class="btn solid" [disabled]="addCategoryForm.invalid">Add Category</button>
+
+        <button type="submit" [disabled]="addCategoryForm.invalid" [attr.aria-disabled]="addCategoryForm.invalid"
+          [style.opacity]="addCategoryForm.invalid ? '0.5' : '1'"
+          [style.filter]="addCategoryForm.invalid ? 'grayscale(20%)' : 'none'"
+          [style.pointer-events]="addCategoryForm.invalid ? 'none' : 'auto'"
+          [style.cursor]="addCategoryForm.invalid ? 'not-allowed' : 'pointer'"
+          [style.background-color]="addCategoryForm.invalid ? '#9acaa9' : '#1f8f4a'"
+          [style.border-color]="addCategoryForm.invalid ? '#8ab999' : '#1f8f4a'"
+          style="flex:0 0 auto;padding:0.45rem 0.75rem;border-radius:0.5rem;border:1px solid #1f8f4a;background:#1f8f4a;color:#fff;margin:0;white-space:nowrap;">
+          Add Category
+        </button>
       </form>
     </div>
   </article>
@@ -29,54 +42,68 @@
     <header class="card-header tone-blue">
       <h3>Add New Item</h3>
     </header>
-    <div class="card-body">
-      <form [formGroup]="addItemForm" (ngSubmit)="addItem()" class="form-row">
-        <div class="grow">
-          <input type="text" formControlName="name" placeholder="Item Name" />
+<div class="card-body">
+  <form [formGroup]="addItemForm"
+        (ngSubmit)="addItem()"
+        style="display:flex;flex-wrap:nowrap;align-items:center;gap:0.5rem;margin:0;padding:0;">
 
+    <input type="text"
+           formControlName="name"
+           placeholder="Item Name"
+           style="flex:1 1 auto;min-width:0;box-sizing:border-box;padding:0.5rem 0.6rem;border:1px solid #ccc;border-radius:0.5rem;margin:0;" />
 
+    <select formControlName="categoryId"
+            style="flex:1 1 auto;min-width:0;box-sizing:border-box;padding:0.5rem 0.6rem;border:1px solid #ccc;border-radius:0.5rem;margin:0;">
+      <option [ngValue]="null" disabled>-- Select Category --</option>
+      @for (c of categories(); track c.id) {
+      <option [ngValue]="c.id">{{ c.name }}</option>
+      }
+    </select>
 
-          
-        </div>
-        <div class="grow">
-          <select formControlName="categoryId">
-            <option [ngValue]="null" disabled>-- Select Category --</option>
-            @for (c of categories(); track c.id) {
-              <option [ngValue]="c.id">{{ c.name }}</option>
-            }
-          </select>
-        </div>
-        <button type="submit" class="btn solid" [disabled]="addItemForm.invalid">Add Item</button>
-      </form>
-    </div>
+    <button type="submit"
+            [disabled]="addItemForm.invalid"
+            [attr.aria-disabled]="addItemForm.invalid"
+            [style.opacity]="addItemForm.invalid ? '0.5' : '1'"
+            [style.filter]="addItemForm.invalid ? 'grayscale(20%)' : 'none'"
+            [style.pointer-events]="addItemForm.invalid ? 'none' : 'auto'"
+            [style.cursor]="addItemForm.invalid ? 'not-allowed' : 'pointer'"
+            [style.background-color]="addItemForm.invalid ? '#9bbbe6' : '#1e63d6'"
+            [style.border-color]="addItemForm.invalid ? '#8aaad5' : '#1e63d6'"
+            style="flex:0 0 auto;padding:0.45rem 0.75rem;border-radius:0.5rem;border:1px solid #1e63d6;background:#1e63d6;color:#fff;margin:0;white-space:nowrap;">
+      Add Item
+    </button>
+  </form>
+</div>
+
   </article>
 
   @for (g of grouped(); track g.key) {
-    <article class="card">
-      <header class="card-header">
-        <div class="title-with-badge">
-          <span class="title">{{ g.category.name }}</span>
-          <span class="badge" [class.badge-success]="g.category.isDefault" [class.badge-secondary]="!g.category.isDefault">
-            {{ g.category.isDefault ? 'Default' : 'Optional' }}
-          </span>
-        </div>
-        <button class="btn outline danger sm" title="Delete Category" (click)="removeCategory(g.category.id)">🗑</button>
-      </header>
-
-      <div class="card-body">
-        @if (g.items.length === 0) {
-          <p class="muted fst-italic">No items in this category.</p>
-        } @else {
-          <ul class="item-grid" role="list">
-            @for (it of g.items; track it.id) {
-              <li class="item-row">
-                <button class="btn ghost sm danger" title="Delete Item" (click)="removeItem(it.id!)">🗑</button>
-                <span class="label">{{ it.name }}</span>
-              </li>
-            }
-          </ul>
-        }
+  <article class="card">
+    <header class="card-header">
+      <div class="title-with-badge">
+        <span class="title">{{ g.category.name }}</span>
+        <span class="badge" [class.badge-success]="g.category.isDefault"
+          [class.badge-secondary]="!g.category.isDefault">
+          {{ g.category.isDefault ? 'Default' : 'Optional' }}
+        </span>
       </div>
-    </article>
+      <button class="btn outline danger sm" title="Delete Category" (click)="removeCategory(g.category.id)">🗑</button>
+    </header>
+
+    <div class="card-body">
+      @if (g.items.length === 0) {
+      <p class="muted fst-italic">No items in this category.</p>
+      } @else {
+      <ul class="item-grid" role="list">
+        @for (it of g.items; track it.id) {
+        <li class="item-row">
+          <button class="btn ghost sm danger" title="Delete Item" (click)="removeItem(it.id!)">🗑</button>
+          <span class="label">{{ it.name }}</span>
+        </li>
+        }
+      </ul>
+      }
+    </div>
+  </article>
   }
 </section>
