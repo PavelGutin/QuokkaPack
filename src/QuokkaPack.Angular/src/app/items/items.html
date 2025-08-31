@@ -1,0 +1,82 @@
+<!-- src/app/items/items.html -->
+<section class="mast">
+  <h2>Master List</h2>
+  <div class="meta">{{ itemCount() }} items</div>
+</section>
+
+<section class="grid-2">
+  <!-- Add New Category -->
+  <article class="card add add-category">
+    <header class="card-header tone-green">
+      <h3>Add New Category</h3>
+    </header>
+    <div class="card-body">
+      <form [formGroup]="addCategoryForm" (ngSubmit)="addCategory()" class="form-row">
+        <div class="grow">
+          <input type="text" formControlName="name" placeholder="Category Name" />
+        </div>
+        <label class="inline">
+          <input type="checkbox" formControlName="isDefault" />
+          <span>Default</span>
+        </label>
+        <button type="submit" class="btn solid" [disabled]="addCategoryForm.invalid">Add Category</button>
+      </form>
+    </div>
+  </article>
+
+  <!-- Add New Item -->
+  <article class="card add add-item">
+    <header class="card-header tone-blue">
+      <h3>Add New Item</h3>
+    </header>
+    <div class="card-body">
+      <form [formGroup]="addItemForm" (ngSubmit)="addItem()" class="form-row">
+        <div class="grow">
+          <input type="text" formControlName="name" placeholder="Item Name" />
+
+
+
+          
+        </div>
+        <div class="grow">
+          <select formControlName="categoryId">
+            <option [ngValue]="null" disabled>-- Select Category --</option>
+            @for (c of categories(); track c.id) {
+              <option [ngValue]="c.id">{{ c.name }}</option>
+            }
+          </select>
+        </div>
+        <button type="submit" class="btn solid" [disabled]="addItemForm.invalid">Add Item</button>
+      </form>
+    </div>
+  </article>
+
+  @for (g of grouped(); track g.key) {
+    <article class="card">
+      <header class="card-header">
+        <div class="title-with-badge">
+          <span class="title">{{ g.category.name }}</span>
+          <span class="badge" [class.badge-success]="g.category.isDefault" [class.badge-secondary]="!g.category.isDefault">
+            {{ g.category.isDefault ? 'Default' : 'Optional' }}
+          </span>
+        </div>
+        <button class="btn outline danger sm" title="Delete Category" (click)="removeCategory(g.category.id)">🗑</button>
+      </header>
+
+      <div class="card-body">
+        @if (g.items.length === 0) {
+          <p class="muted fst-italic">No items in this category.</p>
+        } @else {
+          <ul class="item-grid" role="list">
+            @for (it of g.items; track it.id) {
+              <li class="item-row">
+                <button class="btn ghost sm danger" title="Delete Item" (click)="removeItem(it.id!)">🗑</button>
+                <span class="label">{{ it.name }}</span>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+    </article>
+  }
+</section>

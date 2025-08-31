@@ -57,6 +57,7 @@ namespace QuokkaPack.API.Controllers
             item.MasterUserId = user.Id;
             _context.Items.Add(item);
             await _context.SaveChangesAsync();
+            await _context.Entry(item).Reference(i => i.Category).LoadAsync();
 
             try
             {

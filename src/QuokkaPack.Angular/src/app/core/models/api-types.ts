@@ -13,6 +13,13 @@ export type TripEditDto             = components['schemas']['TripEditDto']
 export type TripItemCreateDto       = components['schemas']['TripItemCreateDto']
 export type TripItemEditDto         = components['schemas']['TripItemEditDto']
 export type TripCreateDto           = components['schemas']['TripCreateDto']
+export type ItemCreateDto           = components['schemas']['ItemCreateDto']
+export type ItemEditDto             = components['schemas']['ItemEditDto']
+export type CategoryCreateDto       = components['schemas']['CategoryCreateDto']
+export type CategoryEditDto         = components['schemas']['CategoryEditDto']
+
+
+
 
 
 /* Example: UI-only view model extensions can live here too.
