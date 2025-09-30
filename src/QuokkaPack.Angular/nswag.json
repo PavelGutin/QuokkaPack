@@ -1,0 +1,21 @@
+{
+  "documentGenerator": {
+    "aspNetCoreToOpenApi": {
+      "project": "QuokkaPack.API.csproj",
+      "noBuild": false,
+      "aspNetCoreEnvironment": "Development"
+    }
+  },
+  "codeGenerators": {
+    "openApiToTypeScriptClient": {
+      "template": "Angular",
+      "httpClass": "HttpClient",
+      "injectionTokenType": "InjectionToken",
+      "generateClientClasses": true,
+      "generateClientInterfaces": true,
+      "generateDtoTypes": true,
+      "useSingletonProvider": false,
+      "output": "../QuokkaPack.Angular/src/app/api-client.ts"
+    }
+  }
+}
