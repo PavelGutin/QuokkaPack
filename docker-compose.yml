@@ -27,15 +27,56 @@ services:
     depends_on:
       - sqlserver
 
+  quokkapack.blazor:
+    build:
+      context: .
+      dockerfile: src/QuokkaPack.Blazor/Dockerfile
+    ports:
+      - "7300:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - JwtSettings__Secret=${JWT_SECRET}
+      - ApiSettings__BaseUrl=http://quokkapack.api:8080
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=QuokkaPackDb;User Id=sa;Password=YourStrongPassword123!;TrustServerCertificate=True;
+    depends_on:
+      - sqlserver
+      - quokkapack.api
+
+  quokkapack.angular:
+    build:
+      context: .
+      dockerfile: src/QuokkaPack.Angular/Dockerfile
+    ports:
+      - "7400:80"
+    environment:
+      - NODE_ENV=development
+      - API_BASE_URL=http://quokkapack.api:8080
+    depends_on:
+      - quokkapack.api
+
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
     environment:
       SA_PASSWORD: "YourStrongPassword123!"
       ACCEPT_EULA: "Y"
+      MSSQL_PID: "Developer"
+      MSSQL_COLLATION: "SQL_Latin1_General_CP1_CI_AS"
     ports:
       - "1433:1433"
     volumes:
-      - sql_data:/var/opt/mssql
+      - sql_data:/var/opt/mssql/data
+      - sql_log:/var/opt/mssql/log
+      - sql_backup:/var/opt/mssql/backup
+      - ./scripts/init-dev-db.sql:/docker-entrypoint-initdb.d/init-dev-db.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P YourStrongPassword123! -Q 'SELECT 1' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+    restart: unless-stopped
 
 volumes:
   sql_data:
+  sql_log:
+  sql_backup:

@@ -24,13 +24,15 @@ builder.Services.AddHttpClient("QuokkaApi", client =>
 });
 
 
-builder.Host.UseSerilog((ctx, lc) => lc
-    .ReadFrom.Configuration(ctx.Configuration)
-);
-
+// Configure container-friendly logging
+builder.Host.UseContainerFriendlyLogging("QuokkaPack.Razor");
 
 builder.Services.AddJwtAuthentication(builder.Configuration);
 
+// Add comprehensive health checks and monitoring
+builder.Services.AddWebApplicationHealthChecks(builder.Configuration, "QuokkaPack.Razor");
+builder.Services.AddContainerMonitoring();
+builder.Services.AddHealthCheckLogging();
 
 var app = builder.Build();
 
@@ -59,5 +61,8 @@ app.MapStaticAssets();
 app.UseStaticFiles();
 app.MapRazorPages()
    .WithStaticAssets();
+
+// Map comprehensive health check endpoints
+app.MapDetailedHealthChecks();
 
 app.Run();

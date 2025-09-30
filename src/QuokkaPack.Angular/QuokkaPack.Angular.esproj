@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.VisualStudio.JavaScript.Sdk/1.0.784122">
+  <PropertyGroup>
+    <StartupCommand>npm start</StartupCommand>
+    <JavaScriptTestRoot>src\</JavaScriptTestRoot>
+    <JavaScriptTestFramework>Jasmine</JavaScriptTestFramework>
+    <ShouldRunNpmInstall>true</ShouldRunNpmInstall>
+    <BuildCommand>npm run build</BuildCommand>
+    <CleanCommand>npm run clean</CleanCommand>
+    <TargetFramework>net9.0</TargetFramework>
+  </PropertyGroup>
+
+  <!-- TypeScript type generation target -->
+  <Target Name="GenerateTypeScriptTypes" BeforeTargets="Build">
+    <Message Text="Generating TypeScript types from Data project models..." Importance="high" />
+    <Exec Command="dotnet run --project $(MSBuildThisFileDirectory)../QuokkaPack.TypeGen/QuokkaPack.TypeGen.csproj -- --output $(MSBuildProjectDirectory)/src/app/api/types.gen.ts" 
+          ContinueOnError="false" />
+  </Target>
+
+  <!-- Ensure npm install runs before type generation -->
+  <Target Name="EnsureNodeModules" BeforeTargets="GenerateTypeScriptTypes">
+    <Exec Command="npm install" WorkingDirectory="$(MSBuildProjectDirectory)" Condition="!Exists('node_modules')" />
+  </Target>
+</Project>

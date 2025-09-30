@@ -19,16 +19,17 @@ builder.Services.AddCors(options =>
             .WithOrigins(
                 "https://localhost:7045",         // Blazor dev server (bare metal)
                 "http://localhost:7200",          // Blazor in Docker (based on your docker-compose)
-                "http://quokkapack.blazor")       // Internal Docker hostname (if you're using it)
+                "http://quokkapack.blazor",       // Internal Docker hostname (if you're using it)
+                "http://localhost:80",            // Self-host scenario
+                "http://localhost")               // Self-host scenario (alternative)
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials(); // If you ever use cookies/session auth
     });
 });
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? 
-    throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
+// Configure database provider based on connection string and environment
+builder.Services.AddQuokkaPackDatabase(builder.Configuration);
 
 builder.Services.AddIdentity<IdentityUser, IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>()
@@ -54,13 +55,19 @@ builder.Services.AddControllers().AddJsonOptions(o =>
 
 
 
-builder.Host.UseSerilog((ctx, lc) => lc
-    .ReadFrom.Configuration(ctx.Configuration)
-);
+// Configure container-friendly logging
+builder.Host.UseContainerFriendlyLogging("QuokkaPack.API");
 
 builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddScoped<IUserResolver, UserResolver>();
 
+// Add database initialization with retry logic
+builder.Services.AddDatabaseInitialization();
+
+// Add comprehensive health checks and monitoring
+builder.Services.AddApiHealthChecks(builder.Configuration);
+builder.Services.AddContainerMonitoring();
+builder.Services.AddHealthCheckLogging();
 
 var app = builder.Build();
 
@@ -86,6 +93,9 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.MapControllers();
+
+// Map comprehensive health check endpoints
+app.MapDetailedHealthChecks();
 
 //Console.WriteLine($"QuokkaPack.API running in environment: {app.Environment.EnvironmentName}");
 

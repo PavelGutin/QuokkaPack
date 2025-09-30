@@ -1,0 +1,202 @@
+# Self-host all-in-one Dockerfile for QuokkaPack Razor frontend
+# Combines API, Razor frontend, and SQLite database in a single container
+# Designed for easy self-hosting with minimal configuration
+
+# Build stage - Build both API and Razor projects
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+ARG BUILD_CONFIGURATION=Release
+WORKDIR /src
+
+# Copy project files for dependency resolution (layer caching optimization)
+COPY ["src/QuokkaPack.API/QuokkaPack.API.csproj", "src/QuokkaPack.API/"]
+COPY ["src/QuokkaPack.Razor/QuokkaPack.Razor.csproj", "src/QuokkaPack.Razor/"]
+COPY ["src/QuokkaPack.Data/QuokkaPack.Data.csproj", "src/QuokkaPack.Data/"]
+COPY ["src/QuokkaPack.Shared/QuokkaPack.Shared.csproj", "src/QuokkaPack.Shared/"]
+COPY ["src/QuokkaPack.ServerCommon/QuokkaPack.ServerCommon.csproj", "src/QuokkaPack.ServerCommon/"]
+
+# Restore dependencies for both projects
+RUN dotnet restore "src/QuokkaPack.API/QuokkaPack.API.csproj"
+RUN dotnet restore "src/QuokkaPack.Razor/QuokkaPack.Razor.csproj"
+
+# Copy source code
+COPY src/ src/
+
+# Build API project
+WORKDIR "/src/src/QuokkaPack.API"
+RUN dotnet build "QuokkaPack.API.csproj" -c $BUILD_CONFIGURATION -o /app/build/api --no-restore
+
+# Build Razor project
+WORKDIR "/src/src/QuokkaPack.Razor"
+RUN dotnet build "QuokkaPack.Razor.csproj" -c $BUILD_CONFIGURATION -o /app/build/razor --no-restore
+
+# Publish API project
+WORKDIR "/src/src/QuokkaPack.API"
+RUN dotnet publish "QuokkaPack.API.csproj" -c $BUILD_CONFIGURATION -o /app/publish/api --no-restore --no-build /p:UseAppHost=false
+
+# Publish Razor project
+WORKDIR "/src/src/QuokkaPack.Razor"
+RUN dotnet publish "QuokkaPack.Razor.csproj" -c $BUILD_CONFIGURATION -o /app/publish/razor --no-restore --no-build /p:UseAppHost=false
+
+# Runtime stage - nginx + .NET runtime
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
+WORKDIR /app
+
+# Install nginx, curl, SQLite, and openssl for reverse proxy, health checks, database, and JWT secrets
+RUN apt-get update && apt-get install -y \
+    nginx \
+    curl \
+    sqlite3 \
+    supervisor \
+    openssl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create application directories
+RUN mkdir -p /app/api /app/razor /app/data /app/logs /var/log/supervisor
+
+# Copy published applications
+COPY --from=build /app/publish/api /app/api/
+COPY --from=build /app/publish/razor /app/razor/
+
+# Create nginx configuration for reverse proxy
+RUN cat > /etc/nginx/sites-available/default << 'EOF'
+server {
+    listen 80;
+    server_name localhost;
+    
+    # Serve Razor frontend on root
+    location / {
+        proxy_pass http://localhost:5000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection keep-alive;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+        proxy_buffering off;
+        proxy_read_timeout 100s;
+    }
+    
+    # Route API requests to API service
+    location /api/ {
+        proxy_pass http://localhost:5001/;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection keep-alive;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+        proxy_buffering off;
+        proxy_read_timeout 100s;
+    }
+    
+    # Health check endpoint
+    location /health {
+        proxy_pass http://localhost:5000/health;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        access_log off;
+    }
+}
+EOF
+
+# Create supervisor configuration to manage multiple processes
+RUN cat > /etc/supervisor/conf.d/supervisord.conf << 'EOF'
+[supervisord]
+nodaemon=true
+user=root
+logfile=/var/log/supervisor/supervisord.log
+pidfile=/var/run/supervisord.pid
+
+[program:nginx]
+command=nginx -g "daemon off;"
+autostart=true
+autorestart=true
+stderr_logfile=/var/log/supervisor/nginx.err.log
+stdout_logfile=/var/log/supervisor/nginx.out.log
+
+[program:api]
+command=dotnet QuokkaPack.API.dll
+directory=/app/api
+autostart=true
+autorestart=true
+stderr_logfile=/var/log/supervisor/api.err.log
+stdout_logfile=/var/log/supervisor/api.out.log
+environment=ASPNETCORE_ENVIRONMENT=Production,ASPNETCORE_URLS=http://+:5001,ConnectionStrings__DefaultConnection="Data Source=/app/data/quokkapack.db",JwtSettings__Secret="%(ENV_JWT_SECRET)s",SelfHost__DataPath="/app/data"
+
+[program:razor]
+command=dotnet QuokkaPack.Razor.dll
+directory=/app/razor
+autostart=true
+autorestart=true
+stderr_logfile=/var/log/supervisor/razor.err.log
+stdout_logfile=/var/log/supervisor/razor.out.log
+environment=ASPNETCORE_ENVIRONMENT=Production,ASPNETCORE_URLS=http://+:5000,DownstreamApi__BaseUrl="http://localhost:5001",JwtSettings__Secret="%(ENV_JWT_SECRET)s"
+EOF
+
+# Create startup script for database initialization
+RUN cat > /app/startup.sh << 'EOF'
+#!/bin/bash
+set -e
+
+echo "Starting QuokkaPack self-host container..."
+
+# Set default JWT secret if not provided
+if [ -z "$JWT_SECRET" ]; then
+    export JWT_SECRET=$(openssl rand -base64 32)
+    echo "Generated JWT secret for this session"
+fi
+
+# Export JWT_SECRET for supervisor environment substitution
+export JWT_SECRET
+
+# Ensure data directory exists with proper permissions
+mkdir -p /app/data
+chmod 755 /app/data
+
+# Initialize SQLite database if it doesn't exist
+if [ ! -f "/app/data/quokkapack.db" ]; then
+    echo "Initializing SQLite database..."
+    
+    # Create empty database file
+    touch /app/data/quokkapack.db
+    chmod 644 /app/data/quokkapack.db
+    
+    echo "Database file created at /app/data/quokkapack.db"
+fi
+
+echo "Database initialization complete"
+
+# Update supervisor configuration with actual JWT_SECRET
+sed -i "s/%(ENV_JWT_SECRET)s/$JWT_SECRET/g" /etc/supervisor/conf.d/supervisord.conf
+
+# Start supervisor to manage all processes
+exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
+EOF
+
+# Make startup script executable
+RUN chmod +x /app/startup.sh
+
+# Create non-root user for security (but supervisor needs root for nginx)
+RUN groupadd -r appuser && useradd -r -g appuser appuser
+RUN chown -R appuser:appuser /app/data /app/logs
+
+# Expose port 80 for the combined application
+EXPOSE 80
+
+# Health check for the combined application
+HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=3 \
+    CMD curl -f http://localhost:80/health || exit 1
+
+# Volume mount point for data persistence
+VOLUME ["/app/data"]
+
+# Environment variables with defaults
+ENV ASPNETCORE_ENVIRONMENT=Production
+ENV JWT_SECRET=""
+ENV SELFHOST_DATA_PATH="/app/data"
+
+ENTRYPOINT ["/app/startup.sh"]

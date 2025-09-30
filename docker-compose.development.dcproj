@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" Sdk="Microsoft.Docker.Sdk">
+  <PropertyGroup Label="Globals">
+    <ProjectVersion>2.1</ProjectVersion>
+    <DockerTargetOS>Linux</DockerTargetOS>
+    <DockerPublishLocally>False</DockerPublishLocally>
+    <ProjectGuid>11111111-2222-3333-4444-555555555555</ProjectGuid>
+    <DockerLaunchAction>LaunchBrowser</DockerLaunchAction>
+    <DockerServiceUrl>http://localhost:5001</DockerServiceUrl>
+    <DockerServiceName>quokkapack.razor</DockerServiceName>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <None Include="docker-compose.dev.yml" />
+    <None Include="docker-compose.override.yml" />
+  </ItemGroup>
+  
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DockerComposeFile>docker-compose.dev.yml</DockerComposeFile>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DockerComposeFile>docker-compose.dev.yml</DockerComposeFile>
+  </PropertyGroup>
+</Project>

@@ -1,0 +1,43 @@
+{
+  "profiles": {
+    "Self-Host Razor": {
+      "commandName": "Docker",
+      "dockerfileFile": "Dockerfile.selfhost.razor",
+      "launchBrowser": true,
+      "launchUrl": "http://localhost:8080",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Production",
+        "SelfHost__DataPath": "/app/data"
+      },
+      "publishAllPorts": false,
+      "useSSL": false,
+      "dockerRunArgs": "-p 8080:80 -v quokkapack-razor-data:/app/data"
+    },
+    "Self-Host Blazor": {
+      "commandName": "Docker",
+      "dockerfileFile": "Dockerfile.selfhost.blazor",
+      "launchBrowser": true,
+      "launchUrl": "http://localhost:8081",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Production",
+        "SelfHost__DataPath": "/app/data"
+      },
+      "publishAllPorts": false,
+      "useSSL": false,
+      "dockerRunArgs": "-p 8081:80 -v quokkapack-blazor-data:/app/data"
+    },
+    "Self-Host Angular": {
+      "commandName": "Docker",
+      "dockerfileFile": "Dockerfile.selfhost.angular",
+      "launchBrowser": true,
+      "launchUrl": "http://localhost:8082",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Production",
+        "SelfHost__DataPath": "/app/data"
+      },
+      "publishAllPorts": false,
+      "useSSL": false,
+      "dockerRunArgs": "-p 8082:80 -v quokkapack-angular-data:/app/data"
+    }
+  }
+}

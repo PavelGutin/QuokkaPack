@@ -1,0 +1,38 @@
+# Docker Compose configuration for testing self-host images
+# This file is used to test the all-in-one self-host containers
+
+services:
+  # Razor self-host test
+  quokkapack-selfhost-razor:
+    build:
+      context: .
+      dockerfile: Dockerfile.selfhost.razor
+    ports:
+      - "8080:80"
+    environment:
+      - JWT_SECRET=test-secret-for-development-only-do-not-use-in-production
+      - ASPNETCORE_ENVIRONMENT=Production
+      - SELFHOST_DATA_PATH=/app/data
+    volumes:
+      - ./test-data/razor:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+    restart: unless-stopped
+    container_name: quokkapack-selfhost-razor-test
+
+volumes:
+  # Test data volumes
+  razor_test_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./test-data/razor
+
+networks:
+  default:
+    name: quokkapack-selfhost-test

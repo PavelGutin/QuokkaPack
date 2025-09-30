@@ -370,3 +370,10 @@ FodyWeavers.xsd
 /src/QuokkaPack.API/quokkapack.db-shm
 /src/QuokkaPack.API/quokkapack.db-wal
 /.env
+
+# Docker development data
+/data/dev/sql/*
+!/data/dev/sql/.gitkeep
+
+# Development environment files
+.env.dev.local

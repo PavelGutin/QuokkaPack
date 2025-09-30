@@ -4,4 +4,11 @@
     <!-- Optional: -->
     <!-- <WarningsAsErrors>nullable</WarningsAsErrors> -->
   </PropertyGroup>
+
+  <!-- JavaScript SDK support for Angular project -->
+  <PropertyGroup Condition="'$(MSBuildProjectExtension)' == '.esproj'">
+    <DefaultItemExcludes>$(DefaultItemExcludes);node_modules\**</DefaultItemExcludes>
+    <PublishUrl>publish\</PublishUrl>
+    <WebPublishMethod>FileSystem</WebPublishMethod>
+  </PropertyGroup>
 </Project>

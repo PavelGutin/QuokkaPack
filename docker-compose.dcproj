@@ -8,6 +8,17 @@
     <DockerLaunchAction>LaunchBrowser</DockerLaunchAction>
     <DockerServiceUrl>{Scheme}://localhost:{ServicePort}</DockerServiceUrl>
     <DockerServiceName>quokkapack.razor</DockerServiceName>
+    <DockerComposeBaseFilePath>docker-compose</DockerComposeBaseFilePath>
+    <DockerComposeProjectPath>.</DockerComposeProjectPath>
+    <EnableLaunchSettings>true</EnableLaunchSettings>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DockerComposeFile>docker-compose.simple.yml</DockerComposeFile>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DockerComposeFile>docker-compose.simple.yml</DockerComposeFile>
   </PropertyGroup>
   <ItemGroup>
     <None Include=".env" />
@@ -15,6 +26,18 @@
       <DependentUpon>docker-compose.yml</DependentUpon>
     </None>
     <None Include="docker-compose.yml" />
+    <None Include="docker-compose.simple.yml" />
+    <None Include="docker-compose.dev.yml" />
+    <None Include="docker-compose.prod.yml" />
+    <None Include="docker-compose.razor-only.yml" />
+    <None Include="docker-compose.blazor-only.yml" />
+    <None Include="docker-compose.angular-only.yml" />
+    <None Include="docker-compose.vs.debug.yml" />
+    <None Include="docker-compose.vs.release.yml" />
+    <None Include="Dockerfile.selfhost.razor" />
+    <None Include="Dockerfile.selfhost.blazor" />
+    <None Include="Dockerfile.selfhost.angular" />
     <None Include=".dockerignore" />
+    <None Include="Properties\DockerCompose.launchSettings.json" />
   </ItemGroup>
 </Project>

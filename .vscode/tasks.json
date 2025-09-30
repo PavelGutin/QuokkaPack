@@ -1,0 +1,89 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build All Docker Images",
+            "type": "shell",
+            "command": "pwsh",
+            "args": ["-File", "./scripts/build-all-images.ps1"],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Start Development Environment",
+            "type": "shell", 
+            "command": "pwsh",
+            "args": ["-File", "./scripts/start-dev.ps1"],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Start Production Environment",
+            "type": "shell",
+            "command": "pwsh", 
+            "args": ["-File", "./scripts/start-prod.ps1"],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Stop All Containers",
+            "type": "shell",
+            "command": "pwsh",
+            "args": ["-File", "./scripts/cleanup-containers.ps1"],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always", 
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Run Container Tests",
+            "type": "shell",
+            "command": "pwsh",
+            "args": ["-File", "./scripts/test-containers.ps1"],
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Validate All Systems",
+            "type": "shell",
+            "command": "pwsh",
+            "args": ["-File", "./scripts/validate-all.ps1"],
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        }
+    ]
+}

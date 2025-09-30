@@ -1,0 +1,63 @@
+{
+  "profiles": {
+    "All Services (Development)": {
+      "commandName": "DockerCompose",
+      "composeProfile": {
+        "composePath": "docker-compose.dev.yml"
+      },
+      "serviceActions": {
+        "quokkapack.api": "StartDebugging",
+        "quokkapack.razor": "StartDebugging",
+        "quokkapack.blazor": "StartDebugging",
+        "quokkapack.angular": "StartWithoutDebugging",
+        "sqlserver": "StartWithoutDebugging"
+      }
+    },
+    "All Services (Production)": {
+      "commandName": "DockerCompose",
+      "composeProfile": {
+        "composePath": "docker-compose.prod.yml"
+      },
+      "serviceActions": {
+        "quokkapack.api": "StartWithoutDebugging",
+        "quokkapack.razor": "StartWithoutDebugging",
+        "quokkapack.blazor": "StartWithoutDebugging",
+        "quokkapack.angular": "StartWithoutDebugging",
+        "sqlserver": "StartWithoutDebugging"
+      }
+    },
+    "API + Razor Only": {
+      "commandName": "DockerCompose",
+      "composeProfile": {
+        "composePath": "docker-compose.yml"
+      },
+      "serviceActions": {
+        "quokkapack.api": "StartDebugging",
+        "quokkapack.razor": "StartDebugging",
+        "sqlserver": "StartWithoutDebugging"
+      }
+    },
+    "API + Blazor Only": {
+      "commandName": "DockerCompose",
+      "composeProfile": {
+        "composePath": "docker-compose.yml"
+      },
+      "serviceActions": {
+        "quokkapack.api": "StartDebugging",
+        "quokkapack.blazor": "StartDebugging",
+        "sqlserver": "StartWithoutDebugging"
+      }
+    },
+    "API + Angular Only": {
+      "commandName": "DockerCompose",
+      "composeProfile": {
+        "composePath": "docker-compose.yml"
+      },
+      "serviceActions": {
+        "quokkapack.api": "StartDebugging",
+        "quokkapack.angular": "StartWithoutDebugging",
+        "sqlserver": "StartWithoutDebugging"
+      }
+    }
+  }
+}

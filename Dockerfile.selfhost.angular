@@ -1,0 +1,293 @@
+# Self-host all-in-one Dockerfile for QuokkaPack Angular frontend
+# Combines API, Angular SPA, and SQLite database in a single container
+# Designed for easy self-hosting with minimal configuration
+
+# Build stage for .NET API
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS api-build
+ARG BUILD_CONFIGURATION=Release
+WORKDIR /src
+
+# Copy project files for dependency resolution (layer caching optimization)
+COPY ["src/QuokkaPack.API/QuokkaPack.API.csproj", "src/QuokkaPack.API/"]
+COPY ["src/QuokkaPack.Data/QuokkaPack.Data.csproj", "src/QuokkaPack.Data/"]
+COPY ["src/QuokkaPack.Shared/QuokkaPack.Shared.csproj", "src/QuokkaPack.Shared/"]
+COPY ["src/QuokkaPack.ServerCommon/QuokkaPack.ServerCommon.csproj", "src/QuokkaPack.ServerCommon/"]
+
+# Restore dependencies for API project
+RUN dotnet restore "src/QuokkaPack.API/QuokkaPack.API.csproj"
+
+# Copy source code
+COPY src/ src/
+
+# Build API project
+WORKDIR "/src/src/QuokkaPack.API"
+RUN dotnet build "QuokkaPack.API.csproj" -c $BUILD_CONFIGURATION -o /app/build/api --no-restore
+
+# Publish API project
+RUN dotnet publish "QuokkaPack.API.csproj" -c $BUILD_CONFIGURATION -o /app/publish/api --no-restore --no-build /p:UseAppHost=false
+
+# Build stage for Angular frontend
+FROM node:18-alpine AS angular-build
+WORKDIR /app
+
+# Copy package files for dependency resolution
+COPY src/QuokkaPack.Angular/package*.json ./
+
+# Install dependencies
+RUN npm ci --only=production --silent
+
+# Copy Angular source code
+COPY src/QuokkaPack.Angular/ ./
+
+# Build Angular application for production
+RUN npm run build
+
+# Runtime stage - nginx + .NET runtime
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
+WORKDIR /app
+
+# Install nginx, curl, SQLite, and openssl for reverse proxy, health checks, database, and JWT secrets
+RUN apt-get update && apt-get install -y \
+    nginx \
+    curl \
+    sqlite3 \
+    supervisor \
+    openssl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create application directories
+RUN mkdir -p /app/api /app/data /app/logs /var/log/supervisor /usr/share/nginx/html
+
+# Copy published API application
+COPY --from=api-build /app/publish/api /app/api/
+
+# Copy built Angular application
+COPY --from=angular-build /app/dist/QuokkaPack.Angular/browser /usr/share/nginx/html/
+
+# Create nginx configuration for Angular SPA and API proxy
+RUN cat > /etc/nginx/nginx.conf << 'EOF'
+events {
+    worker_connections 1024;
+}
+
+http {
+    include       /etc/nginx/mime.types;
+    default_type  application/octet-stream;
+
+    # Logging
+    log_format main '$remote_addr - $remote_user [$time_local] "$request" '
+                    '$status $body_bytes_sent "$http_referer" '
+                    '"$http_user_agent" "$http_x_forwarded_for"';
+
+    access_log /var/log/nginx/access.log main;
+    error_log /var/log/nginx/error.log warn;
+
+    # Performance optimizations
+    sendfile on;
+    tcp_nopush on;
+    tcp_nodelay on;
+    keepalive_timeout 65;
+    types_hash_max_size 2048;
+
+    # Gzip compression
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 1024;
+    gzip_proxied any;
+    gzip_comp_level 6;
+    gzip_types
+        application/atom+xml
+        application/geo+json
+        application/javascript
+        application/x-javascript
+        application/json
+        application/ld+json
+        application/manifest+json
+        application/rdf+xml
+        application/rss+xml
+        application/xhtml+xml
+        application/xml
+        font/eot
+        font/otf
+        font/ttf
+        image/svg+xml
+        text/css
+        text/javascript
+        text/plain
+        text/xml;
+
+    server {
+        listen 80;
+        server_name localhost;
+        root /usr/share/nginx/html;
+        index index.html;
+
+        # Security headers
+        add_header X-Frame-Options "SAMEORIGIN" always;
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header X-XSS-Protection "1; mode=block" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+        add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' ws: wss:;" always;
+
+        # Route API requests to API service
+        location /api/ {
+            proxy_pass http://localhost:5001/;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection keep-alive;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_cache_bypass $http_upgrade;
+            proxy_buffering off;
+            proxy_read_timeout 100s;
+        }
+
+        # Swagger UI proxy (for development/testing)
+        location /swagger/ {
+            proxy_pass http://localhost:5001/swagger/;
+            proxy_http_version 1.1;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        # Angular application serving
+        location / {
+            try_files $uri $uri/ /index.html;
+            
+            # Cache static assets
+            location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
+                expires 1y;
+                add_header Cache-Control "public, immutable";
+                access_log off;
+            }
+        }
+
+        # Angular specific files
+        location ~* \.(js|css)$ {
+            expires 1y;
+            add_header Cache-Control "public, immutable";
+            access_log off;
+        }
+
+        # Service worker (if present)
+        location /service-worker.js {
+            add_header Cache-Control "no-cache";
+            expires 0;
+        }
+
+        # Manifest and other PWA files
+        location ~* \.(webmanifest|manifest\.json)$ {
+            add_header Cache-Control "no-cache";
+            expires 0;
+        }
+
+        # Health check endpoint
+        location /health {
+            proxy_pass http://localhost:5001/health;
+            proxy_http_version 1.1;
+            proxy_set_header Host $host;
+            access_log off;
+        }
+
+        # Error pages
+        error_page 404 /index.html;
+        error_page 500 502 503 504 /50x.html;
+        location = /50x.html {
+            root /usr/share/nginx/html;
+        }
+    }
+}
+EOF
+
+# Create supervisor configuration to manage multiple processes
+RUN cat > /etc/supervisor/conf.d/supervisord.conf << 'EOF'
+[supervisord]
+nodaemon=true
+user=root
+logfile=/var/log/supervisor/supervisord.log
+pidfile=/var/run/supervisord.pid
+
+[program:nginx]
+command=nginx -g "daemon off;"
+autostart=true
+autorestart=true
+stderr_logfile=/var/log/supervisor/nginx.err.log
+stdout_logfile=/var/log/supervisor/nginx.out.log
+
+[program:api]
+command=dotnet QuokkaPack.API.dll
+directory=/app/api
+autostart=true
+autorestart=true
+stderr_logfile=/var/log/supervisor/api.err.log
+stdout_logfile=/var/log/supervisor/api.out.log
+environment=ASPNETCORE_ENVIRONMENT=Production,ASPNETCORE_URLS=http://+:5001,ConnectionStrings__DefaultConnection="Data Source=/app/data/quokkapack.db",JwtSettings__Secret="%(ENV_JWT_SECRET)s",SelfHost__DataPath="/app/data"
+EOF
+
+# Create startup script for database initialization
+RUN cat > /app/startup.sh << 'EOF'
+#!/bin/bash
+set -e
+
+echo "Starting QuokkaPack Angular self-host container..."
+
+# Set default JWT secret if not provided
+if [ -z "$JWT_SECRET" ]; then
+    export JWT_SECRET=$(openssl rand -base64 32)
+    echo "Generated JWT secret for this session"
+fi
+
+# Export JWT_SECRET for supervisor environment substitution
+export JWT_SECRET
+
+# Ensure data directory exists with proper permissions
+mkdir -p /app/data
+chmod 755 /app/data
+
+# Initialize SQLite database if it doesn't exist
+if [ ! -f "/app/data/quokkapack.db" ]; then
+    echo "Initializing SQLite database..."
+    
+    # Create empty database file
+    touch /app/data/quokkapack.db
+    chmod 644 /app/data/quokkapack.db
+    
+    echo "Database file created at /app/data/quokkapack.db"
+fi
+
+echo "Database initialization complete"
+
+# Update supervisor configuration with actual JWT_SECRET
+sed -i "s/%(ENV_JWT_SECRET)s/$JWT_SECRET/g" /etc/supervisor/conf.d/supervisord.conf
+
+# Start supervisor to manage all processes
+exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
+EOF
+
+# Make startup script executable
+RUN chmod +x /app/startup.sh
+
+# Create non-root user for security (but supervisor needs root for nginx)
+RUN groupadd -r appuser && useradd -r -g appuser appuser
+RUN chown -R appuser:appuser /app/data /app/logs
+
+# Expose port 80 for the combined application
+EXPOSE 80
+
+# Health check for the combined application
+HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=3 \
+    CMD curl -f http://localhost:80/health || exit 1
+
+# Volume mount point for data persistence
+VOLUME ["/app/data"]
+
+# Environment variables with defaults
+ENV ASPNETCORE_ENVIRONMENT=Production
+ENV JWT_SECRET=""
+ENV SELFHOST_DATA_PATH="/app/data"
+
+ENTRYPOINT ["/app/startup.sh"]

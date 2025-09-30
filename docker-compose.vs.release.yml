@@ -1,0 +1,17 @@
+# Visual Studio release overrides
+# This file is used when running in release mode from Visual Studio
+
+services:
+  quokkapack.api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+    labels:
+      - "com.microsoft.created-by=visual-studio"
+      - "com.microsoft.visual-studio.project-name=QuokkaPack.API"
+    
+  quokkapack.razor:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+    labels:
+      - "com.microsoft.created-by=visual-studio"
+      - "com.microsoft.visual-studio.project-name=QuokkaPack.Razor"

@@ -1,26 +1,28 @@
-/* Manual alias file for OpenAPI-generated types.
-   Update if your OpenAPI schema names change. */
+/* Type aliases for generated types from C# models.
+   These types are automatically generated from the Data project models. */
 
-import type { components } from '../../../app/api/types.gen';
-
-export type TripCatalogItemReadDto  = components['schemas']['TripCatalogItemReadDto'];
-export type TripDetailsReadDto      = components['schemas']['TripDetailsReadDto'];
-export type TripSummaryReadDto      = components['schemas']['TripSummaryReadDto'];
-export type TripItemReadDto         = components['schemas']['TripItemReadDto'];
-export type ItemReadDto             = components['schemas']['ItemReadDto']
-export type CategoryReadDto         = components['schemas']['CategoryReadDto']
-export type TripEditDto             = components['schemas']['TripEditDto']
-export type TripItemCreateDto       = components['schemas']['TripItemCreateDto']
-export type TripItemEditDto         = components['schemas']['TripItemEditDto']
-export type TripCreateDto           = components['schemas']['TripCreateDto']
-export type ItemCreateDto           = components['schemas']['ItemCreateDto']
-export type ItemEditDto             = components['schemas']['ItemEditDto']
-export type CategoryCreateDto       = components['schemas']['CategoryCreateDto']
-export type CategoryEditDto         = components['schemas']['CategoryEditDto']
-
-
-
-
+// Import generated types from the TypeGen output
+export type {
+  Trip,
+  Category,
+  Item,
+  TripItem,
+  MasterUser,
+  TripSummaryReadDto,
+  TripDetailsReadDto,
+  TripEditDto,
+  TripCreateDto,
+  CategoryReadDto,
+  CategoryCreateDto,
+  CategoryEditDto,
+  ItemReadDto,
+  ItemCreateDto,
+  ItemEditDto,
+  TripItemReadDto,
+  TripItemCreateDto,
+  TripItemEditDto,
+  TripCatalogItemReadDto
+} from '../../api/types.gen';
 
 /* Example: UI-only view model extensions can live here too.
 export type ItemVM = ItemReadDto & { isEditing?: boolean };

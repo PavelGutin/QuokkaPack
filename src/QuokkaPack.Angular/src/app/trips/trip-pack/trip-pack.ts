@@ -81,7 +81,7 @@ private baseGroups = computed<Group[]>(() => {
       categoryId: g.categoryId,
       category: g.category,
       hasTripItems: g.hasTripItems,
-      items: g.items.slice().sort((a, b) => a.name.localeCompare(b.name)),
+      items: g.items.slice().sort((a, b) => (a.name ?? '').localeCompare(b.name ?? '')),
     }));
 });
 
@@ -240,7 +240,7 @@ packGroups = computed<Group[]>(() => this.baseGroups()
   private mutateTripItem(tripItemId: number, patch: Partial<TripCatalogItemReadDto>) {
     const t = this.trip();
     if (!t) return;
-    const items = t.items.slice();
+    const items = t.items?.slice() ?? [];
     const idx = items.findIndex(x => x.tripItemId === tripItemId);
     if (idx >= 0) {
       items[idx] = { ...items[idx], ...patch };

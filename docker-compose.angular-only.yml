@@ -1,0 +1,78 @@
+version: '3.8'
+
+services:
+  quokkapack.api:
+    build:
+      context: .
+      dockerfile: src/QuokkaPack.API/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=QuokkaPack;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=true;
+      - JwtSettings__Secret=YourSuperSecretKeyThatIsAtLeast32CharactersLong123456
+      - JwtSettings__Issuer=QuokkaPack
+      - JwtSettings__Audience=QuokkaPack
+      - JwtSettings__ExpiryMinutes=60
+    ports:
+      - "5000:8080"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    volumes:
+      - ./src:/app/src:ro
+    networks:
+      - quokkapack-network
+
+  quokkapack.angular:
+    build:
+      context: .
+      dockerfile: src/QuokkaPack.Angular/Dockerfile
+    environment:
+      - NODE_ENV=development
+    ports:
+      - "4200:80"
+    depends_on:
+      quokkapack.api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    volumes:
+      - ./src/QuokkaPack.Angular:/app/src:ro
+    networks:
+      - quokkapack-network
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=YourStrong@Passw0rd
+      - MSSQL_PID=Express
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P YourStrong@Passw0rd -Q 'SELECT 1'"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+      - quokkapack-network
+
+volumes:
+  sqlserver_data:
+
+networks:
+  quokkapack-network:
+    driver: bridge

@@ -1,0 +1,182 @@
+# Development Docker Compose Configuration
+# This configuration provides hot reload, debugging support, and development-friendly settings
+
+services:
+  # API Service with debugging support
+  quokkapack.api:
+    build:
+      context: .
+      dockerfile: src/QuokkaPack.API/Dockerfile
+      target: build  # Use build stage for development with debugging tools
+    ports:
+      - "7100:8080"   # API port
+      - "5000:5000"   # Debug port
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - JwtSettings__Secret=${JWT_SECRET:-ThisIsA32CharacterLongSecretKey!}
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=QuokkaPackDb;User Id=sa;Password=YourStrongPassword123!;TrustServerCertificate=True;
+      - Logging__LogLevel__Default=Debug
+      - Logging__LogLevel__Microsoft.AspNetCore=Information
+    volumes:
+      - ./src/QuokkaPack.API:/app/src/QuokkaPack.API:ro
+      - ./src/QuokkaPack.Data:/app/src/QuokkaPack.Data:ro
+      - ./src/QuokkaPack.Shared:/app/src/QuokkaPack.Shared:ro
+      - ./src/QuokkaPack.ServerCommon:/app/src/QuokkaPack.ServerCommon:ro
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/ready"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    restart: unless-stopped
+
+  # Razor Pages Service with hot reload
+  quokkapack.razor:
+    build:
+      context: .
+      dockerfile: src/QuokkaPack.Razor/Dockerfile
+      target: build  # Use build stage for development
+    ports:
+      - "7200:8080"   # Razor port
+      - "5001:5001"   # Debug port
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - JwtSettings__Secret=${JWT_SECRET:-ThisIsA32CharacterLongSecretKey!}
+      - DownstreamApi__BaseUrl=http://quokkapack.api:8080
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=QuokkaPackDb;User Id=sa;Password=YourStrongPassword123!;TrustServerCertificate=True;
+      - Logging__LogLevel__Default=Debug
+      - Logging__LogLevel__Microsoft.AspNetCore=Information
+    volumes:
+      - ./src/QuokkaPack.Razor:/app/src/QuokkaPack.Razor:ro
+      - ./src/QuokkaPack.Shared:/app/src/QuokkaPack.Shared:ro
+      - ./src/QuokkaPack.ServerCommon:/app/src/QuokkaPack.ServerCommon:ro
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      quokkapack.api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/ready"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    restart: unless-stopped
+
+  # Blazor Service with hot reload
+  quokkapack.blazor:
+    build:
+      context: .
+      dockerfile: src/QuokkaPack.Blazor/Dockerfile
+      target: build  # Use build stage for development
+    ports:
+      - "7300:80"     # Blazor nginx port
+    environment:
+      - NODE_ENV=development
+      - API_BASE_URL=http://quokkapack.api:8080
+    volumes:
+      - ./src/QuokkaPack.Blazor/src:/app/src:ro
+      - ./src/QuokkaPack.Blazor/wwwroot:/usr/share/nginx/html:ro
+    depends_on:
+      quokkapack.api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+  # Angular Service with development server
+  quokkapack.angular:
+    build:
+      context: ./src/QuokkaPack.Angular
+      dockerfile: Dockerfile
+      target: build  # Use build stage for development
+    ports:
+      - "7400:4200"   # Angular dev server port
+    environment:
+      - NODE_ENV=development
+      - API_BASE_URL=http://quokkapack.api:8080
+    volumes:
+      - ./src/QuokkaPack.Angular/src:/app/src:ro
+      - ./src/QuokkaPack.Angular/angular.json:/app/angular.json:ro
+      - ./src/QuokkaPack.Angular/package.json:/app/package.json:ro
+      - ./src/QuokkaPack.Angular/tsconfig.json:/app/tsconfig.json:ro
+      - ./src/QuokkaPack.Angular/tsconfig.app.json:/app/tsconfig.app.json:ro
+    command: ["npm", "start", "--", "--host", "0.0.0.0", "--port", "4200", "--poll", "2000"]
+    depends_on:
+      quokkapack.api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4200/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    restart: unless-stopped
+
+  # SQL Server with development database seeding
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      SA_PASSWORD: "YourStrongPassword123!"
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Developer"  # Use Developer edition for development
+      MSSQL_COLLATION: "SQL_Latin1_General_CP1_CI_AS"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sql_dev_data:/var/opt/mssql/data
+      - sql_dev_log:/var/opt/mssql/log
+      - sql_dev_backup:/var/opt/mssql/backup
+      - ./scripts/init-dev-db.sql:/docker-entrypoint-initdb.d/init-dev-db.sql:ro
+      - ./scripts/init-db-with-migrations.sh:/docker-entrypoint-initdb.d/init-db-with-migrations.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P YourStrongPassword123! -Q 'SELECT 1' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+    restart: unless-stopped
+    command: >
+      sh -c "
+        /opt/mssql/bin/sqlservr &
+        sleep 30 &&
+        chmod +x /docker-entrypoint-initdb.d/init-db-with-migrations.sh &&
+        /docker-entrypoint-initdb.d/init-db-with-migrations.sh &&
+        wait
+      "
+
+volumes:
+  sql_dev_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/dev/sql/data
+  
+  sql_dev_log:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/dev/sql/log
+  
+  sql_dev_backup:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/dev/sql/backup
+
+networks:
+  default:
+    name: quokkapack-dev
+    driver: bridge
