@@ -2,12 +2,15 @@
   "name": "quokka-pack.angular",
   "version": "0.0.0",
   "scripts": {
+    "prestart": "npm run codegen",
+    "prebuild": "npm run codegen",
     "ng": "ng",
     "start": "ng serve --proxy-config proxy.conf.json",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "gen:types": "openapi-typescript http://localhost:5000/swagger/v1/swagger.json -o src/app/api/types.gen.ts",
-    "test": "ng test"
+    "test": "ng test",
+    "codegen": "dotnet nswag run codegen/nswag.json"
   },
   "prettier": {
     "overrides": [

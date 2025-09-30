@@ -20,11 +20,6 @@
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1" />
-		<PackageReference Include="NSwag.AspNetCore" Version="14.6.0" />
-		<PackageReference Include="NSwag.MSBuild" Version="14.6.0">
-		  <PrivateAssets>all</PrivateAssets>
-		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
 		<PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
 		<PackageReference Include="Serilog.Settings.Configuration" Version="9.0.0" />
 		<PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
@@ -42,20 +37,4 @@
 	<ItemGroup>
 		<Folder Include="Logs\" />
 	</ItemGroup>
-
-	<ItemGroup>
-		<!-- Pin NSwag to a known-good version -->
-		<PackageReference Include="NSwag.MSBuild" Version="14.1.0" PrivateAssets="All" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<!-- Point to your config file -->
-		<NSwagConfig Include="$(MSBuildProjectDirectory)\nswag.json" />
-	</ItemGroup>
-
-	<Target Name="NSwag_Run" AfterTargets="Build" Condition="Exists('$(MSBuildProjectDirectory)\nswag.json')">
-		<!-- Fails the build if generation fails; no external tooling needed -->
-		<NSwag Command="run" ConfigFile="@(NSwagConfig)" />
-	</Target>
-
 </Project>
