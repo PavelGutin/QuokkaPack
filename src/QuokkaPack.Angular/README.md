@@ -1,6 +1,6 @@
 # QuokkaPackAngular
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.1.5.
+This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.3.3.
 
 ## Development server
 
@@ -13,11 +13,6 @@ ng serve
 Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
 
 ## Code scaffolding
-To generate the interfaces from the API, run: 
-
-```bash
-npm run gen:types
-```
 
 Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
 

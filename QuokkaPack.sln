@@ -29,6 +29,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuokkaPack.ServerCommon", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuokkaPack.Blazor", "src\QuokkaPack.Blazor\QuokkaPack.Blazor.csproj", "{0D51CDEA-CDC9-48E3-A6CF-94CD5E1FFE26}"
 EndProject
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "QuokkaPack.Angular", "src\QuokkaPack.Angular\QuokkaPack.Angular.esproj", "{06363C1C-8C78-CA27-F375-774062789C4C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -67,6 +69,12 @@ Global
 		{0D51CDEA-CDC9-48E3-A6CF-94CD5E1FFE26}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0D51CDEA-CDC9-48E3-A6CF-94CD5E1FFE26}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0D51CDEA-CDC9-48E3-A6CF-94CD5E1FFE26}.Release|Any CPU.Build.0 = Release|Any CPU
+		{06363C1C-8C78-CA27-F375-774062789C4C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{06363C1C-8C78-CA27-F375-774062789C4C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{06363C1C-8C78-CA27-F375-774062789C4C}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{06363C1C-8C78-CA27-F375-774062789C4C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{06363C1C-8C78-CA27-F375-774062789C4C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{06363C1C-8C78-CA27-F375-774062789C4C}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -79,6 +87,7 @@ Global
 		{4E91935F-5043-9116-3072-2848829D4A80} = {170078B7-4B0E-4BBF-B95D-5C93650C9EE1}
 		{1A497445-6502-4263-B852-1D736AD54F86} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{0D51CDEA-CDC9-48E3-A6CF-94CD5E1FFE26} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{06363C1C-8C78-CA27-F375-774062789C4C} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DCA49A4D-3FBD-4E27-AD47-FF317F2F8E9B}
