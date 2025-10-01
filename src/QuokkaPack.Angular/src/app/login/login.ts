@@ -32,7 +32,7 @@ export class Login {
 
   submit() {
     this.error = '';
-    this.auth.login({ email: this.email, password: this.password })
+    this.auth.login({ Email: this.email, Password: this.password })
       .subscribe({
         next: () => this.router.navigateByUrl('/'),
         error: (e) => this.error = e?.error?.message ?? 'Login failed'

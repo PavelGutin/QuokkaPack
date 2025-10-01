@@ -1,4 +1,5 @@
 {
+  "runtime": "Net90",
   "documentGenerator": {
     "fromDocument": {
       "url": "../../../artifacts/openapi.json"
@@ -13,6 +14,8 @@
       "generateClientInterfaces": true,
       "generateDtoTypes": true,
       "useSingletonProvider": false,
+      "handleReferences": true,
+      "nullValue": "Null",
       "output": "../src/app/api/api-client.ts"
     }
   }

@@ -206,6 +206,10 @@ PublishScripts/
 *.nuget.props
 *.nuget.targets
 
+# Generated OpenAPI/Swagger files
+artifacts/*.json
+!artifacts/.gitkeep
+
 # Microsoft Azure Build Output
 csx/
 *.build.csdef

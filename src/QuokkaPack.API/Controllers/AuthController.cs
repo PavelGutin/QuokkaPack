@@ -48,6 +48,9 @@ public class AuthController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterRequest request)
     {
+        if (request.Password != request.ConfirmPassword)
+            return BadRequest(new { Errors = new[] { new { Description = "Passwords do not match." } } });
+
         var identityUser = new IdentityUser { UserName = request.Email, Email = request.Email };
         var result = await _userManager.CreateAsync(identityUser, request.Password);
 
@@ -122,5 +125,6 @@ public class AuthController : ControllerBase
     {
         public string Email { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
+        public string ConfirmPassword { get; set; } = string.Empty;
     }
 }

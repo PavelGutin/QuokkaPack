@@ -8,9 +8,11 @@
     "start": "ng serve --proxy-config proxy.conf.json",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "gen:types": "openapi-typescript http://localhost:5000/swagger/v1/swagger.json -o src/app/api/types.gen.ts",
     "test": "ng test",
-    "codegen": "dotnet nswag run codegen/nswag.json"
+    "codegen": "pwsh ../../tools/codegen/generate-openapi.ps1",
+    "codegen:spec": "pwsh ../../tools/codegen/generate-openapi.ps1",
+    "codegen:client": "dotnet nswag run codegen/nswag.json && node codegen/fix-api-client.js",
+    "codegen:fix": "node codegen/fix-api-client.js"
   },
   "prettier": {
     "overrides": [
@@ -46,7 +48,6 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
-    "openapi-typescript": "^7.9.1",
     "typescript": "~5.8.2"
   }
 }

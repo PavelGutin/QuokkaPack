@@ -47,8 +47,8 @@ export class TripPack implements OnInit, OnChanges {
   error = signal<string>('');
   private loadedForId: number | null = null;
 
-  // --- Edit buffer ---
-  edit: TripEditDto | null = null;
+  // --- Edit buffer (uses string dates for form inputs) ---
+  edit: { id: number; startDate: string; endDate: string; destination: string } | null = null;
 
   // --- Pack mode local state: tripItemId -> packed? ---
   packedMap = signal<Record<number, boolean>>({});
@@ -122,8 +122,8 @@ packGroups = computed<Group[]>(() => this.baseGroups()
     if (!t) return;
     this.edit = {
       id: t.id,
-      startDate: (t.startDate ?? '').slice(0, 10),
-      endDate: (t.endDate ?? '').slice(0, 10),
+      startDate: this.formatDateToInput(t.startDate),
+      endDate: this.formatDateToInput(t.endDate),
       destination: t.destination ?? '',
     };
   }
@@ -158,14 +158,13 @@ packGroups = computed<Group[]>(() => this.baseGroups()
   }
 
   saveTrip() {
-    if (!this.edit) return;
-    const dto: TripEditDto = {
-      id: this.edit.id,
-      startDate: this.toYyyyMmDd(this.edit.startDate),
-      endDate: this.toYyyyMmDd(this.edit.endDate),
-      destination: (this.edit.destination ?? '').trim(),
-    };
-    if (!this.canSave(dto)) return;
+    if (!this.canSave(this.edit)) return;
+    const dto = new TripEditDto({
+      id: this.edit!.id,
+      startDate: new Date(this.edit!.startDate),
+      endDate: new Date(this.edit!.endDate),
+      destination: (this.edit!.destination ?? '').trim(),
+    });
 
     this.loading.set(true);
     this.error.set('');
@@ -191,10 +190,10 @@ packGroups = computed<Group[]>(() => this.baseGroups()
     // also reflect on trip() for the disabled checkboxes in edit mode
     this.mutateTripItem(it.tripItemId, { isPacked: checked });
 
-    const tripItemEditDto: TripItemEditDto = {
+    const tripItemEditDto = new TripItemEditDto({
       id: it.tripItemId,
       isPacked: checked
-    };
+    });
     this.tripsService.updateTripItem(this.loadedForId, it.tripItemId, tripItemEditDto).subscribe({
       next: () => { /* success, keep optimistic state */ },
       error: (e) => {
@@ -211,7 +210,7 @@ packGroups = computed<Group[]>(() => this.baseGroups()
   // --- EDIT: add/remove items -> call API then refresh ---
   addToTrip(it: TripCatalogItemReadDto) {
     if (this.loadedForId == null) return;
-    const dto: TripItemCreateDto = { itemId: it.itemId, isPacked: false };
+    const dto = new TripItemCreateDto({ itemId: it.itemId, isPacked: false });
     this.loading.set(true);
     this.error.set('');
     this.tripsService
@@ -243,8 +242,9 @@ packGroups = computed<Group[]>(() => this.baseGroups()
     const items = t.items.slice();
     const idx = items.findIndex(x => x.tripItemId === tripItemId);
     if (idx >= 0) {
-      items[idx] = { ...items[idx], ...patch };
-      this.trip.set({ ...t, items });
+      Object.assign(items[idx], patch);
+      const updatedTrip = new TripDetailsReadDto({ ...t, items });
+      this.trip.set(updatedTrip);
     }
   }
 
@@ -253,12 +253,15 @@ packGroups = computed<Group[]>(() => this.baseGroups()
     if (!s) return '';
     return s.length >= 10 ? s.slice(0, 10) : s;
   }
-  private isYyyyMmDd(s: string): boolean {
-    return /^\d{4}-\d{2}-\d{2}$/.test(s);
+  private formatDateToInput(date: Date | undefined): string {
+    if (!date) return '';
+    const d = new Date(date);
+    return d.toISOString().slice(0, 10);
   }
-  canSave(dto: TripEditDto): boolean {
-    if (!dto.destination) return false;
-    if (!this.isYyyyMmDd(dto.startDate) || !this.isYyyyMmDd(dto.endDate)) return false;
-    return dto.startDate <= dto.endDate;
+
+  canSave(editBuffer: typeof this.edit): boolean {
+    if (!editBuffer || !editBuffer.destination) return false;
+    if (!editBuffer.startDate || !editBuffer.endDate) return false;
+    return editBuffer.startDate <= editBuffer.endDate;
   }
 }

@@ -4,7 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, tap } from 'rxjs';
 import { jwtDecode } from 'jwt-decode';
 
-type LoginDto = { email: string; password: string };
+type LoginDto = { Email: string; Password: string };
 type LoginResponse = { token: string };
 type JwtPayload = { exp?: number; email?: string; unique_name?: string };
 

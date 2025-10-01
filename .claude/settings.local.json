@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Stop-Process -Force -ErrorAction SilentlyContinue)",
+      "Bash(git checkout:*)",
+      "Bash(npx tsc:*)",
+      "Bash(node:*)",
+      "Bash(npm run start:*)",
+      "Bash(npm run codegen:*)",
+      "Bash(cat:*)",
+      "Bash(npm run codegen:client:*)",
+      "Bash(npm run codegen:fix:*)",
+      "Bash(timeout 30 npm run start)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(awk:*)",
+      "Bash(taskkill:*)",
+      "Bash(timeout 30 ng serve:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

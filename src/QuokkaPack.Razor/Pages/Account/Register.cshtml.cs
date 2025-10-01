@@ -29,10 +29,26 @@ namespace QuokkaPack.Razor.Pages.Account
             var client = _httpClientFactory.CreateClient("QuokkaApi");
 
             var response = await client.PostAsJsonAsync("/api/auth/register", Input);
-            
+
             if (!response.IsSuccessStatusCode)
             {
-                ErrorMessage = "Invalid username or password.";
+                var errorContent = await response.Content.ReadAsStringAsync();
+                try
+                {
+                    var errorResponse = await response.Content.ReadFromJsonAsync<ErrorResponse>();
+                    if (errorResponse?.Errors != null && errorResponse.Errors.Any())
+                    {
+                        ErrorMessage = string.Join(", ", errorResponse.Errors.Select(e => e.Description));
+                    }
+                    else
+                    {
+                        ErrorMessage = $"Registration failed: {errorContent}";
+                    }
+                }
+                catch
+                {
+                    ErrorMessage = $"Registration failed: {errorContent}";
+                }
                 return Page();
             }
 
@@ -67,6 +83,17 @@ namespace QuokkaPack.Razor.Pages.Account
             [DataType(DataType.Password)]
             [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
             public string ConfirmPassword { get; set; } = string.Empty;
+        }
+
+        public class ErrorResponse
+        {
+            public IEnumerable<ErrorDetail> Errors { get; set; } = [];
+        }
+
+        public class ErrorDetail
+        {
+            public string Code { get; set; } = string.Empty;
+            public string Description { get; set; } = string.Empty;
         }
     }
 }

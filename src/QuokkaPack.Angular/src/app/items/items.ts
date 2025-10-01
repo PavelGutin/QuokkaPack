@@ -72,9 +72,10 @@ export class ItemsComponent {
 
       if (!map.has(key)) {
         const fromList = cats.find(c => c.id === key);
+        const unknownCategory = new CategoryReadDto({ id: key, name: '(Unknown)', isDefault: false });
         map.set(key, {
           key,
-          category: fromList ?? { id: key, name: '(Unknown)', isDefault: false },
+          category: fromList ?? unknownCategory,
           items: []
         });
       }
