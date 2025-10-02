@@ -53,7 +53,7 @@ private fetchTrips() {
 }
 
   // Actions (stubbed; wire up routing later)
-  addTrip() { alert('Add Trip (stub)'); }
+  addTrip() { this.router.navigate(['/trips/create']); }
   viewTrip(id: number | string) { alert(`View Trip ${id} (stub)`); }
   //packTrip(id: number | string) { alert(`Pack Trip ${id} (stub)`); }
   packTrip(id: number | string) { this.router.navigate(['/trips', id, 'pack']); }
