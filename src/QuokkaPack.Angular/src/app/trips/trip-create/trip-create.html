@@ -67,7 +67,11 @@
                 <div>
                   <div class="fw-bold">{{ category.name }}</div>
                   <div class="small text-muted">
-                    [LIST OF ITEMS UNDER CONSTRUCTION]
+                    @for (item of getItemsForCategory(category.id); track item.id) {
+                      <span>{{ item.name }}</span>@if (!$last) {<span>, </span>}
+                    } @empty {
+                      <span class="fst-italic">No items</span>
+                    }
                   </div>
                 </div>
               </div>

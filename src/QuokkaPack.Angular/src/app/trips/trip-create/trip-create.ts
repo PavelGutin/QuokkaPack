@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TripsService } from '../../core/features/trips/trips.service';
-import { TripCreateDto, CategoryReadDto } from '../../core/models/api-types';
+import { ItemsService } from '../../core/features/items/items.service';
+import { TripCreateDto, CategoryReadDto, ItemReadDto } from '../../core/models/api-types';
 
 @Component({
   selector: 'app-trip-create',
@@ -14,6 +15,7 @@ import { TripCreateDto, CategoryReadDto } from '../../core/models/api-types';
 })
 export class TripCreate implements OnInit {
   private tripsSvc = inject(TripsService);
+  private itemsSvc = inject(ItemsService);
   private router = inject(Router);
 
   trip: TripCreateDto = new TripCreateDto({
@@ -28,6 +30,7 @@ export class TripCreate implements OnInit {
   endDateStr = '';
 
   allCategories: CategoryReadDto[] = [];
+  allItems: ItemReadDto[] = [];
   selectedCategoryIds: number[] = [];
   loading = false;
   error = '';
@@ -45,10 +48,24 @@ export class TripCreate implements OnInit {
         this.selectedCategoryIds = categories
           .filter(c => c.isDefault)
           .map(c => c.id);
-        this.loading = false;
+        this.loadItems();
       },
       error: (err) => {
         this.error = 'Failed to load categories';
+        this.loading = false;
+        console.error(err);
+      }
+    });
+  }
+
+  private loadItems(): void {
+    this.itemsSvc.list().subscribe({
+      next: (items) => {
+        this.allItems = items;
+        this.loading = false;
+      },
+      error: (err) => {
+        this.error = 'Failed to load items';
         this.loading = false;
         console.error(err);
       }
@@ -97,5 +114,9 @@ export class TripCreate implements OnInit {
 
   cancel(): void {
     this.router.navigate(['/trips']);
+  }
+
+  getItemsForCategory(categoryId: number): ItemReadDto[] {
+    return this.allItems.filter(item => item.categoryId === categoryId);
   }
 }
