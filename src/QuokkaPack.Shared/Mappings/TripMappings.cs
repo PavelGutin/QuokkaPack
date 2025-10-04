@@ -14,15 +14,12 @@ namespace QuokkaPack.Shared.Mappings
                 Destination = dto.Destination
             };
         }
-        public static TripSummaryReadDto ToReadDto(this Trip trip)
+
+        public static void UpdateFromDto(this Trip trip, TripEditDto dto)
         {
-            return new TripSummaryReadDto
-            {
-                Id = trip.Id,
-                Destination = trip.Destination,
-                StartDate = trip.StartDate,
-                EndDate = trip.EndDate
-            };
+            trip.Destination = dto.Destination;
+            trip.StartDate = dto.StartDate;
+            trip.EndDate = dto.EndDate;
         }
     }
 }

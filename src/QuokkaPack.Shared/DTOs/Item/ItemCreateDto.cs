@@ -1,10 +1,8 @@
-﻿namespace QuokkaPack.Shared.DTOs.ItemDTOs
+﻿namespace QuokkaPack.Shared.DTOs.Item
 {
     public class ItemCreateDto
     {
-        public string Name { get; set; } = default!;
-        public string? Notes { get; set; }
-        public bool IsEssential { get; set; } = false;
-        public int CategoryId {get; set;}
+        public string Name { get; set; } = string.Empty;
+        public int CategoryId { get; set; }
     }
 }

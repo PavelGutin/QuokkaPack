@@ -1,13 +1,13 @@
-﻿using QuokkaPack.Shared.DTOs.CategoryDTOs;
-
-namespace QuokkaPack.Shared.DTOs.ItemDTOs
+﻿namespace QuokkaPack.Shared.DTOs.Item
 {
+    /// <summary>
+    /// Item from the user's catalog (denormalized for client convenience)
+    /// </summary>
     public class ItemReadDto
     {
         public int Id { get; set; }
-        public string Name { get; set; } = default!;
-        public string? Notes { get; set; }
-        public bool IsEssential { get; set; } = false;
-        public CategoryReadDtoSimple Category { get; set; } = default!;
+        public string Name { get; set; } = string.Empty;
+        public int CategoryId { get; set; }
+        public string CategoryName { get; set; } = string.Empty;
     }
 }

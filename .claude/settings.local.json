@@ -16,7 +16,8 @@
       "Bash(awk:*)",
       "Bash(taskkill:*)",
       "Bash(timeout 30 ng serve:*)",
-      "Bash(npx ng generate component:*)"
+      "Bash(npx ng generate component:*)",
+      "Bash(dotnet build:*)"
     ],
     "deny": [],
     "ask": []

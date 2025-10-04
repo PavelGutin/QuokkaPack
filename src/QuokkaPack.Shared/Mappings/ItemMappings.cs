@@ -1,4 +1,4 @@
-﻿using QuokkaPack.Shared.DTOs.ItemDTOs;
+﻿using QuokkaPack.Shared.DTOs.Item;
 using QuokkaPack.Shared.Models;
 
 namespace QuokkaPack.Shared.Mappings
@@ -20,19 +20,15 @@ namespace QuokkaPack.Shared.Mappings
             {
                 Id = item.Id,
                 Name = item.Name,
-                Category = item?.Category?.ToReadDtoSimple()
+                CategoryId = item.CategoryId,
+                CategoryName = item.Category?.Name ?? string.Empty
             };
         }
 
-        public static ItemReadDtoSimple ToReadDtoSimple(this Item item)
+        public static void UpdateFromDto(this Item item, ItemEditDto dto)
         {
-            return new ItemReadDtoSimple
-            {
-                Id = item.Id,
-                Name = item.Name
-            };
+            item.Name = dto.Name;
+            item.CategoryId = dto.CategoryId;
         }
-
-        
     }
 }

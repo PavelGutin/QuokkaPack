@@ -1,9 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QuokkaPack.API.Services;
 using QuokkaPack.Data;
-using QuokkaPack.Shared.DTOs.CategoryDTOs;
+using QuokkaPack.Shared.DTOs.Category;
 using QuokkaPack.Shared.Mappings;
 
 namespace QuokkaPack.API.Controllers
@@ -22,58 +22,83 @@ namespace QuokkaPack.API.Controllers
             _context = context;
         }
 
+        /// <summary>
+        /// GET /api/categories - Get all categories for user
+        /// </summary>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CategoryReadDto>>> GetCategories()
         {
+            var user = await _userResolver.GetOrCreateAsync(User);
+
             var categories = await _context.Categories
-                //.Include(category => category.Items)
+                .Where(c => c.MasterUserId == user.Id)
+                .AsNoTracking()
+                .Select(c => new CategoryReadDto
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    IsDefault = c.IsDefault
+                })
                 .ToListAsync();
-            return categories.Select(c => c.ToReadDto()).ToList();
+
+            return Ok(categories);
         }
 
+        /// <summary>
+        /// GET /api/categories/{id} - Get single category
+        /// </summary>
         [HttpGet("{id}")]
         public async Task<ActionResult<CategoryReadDto>> GetCategory(int id)
         {
-            var category = await _context.Categories.FindAsync(id);
+            var user = await _userResolver.GetOrCreateAsync(User);
+
+            var category = await _context.Categories
+                .Where(c => c.Id == id && c.MasterUserId == user.Id)
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
+
             if (category == null)
                 return NotFound();
 
             return category.ToReadDto();
         }
 
+        /// <summary>
+        /// POST /api/categories - Create new category
+        /// </summary>
         [HttpPost]
         public async Task<ActionResult<CategoryReadDto>> CreateCategory(CategoryCreateDto dto)
         {
-            var category = dto.ToCategory();
             var user = await _userResolver.GetOrCreateAsync(User);
+
+            var category = dto.ToCategory();
             category.MasterUserId = user.Id;
 
             _context.Categories.Add(category);
             await _context.SaveChangesAsync();
 
-            try
-            {
-                return CreatedAtAction(nameof(GetCategory), new { id = category.Id }, category.ToReadDto());
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Error generating CreatedAtAction: {ex.Message}");
-            }
+            return CreatedAtAction(nameof(GetCategory), new { id = category.Id }, category.ToReadDto());
         }
 
+        /// <summary>
+        /// PUT /api/categories/{id} - Update category
+        /// </summary>
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateCategory(int id, CategoryEditDto dto)
         {
             if (id != dto.Id)
-                return BadRequest("ID in URL does not match ID in body.");
+                return BadRequest("ID mismatch");
 
-            var category = await _context.Categories.FindAsync(id);
+            var user = await _userResolver.GetOrCreateAsync(User);
+
+            var category = await _context.Categories
+                .Where(c => c.Id == id && c.MasterUserId == user.Id)
+                .FirstOrDefaultAsync();
+
             if (category == null)
                 return NotFound();
 
-            // TODO: Replace with mapper or extension
-            category.Name = dto.Name;
-            category.IsDefault = dto.IsDefault;
+            category.UpdateFromDto(dto);
 
             try
             {
@@ -81,19 +106,26 @@ namespace QuokkaPack.API.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!_context.Categories.Any(e => e.Id == id))
+                if (!await _context.Categories.AnyAsync(e => e.Id == id))
                     return NotFound();
-                else
-                    throw;
+                throw;
             }
 
             return NoContent();
         }
 
+        /// <summary>
+        /// DELETE /api/categories/{id} - Delete category
+        /// </summary>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCategory(int id)
         {
-            var category = await _context.Categories.FindAsync(id);
+            var user = await _userResolver.GetOrCreateAsync(User);
+
+            var category = await _context.Categories
+                .Where(c => c.Id == id && c.MasterUserId == user.Id)
+                .FirstOrDefaultAsync();
+
             if (category == null)
                 return NotFound();
 

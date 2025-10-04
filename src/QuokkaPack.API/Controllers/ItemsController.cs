@@ -1,14 +1,14 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QuokkaPack.API.Services;
 using QuokkaPack.Data;
-using QuokkaPack.Shared.DTOs.ItemDTOs;
+using QuokkaPack.Shared.DTOs.Item;
 using QuokkaPack.Shared.Mappings;
 
 namespace QuokkaPack.API.Controllers
 {
-    [Authorize(AuthenticationSchemes = "Bearer")] //TODO: Figure out why I need to specify "Bearer" here
+    [Authorize(AuthenticationSchemes = "Bearer")]
     [ApiController]
     [Route("api/[controller]")]
     public class ItemsController : ControllerBase
@@ -22,66 +22,88 @@ namespace QuokkaPack.API.Controllers
             _context = context;
         }
 
+        /// <summary>
+        /// GET /api/items - Get entire user catalog (for client-side joins)
+        /// </summary>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ItemReadDto>>> GetItems()
         {
+            var user = await _userResolver.GetOrCreateAsync(User);
+
             var items = await _context.Items
-                .Include(item => item.Category) 
+                .Where(item => item.MasterUserId == user.Id)
+                .Include(item => item.Category)
                 .AsNoTracking()
-                .Select(item => item.ToReadDto())
+                .Select(item => new ItemReadDto
+                {
+                    Id = item.Id,
+                    Name = item.Name,
+                    CategoryId = item.CategoryId,
+                    CategoryName = item.Category.Name
+                })
                 .ToListAsync();
 
             return Ok(items);
         }
 
+        /// <summary>
+        /// GET /api/items/{id} - Get single item
+        /// </summary>
         [HttpGet("{id}")]
         public async Task<ActionResult<ItemReadDto>> GetItem(int id)
         {
+            var user = await _userResolver.GetOrCreateAsync(User);
+
             var item = await _context.Items
+                .Where(i => i.Id == id && i.MasterUserId == user.Id)
+                .Include(i => i.Category)
                 .AsNoTracking()
-                .FirstOrDefaultAsync(i => i.Id == id);
+                .FirstOrDefaultAsync();
 
             if (item == null)
-            {
                 return NotFound();
-            }
 
             return item.ToReadDto();
         }
 
+        /// <summary>
+        /// POST /api/items - Create new catalog item
+        /// </summary>
         [HttpPost]
         public async Task<ActionResult<ItemReadDto>> CreateItem([FromBody] ItemCreateDto itemDto)
         {
-            var item = itemDto.ToItem();
             var user = await _userResolver.GetOrCreateAsync(User);
+
+            var item = itemDto.ToItem();
             item.MasterUserId = user.Id;
+
             _context.Items.Add(item);
             await _context.SaveChangesAsync();
+
             await _context.Entry(item).Reference(i => i.Category).LoadAsync();
 
-            try
-            {
-                return CreatedAtAction(nameof(GetItem), new { id = item.Id }, item.ToReadDto());
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Error generating CreatedAtAction: {ex.Message}");
-            }
+            return CreatedAtAction(nameof(GetItem), new { id = item.Id }, item.ToReadDto());
         }
 
+        /// <summary>
+        /// PUT /api/items/{id} - Update catalog item
+        /// </summary>
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateItem(int id, ItemEditDto dto)
         {
             if (id != dto.Id)
-                return BadRequest("ID in URL does not match ID in body.");
+                return BadRequest("ID mismatch");
 
-            var item = await _context.Items.FindAsync(id);
+            var user = await _userResolver.GetOrCreateAsync(User);
+
+            var item = await _context.Items
+                .Where(i => i.Id == id && i.MasterUserId == user.Id)
+                .FirstOrDefaultAsync();
+
             if (item == null)
                 return NotFound();
 
-            //TODO: Use automapper or an extension method to map DTO to entity
-            item.Name = dto.Name;
-            item.Category = dto.Category;
+            item.UpdateFromDto(dto);
 
             try
             {
@@ -89,23 +111,28 @@ namespace QuokkaPack.API.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!_context.Items.Any(e => e.Id == id))
+                if (!await _context.Items.AnyAsync(e => e.Id == id))
                     return NotFound();
-                else
-                    throw;
+                throw;
             }
 
             return NoContent();
         }
 
+        /// <summary>
+        /// DELETE /api/items/{id} - Delete catalog item
+        /// </summary>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteItem(int id)
         {
-            var item = await _context.Items.FindAsync(id);
+            var user = await _userResolver.GetOrCreateAsync(User);
+
+            var item = await _context.Items
+                .Where(i => i.Id == id && i.MasterUserId == user.Id)
+                .FirstOrDefaultAsync();
+
             if (item == null)
-            {
                 return NotFound();
-            }
 
             _context.Items.Remove(item);
             await _context.SaveChangesAsync();
