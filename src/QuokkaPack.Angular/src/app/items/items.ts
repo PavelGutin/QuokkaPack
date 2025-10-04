@@ -66,8 +66,7 @@ export class ItemsComponent {
     // place each item into its category group
     for (const it of this.items()) {
       const key: CategoryKey =
-        it.category?.id ??
-        (it as any).categoryId ??          // tolerate server responses with categoryId only
+        it.categoryId ??
         -1;                                // bucket for unknowns (or skip)
 
       if (!map.has(key)) {
@@ -149,9 +148,9 @@ export class ItemsComponent {
 
     this.itemsSvc.create(dto).subscribe({
       next: (created) => {
-        // enforce contract (fail fast if server didn’t include category)
-        if (!created?.id || !created?.category) {
-          throw new Error('API contract: expected ItemReadDto with nested `category`.');
+        // enforce contract (fail fast if server didn't include categoryId and categoryName)
+        if (!created?.id || !created?.categoryId) {
+          throw new Error('API contract: expected ItemReadDto with categoryId and categoryName.');
         }
         this.items.update(prev => [created, ...prev]);
         this.addItemForm.reset({ name: '', categoryId: null });

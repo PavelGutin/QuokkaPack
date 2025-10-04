@@ -12,7 +12,6 @@
 
 // Re-export all DTO types from the NSwag-generated client
 export {
-  TripCatalogItemReadDto,
   TripDetailsReadDto,
   TripSummaryReadDto,
   TripItemReadDto,

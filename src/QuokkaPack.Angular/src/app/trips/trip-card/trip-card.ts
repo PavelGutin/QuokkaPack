@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TripSummaryReadDto, TripItemReadDto, ItemReadDto, CategoryReadDto, TripEditDto, TripItemCreateDto } from '../../core/models/api-types';
+import { TripSummaryReadDto } from '../../core/models/api-types';
 
 @Component({
   standalone: true,
@@ -8,7 +8,6 @@ import { TripSummaryReadDto, TripItemReadDto, ItemReadDto, CategoryReadDto, Trip
   imports: [CommonModule],
   templateUrl: './trip-card.html',
   styleUrls: ['./trip-card.scss'],
-  //changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TripCard {
   @Input({ required: true }) trip!: TripSummaryReadDto;
@@ -18,9 +17,15 @@ export class TripCard {
   @Output() edit = new EventEmitter<number | string>();
   @Output() remove = new EventEmitter<number | string>();
 
-  // get categoryCount(): number {
-  //   return this.trip?.categories?.length ?? 0;
-  // }
+  get packingProgress(): string {
+    if (this.trip.totalItems === 0) return '0%';
+    const percent = Math.round((this.trip.packedItems / this.trip.totalItems) * 100);
+    return `${percent}%`;
+  }
+
+  get itemsSummary(): string {
+    return `${this.trip.packedItems}/${this.trip.totalItems} packed`;
+  }
 
   // Simple date helpers (keep same display as grid)
   fmt(raw: string | Date): string {

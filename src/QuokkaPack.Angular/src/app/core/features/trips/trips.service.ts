@@ -1,7 +1,7 @@
 // src/app/core/services/trips.service.ts
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { map, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import {
   TripCreateDto,
   TripEditDto, 
@@ -21,9 +21,7 @@ export class TripsService {
 
   // GET api/Trips
   list(): Observable<TripSummaryReadDto[]> {
-    return this.http.get<TripSummaryReadDto[]>(this.base).pipe(
-      map(dtos => (Array.isArray(dtos) ? dtos.map(tripFromDto) : []))
-    );
+    return this.http.get<TripSummaryReadDto[]>(this.base);
   }
 
   // GET api/Trips/{id}
@@ -92,17 +90,4 @@ deleteCategoryFromTrip(tripId: number, categoryId: number) {
   return this.http.delete<void>(`${this.base}/${tripId}/Categories/${categoryId}`);
 }  
 
-}
-
-/* ---------- module-private mapper (not exported) ---------- */
-//TODO: Remove this. Keeping for now to get out of refactoring hell 
-function tripFromDto(dto: TripSummaryReadDto): TripSummaryReadDto {
-  return dto;
-  // return {
-  //   id: dto.id,
-  //   destination: dto.destination,
-  //   startDate: new Date(dto.startDate),
-  //   endDate: new Date(dto.endDate),
-  //   //categories: dto.categories ?? [], 
-  // };
 }
