@@ -20,7 +20,14 @@
       "Bash(dotnet build:*)",
       "Bash(pwsh:*)",
       "Bash(npm run build:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(grep:*)",
+      "Bash(dir:*)",
+      "WebFetch(domain:i.imgur.com)",
+      "Bash(npx ng:*)",
+      "Bash(find:*)",
+      "Bash(git log:*)"
     ],
     "deny": [],
     "ask": []

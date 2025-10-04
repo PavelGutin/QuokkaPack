@@ -1,97 +1,92 @@
-<div class="page-header">
-  <h1 class="title">Create Trip</h1>
-</div>
+<div class="create-trip-container">
+  <div class="page-header">
+    <h1>Create Trip</h1>
+  </div>
 
-@if (loading) {
-  <p class="loading">Loading…</p>
-} @else {
-  <div class="row">
-    <div class="col-md-4">
-      <form (ngSubmit)="onSubmit()" #tripForm="ngForm">
+  @if (loading) {
+    <p class="loading">Loading…</p>
+  } @else {
+    <div class="form-wrapper">
+      <form (ngSubmit)="onSubmit()" #tripForm="ngForm" class="trip-form">
         @if (error) {
           <div class="alert alert-danger">{{ error }}</div>
         }
 
-        <div class="form-group">
-          <label for="startDate" class="control-label">Start Date</label>
-          <input
-            type="date"
-            id="startDate"
-            name="startDate"
-            class="form-control"
-            [(ngModel)]="startDateStr"
-            required />
+        <div class="form-row">
+          <div class="form-group">
+            <label for="startDate">Start Date</label>
+            <input
+              type="date"
+              id="startDate"
+              name="startDate"
+              [(ngModel)]="startDateStr"
+              required />
+          </div>
+
+          <div class="form-group">
+            <label for="endDate">End Date</label>
+            <input
+              type="date"
+              id="endDate"
+              name="endDate"
+              [(ngModel)]="endDateStr"
+              required />
+          </div>
         </div>
 
         <div class="form-group">
-          <label for="endDate" class="control-label">End Date</label>
-          <input
-            type="date"
-            id="endDate"
-            name="endDate"
-            class="form-control"
-            [(ngModel)]="endDateStr"
-            required />
-        </div>
-
-        <div class="form-group">
-          <label for="destination" class="control-label">Destination</label>
+          <label for="destination">Destination</label>
           <input
             type="text"
             id="destination"
             name="destination"
-            class="form-control"
             [(ngModel)]="trip.destination"
+            placeholder="Where are you going?"
             required />
         </div>
 
-        <div>
-          <label>Categories:</label>
-          @for (category of allCategories; track category.id) {
-            <label
-              [for]="'category_' + category.id"
-              class="d-block border rounded px-3 py-2 mb-2 text-start w-100"
-              [class.bg-light]="isCategorySelected(category.id)"
-              [class.border-primary]="isCategorySelected(category.id)"
-              [class.bg-white]="!isCategorySelected(category.id)"
-              style="cursor: pointer;">
-              <div class="d-flex align-items-start">
-                <input
-                  class="form-check-input me-2 mt-1"
-                  type="checkbox"
-                  [id]="'category_' + category.id"
-                  [checked]="isCategorySelected(category.id)"
-                  (change)="toggleCategory(category.id)"
-                  (click)="$event.stopPropagation()" />
-
-                <div>
-                  <div class="fw-bold">{{ category.name }}</div>
-                  <div class="small text-muted">
-                    @for (item of getItemsForCategory(category.id); track item.id) {
-                      <span>{{ item.name }}</span>@if (!$last) {<span>, </span>}
-                    } @empty {
-                      <span class="fst-italic">No items</span>
-                    }
-                  </div>
+        <div class="categories-section">
+          <label class="section-label">Select Categories</label>
+          <div class="categories-grid">
+            @for (category of allCategories; track category.id) {
+              <label
+                [for]="'category_' + category.id"
+                class="category-card"
+                [class.selected]="isCategorySelected(category.id)">
+                <div class="category-header">
+                  <input
+                    type="checkbox"
+                    [id]="'category_' + category.id"
+                    [checked]="isCategorySelected(category.id)"
+                    (change)="toggleCategory(category.id)"
+                    (click)="$event.stopPropagation()" />
+                  <span class="category-name">{{ category.name }}</span>
                 </div>
-              </div>
-            </label>
-          }
+                <div class="category-items">
+                  @for (item of getItemsForCategory(category.id); track item.id) {
+                    <span class="item-tag">{{ item.name }}</span>
+                  } @empty {
+                    <span class="no-items">No items</span>
+                  }
+                </div>
+              </label>
+            }
+          </div>
         </div>
 
-        <div class="form-group">
-          <button type="submit" class="btn btn-primary" [disabled]="!tripForm.valid || loading">
-            Create
+        <div class="form-actions">
+          <button type="submit" class="btn-primary" [disabled]="!tripForm.valid || loading">
+            Create Trip
           </button>
-          <button type="button" class="btn btn-secondary ms-2" (click)="cancel()">
+          <button type="button" class="btn-outline" (click)="cancel()">
             Cancel
           </button>
         </div>
       </form>
-    </div>
-  </div>
 
-  <div>
-    <a routerLink="/trips">Back to List</a>
-  </div>
-}
+      <div class="back-link">
+        <a routerLink="/trips">← Back to Trips</a>
+      </div>
+    </div>
+  }
+</div>

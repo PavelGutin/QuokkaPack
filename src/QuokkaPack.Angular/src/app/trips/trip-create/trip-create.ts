@@ -11,7 +11,7 @@ import { TripCreateDto, CategoryReadDto, ItemReadDto } from '../../core/models/a
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './trip-create.html',
-  styleUrl: './trip-create.css'
+  styleUrl: './trip-create.scss'
 })
 export class TripCreate implements OnInit {
   private tripsSvc = inject(TripsService);

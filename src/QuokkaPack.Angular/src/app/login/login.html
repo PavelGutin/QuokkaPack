@@ -1,11 +1,38 @@
-<h2>Login</h2>
-<form (ngSubmit)="submit()">
-  <label>Email
-    <input [(ngModel)]="email" name="email" required />
-  </label>
-  <label>Password
-    <input [(ngModel)]="password" name="password" type="password" required />
-  </label>
-  <button type="submit">Sign in</button>
-  <p *ngIf="error" style="color:red">{{ error }}</p>
-</form>
+<div class="login-container">
+  <div class="login-card">
+    <h2 class="login-title">Welcome Back</h2>
+    <p class="login-subtitle">Sign in to your account</p>
+
+    <form (ngSubmit)="submit()" class="login-form">
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input
+          id="email"
+          type="email"
+          [(ngModel)]="email"
+          name="email"
+          required
+          autocomplete="email"
+          placeholder="Enter your email" />
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input
+          id="password"
+          [(ngModel)]="password"
+          name="password"
+          type="password"
+          required
+          autocomplete="current-password"
+          placeholder="Enter your password" />
+      </div>
+
+      <div *ngIf="error" class="alert alert-danger">
+        {{ error }}
+      </div>
+
+      <button type="submit" class="btn-primary btn-lg w-100">Sign in</button>
+    </form>
+  </div>
+</div>

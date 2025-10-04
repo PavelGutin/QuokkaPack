@@ -1,5 +1,5 @@
 using FluentAssertions;
-using QuokkaPack.Shared.DTOs.ItemDTOs;
+using QuokkaPack.Shared.DTOs.Item;
 using QuokkaPack.Shared.Mappings;
 using QuokkaPack.Shared.Models;
 using System.Net;
@@ -39,8 +39,7 @@ namespace QuokkaPack.ApiTests.Controllers
             var itemCreateDto = new ItemCreateDto
             {
                 Name = "Test Item",
-                Notes = "Testing item creation",
-                IsEssential = false
+                CategoryId = 1
             };
             var response = await _client.PostAsJsonAsync("/api/items", itemCreateDto);
             response.StatusCode.Should().Be(HttpStatusCode.Created);
@@ -59,10 +58,11 @@ namespace QuokkaPack.ApiTests.Controllers
         public async Task Put_ShouldReturnNoContent_WhenValid()
         {
             Item item = await SeedItemAsync();
-            var itemEditDto = new ItemEditDto() 
-            { 
-                Id = item.Id, 
-                Name = item.Name + " updated"
+            var itemEditDto = new ItemEditDto()
+            {
+                Id = item.Id,
+                Name = item.Name + " updated",
+                CategoryId = item.CategoryId
             };
             var putResponse = await _client.PutAsJsonAsync($"/api/items/{item.Id}", itemEditDto);
             putResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);

@@ -1,195 +1,144 @@
-<div style="max-width: 800px; margin: 1rem auto; padding: 0 .5rem;">
-  <div style="display:flex;justify-content:space-between;align-items:center;gap:.75rem;">
-    <div>
-      <label style="margin-right:.5rem;">
+<div class="trip-pack-container">
+  <div class="mode-selector">
+    <div class="radio-group">
+      <label class="radio-label">
         <input type="radio" name="mode" [checked]="mode()==='pack'" (change)="setMode('pack')" />
-        Pack
+        <span>Pack</span>
       </label>
-      <label>
+      <label class="radio-label">
         <input type="radio" name="mode" [checked]="mode()==='edit'" (change)="setMode('edit')" />
-        Edit
+        <span>Edit</span>
       </label>
     </div>
 
-    @if (loading()) { <span>Loading…</span> }
-    @if (error()) { <span style="color:#a00;">{{ error() }}</span> }
+    <div class="status-messages">
+      @if (loading()) { <span class="loading">Loading…</span> }
+      @if (error()) { <span class="error">{{ error() }}</span> }
+    </div>
   </div>
 
   @if (trip(); as t) {
-    <section style="border:1px solid #ddd;border-radius:8px;padding:.75rem;margin-top:.75rem;">
+    <section class="trip-info-card">
 
       <!-- Header: readonly vs editable -->
       @if (mode()==='edit' && edit) {
-        <div style="display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:.5rem;align-items:end;">
-          <label style="display:flex;flex-direction:column;gap:.25rem;">
-            Destination
-            <input type="text" [(ngModel)]="edit.destination" />
-          </label>
-          <label style="display:flex;flex-direction:column;gap:.25rem;">
-            Start
-            <input type="date" [(ngModel)]="edit.startDate" />
-          </label>
-          <label style="display:flex;flex-direction:column;gap:.25rem;">
-            End
-            <input type="date" [(ngModel)]="edit.endDate" />
-          </label>
-          <button type="button" (click)="saveTrip()" [disabled]="loading() || !canSave(edit)">Save</button>
+        <div class="trip-edit-form">
+          <div class="form-group">
+            <label for="destination">Destination</label>
+            <input id="destination" type="text" [(ngModel)]="edit.destination" />
+          </div>
+          <div class="form-group">
+            <label for="startDate">Start</label>
+            <input id="startDate" type="date" [(ngModel)]="edit.startDate" />
+          </div>
+          <div class="form-group">
+            <label for="endDate">End</label>
+            <input id="endDate" type="date" [(ngModel)]="edit.endDate" />
+          </div>
+          <button type="button" class="btn-primary" (click)="saveTrip()" [disabled]="loading() || !canSave(edit)">Save</button>
         </div>
       } @else {
-        <div>
-          <h3 style="margin:.25rem 0;">{{ t.destination }}</h3>
-          <small>[{{ t.startDate }} – {{ t.endDate }}]</small>
+        <div class="trip-header">
+          <h2>{{ t.destination }}</h2>
+          <p class="trip-dates">{{ t.startDate }} – {{ t.endDate }}</p>
         </div>
       }
 
       <!-- Body -->
       @if (mode()==='pack') {
         <!-- Only items that are part of the trip, with live API updates on toggle -->
-<div style="margin-top:.75rem;">
-  <div><strong>Mode:</strong> Pack</div>
+        <div class="pack-mode">
+          <h3 class="mode-title">Pack Mode</h3>
 
-  <!-- Card grid -->
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1rem;align-items:stretch; margin-top:.5rem;">
+          <div class="categories-grid">
+            @for (g of packGroups(); track g.categoryName) {
+              <div class="category-card">
+                <h4 class="category-title">
+                  {{ g.categoryName }} <span class="count">({{ g.itemsInTrip.length }})</span>
+                </h4>
 
-    @for (g of packGroups(); track g.categoryName) {
-      <!-- Card -->
-      <section style="border:1px solid #ddd;border-radius:6px;padding:.5rem;background:#fff;display:flex;flex-direction:column;">
-
-        <!-- Card header -->
-        <h4 style="margin:0 0 .5rem;border-bottom:1px solid #eee;padding:0 0 .25rem;font-size:1rem;font-weight:600;">
-          {{ g.categoryName }} ({{ g.itemsInTrip.length }})
-        </h4>
-
-        <!-- Items (top-aligned; not stretched) -->
-        <ul style="list-style:none; margin:.25rem 0 0; padding:0;">
-          @for (it of g.itemsInTrip; track it.tripItemId) {
-            <li style="margin:.25rem 0;">
-              <label style="display:grid;grid-template-columns:1.25rem 1fr;align-items:center;column-gap:.5rem;cursor:pointer;">
-                <input
-                  type="checkbox"
-                  [checked]="packedMap()[it.tripItemId!]"
-                  (change)="onPackedChange(it, $any($event.target).checked)"
-                  style="margin:0;padding:0;width:1rem;height:1rem;"
-                />
-                <span
-                  [style.textDecoration]="packedMap()[it.tripItemId!] ? 'line-through' : 'none'"
-                  [style.color]="packedMap()[it.tripItemId!] ? '#666' : 'inherit'"
-                  style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"
-                >
-                  {{ it.name }}
-                </span>
-              </label>
-            </li>
-          }
-        </ul>
-      </section>
-    }
-  </div>
-</div>
-
-      } @else {
-        <!-- Edit mode: all items grouped by category -->
-        <div style="margin-top:.75rem;">
-          <div><strong>Mode:</strong> Edit</div>
-
-
-
-
-<!-- Responsive card grid -->
-<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1rem;align-items:stretch;">
-
-  <!-- Category cards -->
-  @for (g of groupsInTrip(); track g.categoryName) {
-    <div style="border:1px solid #ddd;border-radius:6px;padding:.5rem;background:#fff;display:flex;flex-direction:column;">
-
-      <!-- Card header -->
-      <div style="font-weight:600;margin:0 0 .5rem;border-bottom:1px solid #eee;padding:0 0 .25rem;">
-        {{ g.categoryName }} ({{ g.itemsInTrip.length + g.itemsNotInTrip.length }})
-      </div>
-
-      <!-- Items inside card (no flex:1, so they hug the top) -->
-      <div style="display:grid;grid-template-columns:2rem 1.25rem 1fr;row-gap:.25rem;column-gap:.25rem;align-items:center;">
-        @for (it of g.itemsInTrip; track it.tripItemId) {
-          <button
-            type="button"
-            (click)="removeFromTrip(it)"
-            title="Remove from trip"
-            style="grid-column:1; padding:0; margin:0; border:none; background:none; line-height:1; width:1.25rem; height:1.25rem; display:grid; place-items:center; cursor:pointer;"
-          >🗑️</button>
-
-          <input
-            type="checkbox"
-            [checked]="it.isPacked"
-            disabled
-            style="grid-column:2; margin:0; padding:0; width:1rem; height:1rem;"
-          />
-
-          <span style="grid-column:3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-            {{ it.name }}
-          </span>
-        }
-
-        @for (it of g.itemsNotInTrip; track it.id) {
-          <button
-            type="button"
-            (click)="addToTrip(it)"
-            title="Add to trip"
-            style="grid-column:1; padding:0; margin:0; border:none; background:none; line-height:1; width:1.25rem; height:1.25rem; display:grid; place-items:center; cursor:pointer;"
-          >➕</button>
-
-          <span
-            style="grid-column:3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"
-          >
-            {{ it.name }}
-          </span>
-        }
-      </div>
-    </div>
-  }
-
-  <!-- Available categories card -->
-  <div style="border:1px solid #ddd;border-radius:6px;padding:.5rem;background:#fff;display:flex;flex-direction:column;">
-    <div style="font-weight:600;margin:0 0 .5rem;border-bottom:1px solid #eee;padding:0 0 .25rem;">
-      Available categories
-    </div>
-
-    <div style="display:grid;grid-template-columns:1.25rem 1fr;row-gap:.25rem;column-gap:.25rem;align-items:center;">
-      @for (g of availableGroups(); track g.categoryName) {
-        <span style="grid-column:1;display:grid;place-items:center;line-height:1;">⚫</span>
-        <span style="grid-column:2;">{{ g.categoryName }} ({{ g.itemsNotInTrip.length }})</span>
-      }
-    </div>
-  </div>
-
-</div>
-
-
-
-
-          <!-- <div style="margin-top:.5rem;">
-            @for (g of groupsInTrip(); track g.category) {
-              <section style="margin:.5rem 0;">
-                <h4 style="margin:.25rem 0;">{{ g.category }} ({{ g.items.length }})</h4>
-                <ul style="margin:.25rem 0; padding-left:1rem;">
-                  @for (it of g.items; track it.itemId) {
-                    <li style="display:flex;align-items:center;gap:.5rem;">
-                      @if (it.tripItemId != null) {
-                        <input type="checkbox" [checked]="it.isPacked ?? false" disabled />
-                        <span>{{ it.name }}</span>
-                        <button type="button" (click)="removeFromTrip(it)" title="Remove from trip">🗑️</button>
-                      } @else {
-                        <span>{{ it.name }}</span>
-                        <button type="button" (click)="addToTrip(it)" title="Add to trip">➕</button>
-                      }
+                <ul class="items-list">
+                  @for (it of g.itemsInTrip; track it.tripItemId) {
+                    <li class="item-row">
+                      <label class="checkbox-label">
+                        <input
+                          type="checkbox"
+                          [checked]="packedMap()[it.tripItemId!]"
+                          (change)="onPackedChange(it, $any($event.target).checked)" />
+                        <span
+                          class="item-name"
+                          [class.packed]="packedMap()[it.tripItemId!]">
+                          {{ it.name }}
+                        </span>
+                      </label>
                     </li>
                   }
                 </ul>
-              </section>
+              </div>
             }
-            @for (g of availableGroups(); track g.category) {
-              <h5 style="margin:.25rem 0;">{{ g.category }} ({{ g.items.length }})</h5>
+          </div>
+        </div>
+
+      } @else {
+        <!-- Edit mode: all items grouped by category -->
+        <div class="edit-mode">
+          <h3 class="mode-title">Edit Mode</h3>
+
+          <div class="categories-grid">
+            <!-- Category cards -->
+            @for (g of groupsInTrip(); track g.categoryName) {
+              <div class="category-card">
+                <h4 class="category-title">
+                  {{ g.categoryName }} <span class="count">({{ g.itemsInTrip.length + g.itemsNotInTrip.length }})</span>
+                </h4>
+
+                <div class="edit-items-grid">
+                  @for (it of g.itemsInTrip; track it.tripItemId) {
+                    <button
+                      type="button"
+                      (click)="removeFromTrip(it)"
+                      title="Remove from trip"
+                      class="btn-icon btn-danger">
+                      🗑️
+                    </button>
+
+                    <input
+                      type="checkbox"
+                      [checked]="it.isPacked"
+                      disabled />
+
+                    <span class="item-name">{{ it.name }}</span>
+                  }
+
+                  @for (it of g.itemsNotInTrip; track it.id) {
+                    <button
+                      type="button"
+                      (click)="addToTrip(it)"
+                      title="Add to trip"
+                      class="btn-icon btn-success">
+                      ➕
+                    </button>
+
+                    <span class="item-name item-not-in-trip">{{ it.name }}</span>
+                  }
+                </div>
+              </div>
             }
-          </div> -->
+
+            <!-- Available categories card -->
+            <div class="category-card available-categories">
+              <h4 class="category-title">Available categories</h4>
+
+              <div class="available-list">
+                @for (g of availableGroups(); track g.categoryName) {
+                  <div class="available-item">
+                    <span class="dot">⚫</span>
+                    <span>{{ g.categoryName }} ({{ g.itemsNotInTrip.length }})</span>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
         </div>
       }
     </section>

@@ -1,35 +1,28 @@
 .grid {
-  /* remove bullets & default padding from UL */
   list-style: none;
   padding: 0;
-  margin: .5rem 0 0;
-
+  margin: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 1rem;
-  align-items: stretch; /* make cells equal height */
-}
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--space-md);
+  align-items: stretch;
 
-.grid > li {
-  margin: 0;              /* remove default LI spacing */
-  /* help the card fill its cell */
-  display: flex;
-}
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
 
-.grid > li app-trip-card {
-  flex: 1;                /* the component tag stretches */
-}
+  > li {
+    margin: 0;
+    display: flex;
 
-/* Optional: subtle outline when the card inside is focused */
-.grid > li:focus-within {
-  outline: 2px solid rgba(121,166,255,.45);
-  outline-offset: 2px;
-  border-radius: .75rem;
-}
+    app-trip-card {
+      flex: 1;
+    }
+  }
 
-/* Optional: slightly larger cards on wide viewports */
-@media (min-width: 1200px) {
-  .grid {
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  > li:focus-within {
+    outline: 2px solid var(--color-primary-light);
+    outline-offset: 2px;
+    border-radius: var(--radius-lg);
   }
 }
