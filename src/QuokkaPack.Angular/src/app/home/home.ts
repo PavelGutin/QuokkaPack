@@ -6,8 +6,6 @@ import { RouterLink } from '@angular/router';
   standalone: true,
   selector: 'app-home',
   imports: [CommonModule],
-  template: `
-    <p>Welcome to QuokkaPack</p>
-  `
+  templateUrl: './home.html'
 })
 export class Home {}

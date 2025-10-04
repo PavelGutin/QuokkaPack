@@ -9,19 +9,7 @@ import { AuthService } from '../core/auth/auth.service';
   selector: 'app-login',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  template: `
-    <h2>Login</h2>
-    <form (ngSubmit)="submit()">
-      <label>Email
-        <input [(ngModel)]="email" name="email" required />
-      </label>
-      <label>Password
-        <input [(ngModel)]="password" name="password" type="password" required />
-      </label>
-      <button type="submit">Sign in</button>
-      <p *ngIf="error" style="color:red">{{ error }}</p>
-    </form>
-  `
+  templateUrl: './login.html'
 })
 export class Login {
   email = '';
