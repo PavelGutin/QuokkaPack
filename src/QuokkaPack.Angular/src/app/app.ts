@@ -1,5 +1,5 @@
 import { Component, signal } from '@angular/core';
-import { RouterLink, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from './core/auth/auth.service';
 
@@ -13,10 +13,13 @@ import { AuthService } from './core/auth/auth.service';
 export class App {
   title = 'QuokkaPack';
 
- constructor(public auth: AuthService) {}
+ constructor(public auth: AuthService, private router: Router) {}
 
   get isLoggedIn(): boolean { return this.auth.hasValidToken(); }
   get userName(): string { return this.auth.userName || 'USER'; }
 
-  logout() { this.auth.logout(); }
+  logout() {
+    this.auth.logout();
+    this.router.navigate(['/']);
+  }
 }
