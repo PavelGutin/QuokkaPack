@@ -132,17 +132,32 @@
 
               @if (availableGroups().length > 0) {
                 <div class="col-12 col-md-6 col-lg-4">
-                  <div class="card border-secondary">
-                    <div class="card-header bg-light">
+                  <div class="card border-success">
+                    <div class="card-header bg-success text-white">
                       <h4 class="h6 mb-0">Available categories</h4>
                     </div>
                     <div class="card-body">
-                      @for (g of availableGroups(); track g.categoryName) {
-                        <div class="mb-2">
-                          <span class="badge bg-secondary me-2">⚫</span>
-                          <span>{{ g.categoryName }} ({{ g.itemsNotInTrip.length }})</span>
-                        </div>
-                      }
+                      <div class="list-group list-group-flush">
+                        @for (g of availableGroups(); track g.categoryName) {
+                          <div class="list-group-item d-flex align-items-start gap-2 px-0">
+                            <div class="flex-grow-1">
+                              <div class="fw-semibold">{{ g.categoryName }}</div>
+                              <div class="text-muted small">{{ getItemNames(g) }}</div>
+                            </div>
+                            <button
+                              type="button"
+                              (click)="addCategoryToTrip(g)"
+                              title="Add category to trip"
+                              class="btn btn-sm border-0"
+                              style="opacity: 0.3; transition: opacity 0.2s;"
+                              (mouseenter)="$any($event.target).style.opacity = '1'"
+                              (mouseleave)="$any($event.target).style.opacity = '0.3'"
+                              [disabled]="loading()">
+                              ➕
+                            </button>
+                          </div>
+                        }
+                      </div>
                     </div>
                   </div>
                 </div>

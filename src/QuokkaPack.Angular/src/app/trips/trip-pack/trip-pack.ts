@@ -11,6 +11,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { forkJoin } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { TripsService } from '../../core/features/trips/trips.service';
 import { TripJoinService, CategoryGroup, ItemWithTripStatus } from '../../core/features/trips/trip-join.service';
@@ -62,9 +63,9 @@ export class TripPack implements OnInit, OnChanges {
     this.groups().filter(g => g.itemsInTrip.length > 0)
   );
 
-  // Groups where items are available but not in trip (for edit mode)
+  // Groups where NO items have been added to trip yet (completely unused categories)
   availableGroups = computed<Group[]>(() =>
-    this.groups().filter(g => g.itemsNotInTrip.length > 0)
+    this.groups().filter(g => g.itemsInTrip.length === 0 && g.itemsNotInTrip.length > 0)
   );
 
   ngOnInit(): void {
@@ -207,6 +208,26 @@ export class TripPack implements OnInit, OnChanges {
       });
   }
 
+  addCategoryToTrip(group: Group) {
+    if (this.loadedForId == null || group.itemsNotInTrip.length === 0) return;
+    this.loading.set(true);
+    this.error.set('');
+
+    // Create add requests for all items in the category
+    const addRequests = group.itemsNotInTrip.map(item => {
+      const dto = new TripItemCreateDto({ itemId: item.id, isPacked: false });
+      return this.tripsService.addTripItem(this.loadedForId!, dto);
+    });
+
+    // Execute all requests in parallel
+    forkJoin(addRequests)
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: () => this.loadTrip(this.loadedForId!),
+        error: (e) => this.error.set(e?.error || e?.message || 'Failed to add category'),
+      });
+  }
+
   // helpers
   private formatDateToInput(date: Date | undefined): string {
     if (!date) return '';
@@ -218,5 +239,9 @@ export class TripPack implements OnInit, OnChanges {
     if (!editBuffer || !editBuffer.destination) return false;
     if (!editBuffer.startDate || !editBuffer.endDate) return false;
     return editBuffer.startDate <= editBuffer.endDate;
+  }
+
+  getItemNames(group: Group): string {
+    return group.itemsNotInTrip.map(it => it.name).join(', ');
   }
 }
