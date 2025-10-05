@@ -1,5 +1,5 @@
-<article
-  class="card"
+<div
+  class="card h-100 shadow-sm"
   [attr.aria-labelledby]="'trip-' + trip.id + '-title'"
   [attr.aria-label]="'Open packing view for ' + trip.destination"
   role="button"
@@ -7,13 +7,18 @@
   (click)="pack.emit(trip.id)"
   (keydown.enter)="pack.emit(trip.id)"
   (keydown.space)="pack.emit(trip.id)"
+  style="cursor: pointer; transition: all 0.2s;"
+  (mouseenter)="$any($event.target).style.transform = 'translateY(-4px)'"
+  (mouseleave)="$any($event.target).style.transform = 'translateY(0)'"
 >
-  <header class="card-header">
-    <h2 class="dest" id="trip-{{ trip.id }}-title">{{ trip.destination }}</h2>
-    <p class="dates">
-      <time [attr.datetime]="iso(trip.startDate)">{{ fmt(trip.startDate) }}</time>
-      –
-      <time [attr.datetime]="iso(trip.endDate)">{{ fmt(trip.endDate) }}</time>
+  <div class="card-body">
+    <h5 class="card-title mb-2" id="trip-{{ trip.id }}-title">{{ trip.destination }}</h5>
+    <p class="card-text text-muted mb-0">
+      <small>
+        <time [attr.datetime]="iso(trip.startDate)">{{ fmt(trip.startDate) }}</time>
+        –
+        <time [attr.datetime]="iso(trip.endDate)">{{ fmt(trip.endDate) }}</time>
+      </small>
     </p>
-  </header>
-</article>
+  </div>
+</div>

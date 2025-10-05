@@ -1,25 +1,25 @@
-<div class="page-header">
-  <h1>My Trips</h1>
-  <div class="actions">
-    <button class="btn-primary" (click)="addTrip()">Add Trip</button>
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>My Trips</h1>
+    <button class="btn btn-primary" (click)="addTrip()">Add Trip</button>
   </div>
-</div>
 
-@if (loading) {
-  <p class="loading">Loading…</p>
-} @else if (error) {
-  <p class="error">{{ error }}</p>
-} @else if (trips.length) {
-  <app-trips-grid
-    [trips]="trips"
-    (view)="viewTrip($event)"
-    (pack)="packTrip($event)"
-    (edit)="editTrip($event)"
-    (remove)="deleteTrip($event)">
-  </app-trips-grid>
-} @else {
-  <div class="empty">
-    <div class="subtle">No trips yet.</div>
-    <button class="btn-primary" (click)="addTrip()">Add Trip</button>
-  </div>
-}
+  @if (loading) {
+    <p class="text-muted fst-italic">Loading…</p>
+  } @else if (error) {
+    <p class="text-danger">{{ error }}</p>
+  } @else if (trips.length) {
+    <app-trips-grid
+      [trips]="trips"
+      (view)="viewTrip($event)"
+      (pack)="packTrip($event)"
+      (edit)="editTrip($event)"
+      (remove)="deleteTrip($event)">
+    </app-trips-grid>
+  } @else {
+    <div class="text-center py-5">
+      <p class="text-muted mb-3">No trips yet.</p>
+      <button class="btn btn-primary" (click)="addTrip()">Add Trip</button>
+    </div>
+  }
+</div>

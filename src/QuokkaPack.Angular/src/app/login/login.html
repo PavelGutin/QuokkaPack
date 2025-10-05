@@ -1,38 +1,46 @@
-<div class="login-container">
-  <div class="login-card">
-    <h2 class="login-title">Welcome Back</h2>
-    <p class="login-subtitle">Sign in to your account</p>
+<div class="container">
+  <div class="row min-vh-100 align-items-center justify-content-center">
+    <div class="col-12 col-sm-10 col-md-8 col-lg-5 col-xl-4">
+      <div class="card shadow">
+        <div class="card-body p-4">
+          <h2 class="card-title text-center mb-1">Welcome Back</h2>
+          <p class="text-center text-muted mb-4">Sign in to your account</p>
 
-    <form (ngSubmit)="submit()" class="login-form">
-      <div class="form-group">
-        <label for="email">Email</label>
-        <input
-          id="email"
-          type="email"
-          [(ngModel)]="email"
-          name="email"
-          required
-          autocomplete="email"
-          placeholder="Enter your email" />
+          <form (ngSubmit)="submit()">
+            <div class="mb-3">
+              <label for="email" class="form-label">Email</label>
+              <input
+                id="email"
+                type="email"
+                class="form-control"
+                [(ngModel)]="email"
+                name="email"
+                required
+                autocomplete="email"
+                placeholder="Enter your email" />
+            </div>
+
+            <div class="mb-3">
+              <label for="password" class="form-label">Password</label>
+              <input
+                id="password"
+                type="password"
+                class="form-control"
+                [(ngModel)]="password"
+                name="password"
+                required
+                autocomplete="current-password"
+                placeholder="Enter your password" />
+            </div>
+
+            <div *ngIf="error" class="alert alert-danger">
+              {{ error }}
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg w-100">Sign in</button>
+          </form>
+        </div>
       </div>
-
-      <div class="form-group">
-        <label for="password">Password</label>
-        <input
-          id="password"
-          [(ngModel)]="password"
-          name="password"
-          type="password"
-          required
-          autocomplete="current-password"
-          placeholder="Enter your password" />
-      </div>
-
-      <div *ngIf="error" class="alert alert-danger">
-        {{ error }}
-      </div>
-
-      <button type="submit" class="btn-primary btn-lg w-100">Sign in</button>
-    </form>
+    </div>
   </div>
 </div>

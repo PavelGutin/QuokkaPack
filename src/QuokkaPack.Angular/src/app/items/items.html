@@ -1,109 +1,109 @@
-<!-- src/app/items/items.html -->
-<section class="mast">
-  <h2>Master List</h2>
-  <div class="meta">{{ itemCount() }} items</div>
-</section>
+<div class="container py-4">
+  <div class="mb-4">
+    <h2>Master List</h2>
+    <p class="text-muted">{{ itemCount() }} items</p>
+  </div>
 
-<!-- TODO: Fix this mess with a proper stylesheet -->
-<section class="grid-2">
-  <!-- Add New Category -->
-  <article class="card add add-category">
-    <header class="card-header tone-green">
-      <h3>Add New Category</h3>
-    </header>
-    <div class="card-body">
-      <form [formGroup]="addCategoryForm" (ngSubmit)="addCategory()"
-        style="display:flex;flex-wrap:nowrap;align-items:center;gap:0.5rem;margin:0;padding:0;">
-
-        <input type="text" formControlName="name" placeholder="Category Name"
-          style="flex:1 1 auto;min-width:0;box-sizing:border-box;padding:0.5rem 0.6rem;border:1px solid #ccc;border-radius:0.5rem;margin:0;" />
-
-        <label style="display:inline-flex;align-items:center;gap:0.35rem;flex:0 0 auto;margin:0;">
-          <input type="checkbox" formControlName="isDefault" style="margin:0;flex:0 0 auto;" />
-          <span style="white-space:nowrap;">Default</span>
-        </label>
-
-        <button type="submit" [disabled]="addCategoryForm.invalid" [attr.aria-disabled]="addCategoryForm.invalid"
-          [style.opacity]="addCategoryForm.invalid ? '0.5' : '1'"
-          [style.filter]="addCategoryForm.invalid ? 'grayscale(20%)' : 'none'"
-          [style.pointer-events]="addCategoryForm.invalid ? 'none' : 'auto'"
-          [style.cursor]="addCategoryForm.invalid ? 'not-allowed' : 'pointer'"
-          [style.background-color]="addCategoryForm.invalid ? '#9acaa9' : '#1f8f4a'"
-          [style.border-color]="addCategoryForm.invalid ? '#8ab999' : '#1f8f4a'"
-          style="flex:0 0 auto;padding:0.45rem 0.75rem;border-radius:0.5rem;border:1px solid #1f8f4a;background:#1f8f4a;color:#fff;margin:0;white-space:nowrap;">
-          Add Category
-        </button>
-      </form>
-    </div>
-  </article>
-
-  <!-- Add New Item -->
-  <article class="card add add-item">
-    <header class="card-header tone-blue">
-      <h3>Add New Item</h3>
-    </header>
-<div class="card-body">
-  <form [formGroup]="addItemForm"
-        (ngSubmit)="addItem()"
-        style="display:flex;flex-wrap:nowrap;align-items:center;gap:0.5rem;margin:0;padding:0;">
-
-    <input type="text"
-           formControlName="name"
-           placeholder="Item Name"
-           style="flex:1 1 auto;min-width:0;box-sizing:border-box;padding:0.5rem 0.6rem;border:1px solid #ccc;border-radius:0.5rem;margin:0;" />
-
-    <select formControlName="categoryId"
-            style="flex:1 1 auto;min-width:0;box-sizing:border-box;padding:0.5rem 0.6rem;border:1px solid #ccc;border-radius:0.5rem;margin:0;">
-      <option [ngValue]="null" disabled>-- Select Category --</option>
-      @for (c of categories(); track c.id) {
-      <option [ngValue]="c.id">{{ c.name }}</option>
-      }
-    </select>
-
-    <button type="submit"
-            [disabled]="addItemForm.invalid"
-            [attr.aria-disabled]="addItemForm.invalid"
-            [style.opacity]="addItemForm.invalid ? '0.5' : '1'"
-            [style.filter]="addItemForm.invalid ? 'grayscale(20%)' : 'none'"
-            [style.pointer-events]="addItemForm.invalid ? 'none' : 'auto'"
-            [style.cursor]="addItemForm.invalid ? 'not-allowed' : 'pointer'"
-            [style.background-color]="addItemForm.invalid ? '#9bbbe6' : '#1e63d6'"
-            [style.border-color]="addItemForm.invalid ? '#8aaad5' : '#1e63d6'"
-            style="flex:0 0 auto;padding:0.45rem 0.75rem;border-radius:0.5rem;border:1px solid #1e63d6;background:#1e63d6;color:#fff;margin:0;white-space:nowrap;">
-      Add Item
-    </button>
-  </form>
-</div>
-
-  </article>
-
-  @for (g of grouped(); track g.key) {
-  <article class="card">
-    <header class="card-header">
-      <div class="title-with-badge">
-        <span class="title">{{ g.category.name }}</span>
-        <span class="badge" [class.badge-success]="g.category.isDefault"
-          [class.badge-secondary]="!g.category.isDefault">
-          {{ g.category.isDefault ? 'Default' : 'Optional' }}
-        </span>
+  <div class="row g-3 mb-4">
+    <!-- Add New Category -->
+    <div class="col-12 col-lg-6">
+      <div class="card border-success">
+        <div class="card-header bg-success text-white">
+          <h3 class="h5 mb-0">Add New Category</h3>
+        </div>
+        <div class="card-body">
+          <form [formGroup]="addCategoryForm" (ngSubmit)="addCategory()" class="row g-2">
+            <div class="col">
+              <input type="text" formControlName="name" class="form-control" placeholder="Category Name" />
+            </div>
+            <div class="col-auto">
+              <div class="form-check mt-2">
+                <input type="checkbox" formControlName="isDefault" class="form-check-input" id="isDefault" />
+                <label class="form-check-label" for="isDefault">Default</label>
+              </div>
+            </div>
+            <div class="col-12 col-sm-auto">
+              <button type="submit" class="btn btn-success w-100" [disabled]="addCategoryForm.invalid">
+                Add Category
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
-      <button class="btn outline danger sm" title="Delete Category" (click)="removeCategory(g.category.id)">🗑</button>
-    </header>
-
-    <div class="card-body">
-      @if (g.items.length === 0) {
-      <p class="muted fst-italic">No items in this category.</p>
-      } @else {
-      <ul class="item-grid" role="list">
-        @for (it of g.items; track it.id) {
-        <li class="item-row">
-          <button class="btn ghost sm danger" title="Delete Item" (click)="removeItem(it.id!)">🗑</button>
-          <span class="label">{{ it.name }}</span>
-        </li>
-        }
-      </ul>
-      }
     </div>
-  </article>
-  }
-</section>
+
+    <!-- Add New Item -->
+    <div class="col-12 col-lg-6">
+      <div class="card border-primary">
+        <div class="card-header bg-primary text-white">
+          <h3 class="h5 mb-0">Add New Item</h3>
+        </div>
+        <div class="card-body">
+          <form [formGroup]="addItemForm" (ngSubmit)="addItem()" class="row g-2">
+            <div class="col-12 col-sm">
+              <input type="text" formControlName="name" class="form-control" placeholder="Item Name" />
+            </div>
+            <div class="col-12 col-sm">
+              <select formControlName="categoryId" class="form-select">
+                <option [ngValue]="null" disabled>-- Select Category --</option>
+                @for (c of categories(); track c.id) {
+                  <option [ngValue]="c.id">{{ c.name }}</option>
+                }
+              </select>
+            </div>
+            <div class="col-12 col-sm-auto">
+              <button type="submit" class="btn btn-primary w-100" [disabled]="addItemForm.invalid">
+                Add Item
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    @for (g of grouped(); track g.key) {
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="card h-100">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-2">
+              <span class="fw-semibold">{{ g.category.name }}</span>
+              <span class="badge" [class.bg-success]="g.category.isDefault" [class.bg-secondary]="!g.category.isDefault">
+                {{ g.category.isDefault ? 'Default' : 'Optional' }}
+              </span>
+            </div>
+            <button
+              class="btn btn-sm border-0"
+              title="Delete Category"
+              (click)="removeCategory(g.category.id)"
+              style="opacity: 0.3; transition: opacity 0.2s;"
+              (mouseenter)="$any($event.target).style.opacity = '1'"
+              (mouseleave)="$any($event.target).style.opacity = '0.3'">🗑</button>
+          </div>
+
+          <div class="card-body">
+            @if (g.items.length === 0) {
+              <p class="text-muted fst-italic mb-0">No items in this category.</p>
+            } @else {
+              <div class="list-group list-group-flush">
+                @for (it of g.items; track it.id) {
+                  <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                    <span>{{ it.name }}</span>
+                    <button
+                      class="btn btn-sm border-0"
+                      title="Delete Item"
+                      (click)="removeItem(it.id!)"
+                      style="opacity: 0.3; transition: opacity 0.2s;"
+                      (mouseenter)="$any($event.target).style.opacity = '1'"
+                      (mouseleave)="$any($event.target).style.opacity = '0.3'">🗑</button>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>

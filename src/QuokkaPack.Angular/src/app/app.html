@@ -1,66 +1,40 @@
-<header>
-  <div class="header-container">
-    <div class="logo">
-      <h1>🦘📦 QuokkaPack</h1>
-    </div>
+<nav class="navbar navbar-expand-md navbar-dark bg-primary sticky-top">
+  <div class="container-fluid">
+    <a class="navbar-brand fw-bold" href="/">🦘📦 QuokkaPack</a>
 
-    @if (!isLoggedIn) {
-      <!-- Logged out -->
-      <nav role="navigation" aria-label="Main" class="desktop-nav">
-        <ul class="nav-list">
-          <li><a routerLink="/login" class="nav-link">Login</a></li>
-        </ul>
-      </nav>
-    } @else {
-      <!-- Logged in - Desktop Nav -->
-      <nav role="navigation" aria-label="Main" class="desktop-nav">
-        <ul class="nav-list">
-          <li><a routerLink="/" class="nav-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Home</a></li>
-          <li><a routerLink="/trips" class="nav-link" routerLinkActive="active">Trips</a></li>
-          <li><a routerLink="/items" class="nav-link" routerLinkActive="active">Items</a></li>
-        </ul>
-      </nav>
-
-      <div class="user-menu">
-        <span class="user-greeting">👋 {{ userName }}</span>
-        <button type="button" class="btn-logout" (click)="logout()">
-          <span class="logout-icon">🚪</span>
-          <span>Logout</span>
-        </button>
-      </div>
-
-      <!-- Mobile Menu Toggle -->
-      <button type="button" class="mobile-menu-toggle" (click)="toggleMobileMenu()" [attr.aria-expanded]="mobileMenuOpen">
-        <span class="hamburger-icon">
-          <span></span>
-          <span></span>
-          <span></span>
-        </span>
+    @if (isLoggedIn) {
+      <button class="navbar-toggler" type="button" (click)="toggleMobileMenu()" [attr.aria-expanded]="mobileMenuOpen" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
       </button>
+
+      <div class="collapse navbar-collapse" [class.show]="mobileMenuOpen">
+        <ul class="navbar-nav me-auto mb-2 mb-md-0">
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="closeMobileMenu()">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/trips" routerLinkActive="active" (click)="closeMobileMenu()">Trips</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/items" routerLinkActive="active" (click)="closeMobileMenu()">Items</a>
+          </li>
+        </ul>
+        <div class="d-flex align-items-center gap-3">
+          <span class="navbar-text">👋 {{ userName }}</span>
+          <button type="button" class="btn btn-outline-light btn-sm" (click)="logout()">
+            <span>🚪</span>
+            <span class="ms-1">Logout</span>
+          </button>
+        </div>
+      </div>
+    } @else {
+      <div class="navbar-nav">
+        <a class="nav-link" routerLink="/login">Login</a>
+      </div>
     }
   </div>
+</nav>
 
-  @if (isLoggedIn && mobileMenuOpen) {
-    <!-- Mobile Nav -->
-    <nav role="navigation" aria-label="Mobile" class="mobile-nav">
-      <ul class="mobile-nav-list">
-        <li><a routerLink="/" class="mobile-nav-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="closeMobileMenu()">Home</a></li>
-        <li><a routerLink="/trips" class="mobile-nav-link" routerLinkActive="active" (click)="closeMobileMenu()">Trips</a></li>
-        <li><a routerLink="/items" class="mobile-nav-link" routerLinkActive="active" (click)="closeMobileMenu()">Items</a></li>
-        <li class="mobile-user-info">
-          <span class="mobile-user-greeting">👋 {{ userName }}</span>
-        </li>
-        <li>
-          <button type="button" class="mobile-btn-logout" (click)="logout()">
-            <span class="logout-icon">🚪</span>
-            <span>Logout</span>
-          </button>
-        </li>
-      </ul>
-    </nav>
-  }
-</header>
-
-<main>
+<main class="container-fluid">
   <router-outlet></router-outlet>
 </main>
