@@ -29,6 +29,7 @@ type Group = CategoryGroup;
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './trip-pack.html',
+  styleUrl: './trip-pack.scss'
 })
 
 export class TripPack implements OnInit, OnChanges {

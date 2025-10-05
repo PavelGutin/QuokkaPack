@@ -27,7 +27,8 @@
       "WebFetch(domain:i.imgur.com)",
       "Bash(npx ng:*)",
       "Bash(find:*)",
-      "Bash(git log:*)"
+      "Bash(git log:*)",
+      "Bash(git push:*)"
     ],
     "deny": [],
     "ask": []
