@@ -8,7 +8,7 @@ using QuokkaPack.Shared.Models;
 
 namespace QuokkaPack.API.Controllers
 {
-    [Authorize(AuthenticationSchemes = "Bearer")] //TODO: Figure out why I need to specify "Bearer" here
+    [Authorize(AuthenticationSchemes = "Bearer")]
     [ApiController]
     [Route("api/Trips/{tripId}/Categories")]
     public class TripCategoriesController : ControllerBase

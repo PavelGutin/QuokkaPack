@@ -11,8 +11,7 @@ import { Router } from '@angular/router';
   selector: 'app-trips-page',
   imports: [CommonModule, TripsGrid],
   templateUrl: './trips-page.html',
-  styleUrls: ['./trips-page.scss'],
-  //changeDetection: ChangeDetectionStrategy.OnPush,  //TODO: Bring this back and fix it
+  styleUrls: ['./trips-page.scss']
 })
 export class TripsPage implements OnInit {
   trips: TripSummaryReadDto[] = [];
