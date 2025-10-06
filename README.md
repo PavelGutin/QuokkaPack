@@ -304,8 +304,9 @@ This starts:
    - Update `appsettings.Production.json` (template included)
 
 3. **CORS Configuration**
-   - Update `Program.cs` CORS policy with your production domain
-   - Remove localhost origins for production builds
+   - Set `AllowedOrigins:Production` in appsettings.Production.json or via environment variable
+   - Example: `https://quokkapack.yourdomain.com`
+   - Localhost origins are automatically included for development
 
 4. **Rate Limiting**
    - Review and adjust rate limits in `appsettings.Production.json`
@@ -329,6 +330,7 @@ npm run build
 ASPNETCORE_ENVIRONMENT=Production
 JwtSettings__Secret=your-production-jwt-secret
 ConnectionStrings__DefaultConnection=your-production-db-connection
+AllowedOrigins__Production=https://quokkapack.yourdomain.com
 ```
 
 ---

@@ -17,14 +17,26 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
+        var allowedOrigins = new List<string>
+        {
+            "http://localhost:4200",              // Angular dev server
+            "https://localhost:7045",             // Blazor dev server (bare metal)
+            "http://localhost:7200",              // Blazor in Docker
+            "http://quokkapack.blazor"            // Internal Docker hostname
+        };
+
+        // Add production origins from environment variable if configured
+        var productionOrigin = builder.Configuration["AllowedOrigins:Production"];
+        if (!string.IsNullOrEmpty(productionOrigin))
+        {
+            allowedOrigins.Add(productionOrigin);
+        }
+
         policy
-            .WithOrigins(
-                "https://localhost:7045",         // Blazor dev server (bare metal)
-                "http://localhost:7200",          // Blazor in Docker (based on your docker-compose)
-                "http://quokkapack.blazor")       // Internal Docker hostname (if you're using it)
+            .WithOrigins(allowedOrigins.ToArray())
             .AllowAnyHeader()
             .AllowAnyMethod()
-            .AllowCredentials(); // If you ever use cookies/session auth
+            .AllowCredentials();
     });
 });
 
