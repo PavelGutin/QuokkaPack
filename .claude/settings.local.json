@@ -33,7 +33,8 @@
       "Bash(npm start)",
       "Bash(git rm:*)",
       "Bash(dotnet add package:*)",
-      "Bash(dotnet test:*)"
+      "Bash(dotnet test:*)",
+      "Bash(dotnet clean:*)"
     ],
     "deny": [],
     "ask": []

@@ -32,4 +32,9 @@
 		<Using Include="Xunit" />
 	</ItemGroup>
 
+	<!-- Copy testhost.deps.json after build for WebApplicationFactory -->
+	<Target Name="CopyTestHostDeps" AfterTargets="Build">
+		<Copy SourceFiles="$(OutDir)QuokkaPack.ApiTests.deps.json" DestinationFiles="$(OutDir)testhost.deps.json" SkipUnchangedFiles="true" />
+	</Target>
+
 </Project>

@@ -19,6 +19,11 @@ namespace QuokkaPack.ApiTests
         {
             builder.UseEnvironment("Testing");
 
+            // Set content root to the API project directory (relative to solution root)
+            var solutionRoot = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", ".."));
+            var apiProjectPath = Path.Combine(solutionRoot, "src", "QuokkaPack.API");
+            builder.UseContentRoot(apiProjectPath);
+
             builder.ConfigureTestServices(services =>
             {
                 services.AddAuthentication(options =>

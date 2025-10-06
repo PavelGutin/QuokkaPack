@@ -117,3 +117,5 @@ Log.Information("QuokkaPack.API started successfully.");
 
 app.Run();
 
+// Make Program class accessible to tests
+public partial class Program { }
