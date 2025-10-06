@@ -91,7 +91,7 @@ namespace QuokkaPack.API.Controllers
 
         // PUT: /api/trips/{tripId}/categories/{categoryId}/reset
         [HttpPut("{categoryId}/reset")]
-        public async Task<IActionResult> ResetCategoryInTrip(int tripId, int categoryId)
+        public Task<IActionResult> ResetCategoryInTrip(int tripId, int categoryId)
         {
             throw new NotImplementedException();
             //var user = await _userResolver.GetOrCreateAsync(User);
