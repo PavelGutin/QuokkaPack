@@ -1,3 +1,4 @@
+using AspNetCoreRateLimit;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using QuokkaPack.API.Services;
@@ -61,6 +62,12 @@ builder.Host.UseSerilog((ctx, lc) => lc
 builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddScoped<IUserResolver, UserResolver>();
 
+// Rate limiting configuration
+builder.Services.AddMemoryCache();
+builder.Services.Configure<IpRateLimitOptions>(builder.Configuration.GetSection("IpRateLimiting"));
+builder.Services.AddInMemoryRateLimiting();
+builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
+
 
 var app = builder.Build();
 
@@ -76,6 +83,8 @@ if (!app.Environment.IsDevelopment())
 app.UseSerilogRequestLogging();
 
 app.UseRouting();
+
+app.UseIpRateLimiting();
 
 app.UseCors("AllowFrontend");
 

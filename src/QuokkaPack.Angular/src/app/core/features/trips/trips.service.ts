@@ -56,7 +56,6 @@ export class TripsService {
   }
 
   setTripItemPacked(tripId: number, tripItemId: number, checked: boolean){
-    console.log(`setTripItemPacked called with tripId=${tripId}, tripItemId=${tripItemId}, checked=${checked}`);
     return this.http.put<void>(`${this.base}/${tripItemId}/TripItems/batch`, '');
   }
 

@@ -29,24 +29,19 @@ export class TripsPage implements OnInit {
   }
 
 private fetchTrips() {
-    this.loading = true; 
+    this.loading = true;
     this.error = '';
-    console.log('Fetching trips…');
 
     this.tripsSvc
       .list()
       .pipe(finalize(() => {
         this.loading = false;
-        console.log('Fetch complete. loading =', this.loading, 'error =', this.error);
       }))
       .subscribe({
         next: trips => {
-          console.log('Service response (domain Trips):', trips);
           this.trips = Array.isArray(trips) ? trips : [];
-          console.log('Parsed trips array:', this.trips);
         },
         error: e => {
-          console.error('Service error:', e);
           this.error = e?.error || e?.message || 'Error';
         }
       });

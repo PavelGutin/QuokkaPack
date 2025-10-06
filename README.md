@@ -38,6 +38,9 @@ Whether you're planning a weekend getaway, a family vacation, or a multi-week ad
 - **Auth Guards**
   Client-side route protection with automatic redirect to login for unauthenticated users.
 
+- **Rate Limiting**
+  API rate limiting to prevent abuse (10 auth requests/minute, 200 general requests/minute).
+
 ### 🎨 User Experience
 
 - **Modern UI with Bootstrap**
@@ -110,31 +113,47 @@ QuokkaPack follows a clean, API-first architecture with clear separation of conc
    cd QuokkaPack
    ```
 
-2. **Set up the database**
+2. **Set up environment variables**
+   ```bash
+   # Copy the example .env file and configure your secrets
+   cp .env.example .env
+   # Edit .env and set JWT_SECRET to a secure random string (min 32 characters)
+   ```
+
+3. **Set up the database**
    ```bash
    cd src/QuokkaPack.API
    dotnet ef database update
    ```
 
-3. **Configure user secrets** (optional - defaults work for local dev)
+4. **Configure JWT secrets**
+
+   For **development**, use user secrets (recommended):
    ```bash
+   cd src/QuokkaPack.API
    dotnet user-secrets set "JwtSettings:Secret" "your-super-secret-key-here-min-32-chars"
    ```
 
-4. **Start the API**
+   For **production**, configure via environment variables or appsettings.Production.json (never commit secrets!)
+   ```bash
+   export JwtSettings__Secret="your-production-secret-min-32-chars"
+   export ConnectionStrings__DefaultConnection="your-production-connection-string"
+   ```
+
+5. **Start the API**
    ```bash
    cd src/QuokkaPack.API
    dotnet run
    ```
    API will be available at `http://localhost:5000`
 
-5. **Start the Angular app**
+6. **Start the Angular app**
    ```bash
    cd src/QuokkaPack.Angular
    npm install
    npm start
    ```
-   App will be available at `http://localhost:4200`
+   App will be available at `http://localhost:4200` (proxies to API on port 7100)
 
 ### First Time Setup
 
@@ -273,13 +292,43 @@ This starts:
 
 ### Production Build
 
+**Important**: Before deploying to production, ensure you've configured:
+
+1. **Secrets Management**
+   - Set `JwtSettings:Secret` via environment variables (min 32 characters)
+   - Never commit secrets to source control
+   - Use Azure Key Vault, AWS Secrets Manager, or similar for production
+
+2. **Database Connection**
+   - Configure production connection string via environment variables
+   - Update `appsettings.Production.json` (template included)
+
+3. **CORS Configuration**
+   - Update `Program.cs` CORS policy with your production domain
+   - Remove localhost origins for production builds
+
+4. **Rate Limiting**
+   - Review and adjust rate limits in `appsettings.Production.json`
+   - Consider using Redis for distributed rate limiting
+
+**Build Commands:**
+
 ```bash
-# Build API
+# Build API for production
 dotnet publish src/QuokkaPack.API -c Release -o out
 
-# Build Angular app
+# Build Angular app for production
 cd src/QuokkaPack.Angular
 npm run build
+# Output will be in dist/QuokkaPack.Angular/browser
+```
+
+**Environment Variables for Production:**
+
+```bash
+ASPNETCORE_ENVIRONMENT=Production
+JwtSettings__Secret=your-production-jwt-secret
+ConnectionStrings__DefaultConnection=your-production-db-connection
 ```
 
 ---

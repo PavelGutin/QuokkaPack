@@ -28,7 +28,11 @@
       "Bash(npx ng:*)",
       "Bash(find:*)",
       "Bash(git log:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(npm install:*)",
+      "Bash(npm start)",
+      "Bash(git rm:*)",
+      "Bash(dotnet add package:*)"
     ],
     "deny": [],
     "ask": []

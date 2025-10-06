@@ -53,7 +53,6 @@ export class TripCreate implements OnInit {
       error: (err) => {
         this.error = 'Failed to load categories';
         this.loading = false;
-        console.error(err);
       }
     });
   }
@@ -67,7 +66,6 @@ export class TripCreate implements OnInit {
       error: (err) => {
         this.error = 'Failed to load items';
         this.loading = false;
-        console.error(err);
       }
     });
   }
@@ -107,7 +105,6 @@ export class TripCreate implements OnInit {
       error: (err) => {
         this.loading = false;
         this.error = err?.error?.message || 'Failed to create trip';
-        console.error(err);
       }
     });
   }
