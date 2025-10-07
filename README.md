@@ -166,6 +166,10 @@ The database is automatically seeded with:
 
 ## 📋 API Endpoints
 
+### Health Check
+- `GET /api/health` - Basic health check (returns status and version)
+- `GET /api/health/detailed` - Detailed health check (includes database connectivity)
+
 ### Authentication
 - `POST /api/auth/login` - Login with username/password
 - `POST /api/auth/register` - Register new user
@@ -307,6 +311,8 @@ This starts:
    - Set `AllowedOrigins:Production` in appsettings.Production.json or via environment variable
    - Example: `https://quokkapack.yourdomain.com`
    - Localhost origins are automatically included for development
+   - Environment variable format: `AllowedOrigins__Production=https://your-domain.com`
+   - Multiple origins can be configured by modifying Program.cs to accept comma-separated values
 
 4. **Rate Limiting**
    - Review and adjust rate limits in `appsettings.Production.json`
