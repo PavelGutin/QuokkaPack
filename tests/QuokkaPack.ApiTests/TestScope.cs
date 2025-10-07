@@ -13,7 +13,7 @@ public class TestScope : IAsyncDisposable
     public AppDbContext Db => Scope.ServiceProvider.GetRequiredService<AppDbContext>();
     public IUserResolver UserResolver => Scope.ServiceProvider.GetRequiredService<IUserResolver>();
     public ClaimsPrincipal Principal { get; }
-    public MasterUser MasterUser { get; private set; }
+    public MasterUser MasterUser { get; private set; } = null!;
 
     private TestScope(IServiceScope scope, ClaimsPrincipal principal)
     {

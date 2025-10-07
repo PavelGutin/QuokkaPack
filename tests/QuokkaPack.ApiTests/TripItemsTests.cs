@@ -11,7 +11,7 @@ namespace QuokkaPack.ApiTests.Controllers
     {
         private readonly HttpClient _client;
         private readonly ApiTestFactory _factory;
-        private TestScope _scope;
+        private TestScope _scope = null!;
 
         public TripItemsTests(ApiTestFactory factory)
         {

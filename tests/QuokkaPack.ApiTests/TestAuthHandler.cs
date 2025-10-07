@@ -14,9 +14,9 @@ public class TestAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions
         IOptionsMonitor<AuthenticationSchemeOptions> options,
         ILoggerFactory logger,
         UrlEncoder encoder,
-        ISystemClock clock,
         IUserResolver userResolver)
-        : base(options, logger, encoder, clock) {
+        : base(options, logger, encoder)
+    {
         _userResolver = userResolver;
     }
 
