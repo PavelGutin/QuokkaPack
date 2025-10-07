@@ -47,35 +47,4 @@
 		<Folder Include="Logs\" />
 	</ItemGroup>
 
-	<!-- Auto-generate Angular API client when API contracts change -->
-	<!--
-		Smart incremental build:
-		- Runs in both Debug and Release configurations
-		- Only runs if Controllers, DTOs, or Models have changed
-		- Skips if api-client.ts is newer than all inputs
-	-->
-	<ItemGroup>
-		<ApiContractFiles Include="Controllers\**\*.cs" />
-		<ApiContractFiles Include="..\QuokkaPack.Shared\DTOs\**\*.cs" />
-		<ApiContractFiles Include="..\QuokkaPack.Shared\Models\**\*.cs" />
-	</ItemGroup>
-
-	<Target Name="GenerateAngularClient" AfterTargets="Build" Inputs="@(ApiContractFiles)" Outputs="$(MSBuildProjectDirectory)\..\QuokkaPack.Angular\src\app\api\api-client.ts">
-
-		<Message Text="API contracts changed - regenerating Angular client..." Importance="high" />
-
-		<!-- Step 1: Generate OpenAPI spec from running API -->
-		<Exec Command="pwsh &quot;$(MSBuildProjectDirectory)\..\..\tools\codegen\generate-openapi.ps1&quot;" ContinueOnError="true" WorkingDirectory="$(MSBuildProjectDirectory)" IgnoreExitCode="false" EnvironmentVariables="MSBUILD_RUNNING=true">
-			<Output TaskParameter="ExitCode" PropertyName="SpecGenExitCode" />
-		</Exec>
-
-		<!-- Step 2: Generate TypeScript client from OpenAPI spec -->
-		<Exec Command="dotnet nswag run &quot;$(MSBuildProjectDirectory)\..\QuokkaPack.Angular\codegen\nswag.json&quot;" ContinueOnError="true" WorkingDirectory="$(MSBuildProjectDirectory)\..\QuokkaPack.Angular" Condition="'$(SpecGenExitCode)' == '0'">
-			<Output TaskParameter="ExitCode" PropertyName="ClientGenExitCode" />
-		</Exec>
-
-		<Message Text="Angular API client generation completed successfully!" Importance="high" Condition="'$(SpecGenExitCode)' == '0' AND '$(ClientGenExitCode)' == '0'" />
-		<Warning Text="Angular API client generation failed. Run 'npm run codegen' manually in src/QuokkaPack.Angular." Condition="'$(SpecGenExitCode)' != '0' OR '$(ClientGenExitCode)' != '0'" />
-	</Target>
-
 </Project>
