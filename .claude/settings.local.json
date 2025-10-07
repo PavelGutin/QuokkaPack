@@ -45,7 +45,9 @@
       "Bash(del \"C:\\Users\\Pasha\\source\\repos\\PavelGutin\\QuokkaPack\\src\\QuokkaPack.Data\\DbInitializer.cs\")",
       "Bash(chmod:*)",
       "Bash(Get-Process)",
-      "Bash(Where-Object { $_rocessName -eq \"dotnet\" -or $_rocessName -eq \"node\" })"
+      "Bash(Where-Object { $_rocessName -eq \"dotnet\" -or $_rocessName -eq \"node\" })",
+      "Bash(Get-NetTCPConnection -LocalPort 7100 -ErrorAction SilentlyContinue)",
+      "Bash(Select-Object LocalAddress, LocalPort, State, OwningProcess)"
     ],
     "deny": [],
     "ask": []
