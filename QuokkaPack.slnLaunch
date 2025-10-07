@@ -1,0 +1,17 @@
+[
+  {
+    "Name": "Angular + API [bare metal]",
+    "Projects": [
+      {
+        "Path": "src\\QuokkaPack.API\\QuokkaPack.API.csproj",
+        "Action": "Start",
+        "DebugTarget": "https"
+      },
+      {
+        "Path": "src\\QuokkaPack.Angular\\QuokkaPack.Angular.esproj",
+        "Action": "Start",
+        "DebugTarget": "localhost (Chrome)"
+      }
+    ]
+  }
+]
