@@ -140,27 +140,33 @@ QuokkaPack follows a clean, API-first architecture with clear separation of conc
    export ConnectionStrings__DefaultConnection="your-production-connection-string"
    ```
 
-5. **Start the API**
+5. **Seed demo data (optional)**
+
+   After the API is running, seed demo data:
+   ```bash
+   # PowerShell (Windows)
+   pwsh tools/seed-demo-data.ps1
+
+   # Bash (macOS/Linux)
+   bash tools/seed-demo-data.sh
+   ```
+
+   This creates a demo user (demo@quokkapack.com / Demo123!) with sample categories, items, and trips.
+
+6. **Start the API**
    ```bash
    cd src/QuokkaPack.API
    dotnet run
    ```
    API will be available at `http://localhost:5000`
 
-6. **Start the Angular app**
+7. **Start the Angular app**
    ```bash
    cd src/QuokkaPack.Angular
    npm install
    npm start
    ```
    App will be available at `http://localhost:4200` (proxies to API on port 7100)
-
-### First Time Setup
-
-The database is automatically seeded with:
-- Default categories (Clothes, Electronics, Toiletries, Documents, etc.)
-- Sample items for each category
-- A test user account
 
 ---
 
@@ -235,36 +241,64 @@ Primary user entity linking to ASP.NET Identity. Owns all categories and items.
 
 ## 🛠️ Development Workflow
 
-### Code Generation
-
-TypeScript API clients are automatically generated when the backend changes:
-
-```bash
-# Manual generation (if needed)
-cd src/QuokkaPack.Angular
-npm run codegen
-```
-
-The generation process:
-1. Builds the API project
-2. Starts a temporary API instance
-3. Fetches the OpenAPI spec from `/swagger/v1/swagger.json`
-4. Generates TypeScript client using NSwag
-5. Applies fixes for Angular compatibility
-
 ### Database Migrations
+
+When you modify entity models, create and apply migrations:
 
 ```bash
 # Create a new migration
 cd src/QuokkaPack.API
 dotnet ef migrations add MigrationName
 
-# Apply migrations
+# Apply migrations to your database
 dotnet ef database update
 
-# Rollback to a specific migration
+# Rollback to a specific migration (if needed)
 dotnet ef database update PreviousMigrationName
 ```
+
+**Note**: Migrations are applied manually. Run `dotnet ef database update` after pulling new migrations or creating your own.
+
+### Code Generation
+
+When API contracts change (DTOs, models, controllers), regenerate the TypeScript client:
+
+```bash
+# From Angular project
+cd src/QuokkaPack.Angular
+npm run codegen
+
+# Or use the script directly (cross-platform)
+pwsh ../../tools/generate-openapi.ps1  # Windows/PowerShell
+bash ../../tools/generate-openapi.sh   # macOS/Linux
+```
+
+The generation process:
+1. Builds the API project
+2. Starts a temporary API instance
+3. Fetches the OpenAPI spec from `/openapi/v1.json`
+4. Generates TypeScript client using NSwag
+5. Applies fixes for Angular compatibility
+
+**Note**: Code generation is manual. Run `npm run codegen` when you modify API contracts.
+
+### Seeding Demo Data
+
+To populate the database with demo data for development:
+
+```bash
+# PowerShell
+pwsh tools/seed-demo-data.ps1
+
+# Bash
+bash tools/seed-demo-data.sh
+```
+
+This creates:
+- Demo user: demo@quokkapack.com / Demo123!
+- 6 categories (Toiletries, Clothing, Electronics, etc.)
+- 43 items across categories
+- 5 sample trips
 
 ### Running Tests
 
