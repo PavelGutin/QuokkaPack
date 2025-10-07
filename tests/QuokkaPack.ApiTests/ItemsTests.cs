@@ -26,10 +26,39 @@ namespace QuokkaPack.ApiTests.Controllers
         }
 
         [Fact]
+        public async Task GetById_ShouldReturnOk_WhenItemExists()
+        {
+            var item = await SeedItemAsync();
+
+            var response = await _client.GetAsync($"/api/items/{item.Id}");
+
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            var result = await response.Content.ReadFromJsonAsync<ItemReadDto>();
+            result.Should().NotBeNull();
+            result!.Id.Should().Be(item.Id);
+            result.Name.Should().Be(item.Name);
+        }
+
+        [Fact]
         public async Task GetById_ShouldReturnNotFound_WhenIdDoesNotExist()
         {
             var response = await _client.GetAsync("/api/items/9999");
             response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        }
+
+        [Fact]
+        public async Task GetAll_ShouldReturnItemsWithCategoryInfo()
+        {
+            var item = await SeedItemAsync();
+
+            var response = await _client.GetAsync("/api/items");
+
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            var results = await response.Content.ReadFromJsonAsync<List<ItemReadDto>>();
+            results.Should().NotBeNull();
+            results.Should().Contain(i => i.Id == item.Id);
+            var returnedItem = results!.First(i => i.Id == item.Id);
+            returnedItem.CategoryName.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -86,15 +115,27 @@ namespace QuokkaPack.ApiTests.Controllers
 
         public async Task<Item> SeedItemAsync()
         {
-            var item = CreateItem(_scope.MasterUser.Id);
+            // First create a category
+            var category = new Category
+            {
+                Name = "Test Category",
+                IsDefault = false,
+                MasterUserId = _scope.MasterUser.Id
+            };
+            _scope.Db.Categories.Add(category);
+            await _scope.Db.SaveChangesAsync();
+
+            // Then create item with that category
+            var item = CreateItem(_scope.MasterUser.Id, category.Id);
             _scope.Db.Items.Add(item);
             await _scope.Db.SaveChangesAsync();
             return item;
         }
-        private Item CreateItem(Guid masterUserId) => new Item
+        private Item CreateItem(Guid masterUserId, int categoryId) => new Item
         {
             Name = "SeededItem",
-            MasterUserId = masterUserId
+            MasterUserId = masterUserId,
+            CategoryId = categoryId
         };
     }
 }
