@@ -44,12 +44,21 @@ namespace QuokkaPack.ServerCommon.Extensions
                             }
 
                             // 2. Fallback to session (for browser-based requests)
+                            // Only access session if it's available (configured in the app)
                             if (string.IsNullOrEmpty(context.Token))
                             {
-                                var token = context.HttpContext.Session.GetString("JWT");
-                                if (!string.IsNullOrEmpty(token))
+                                try
                                 {
-                                    context.Token = token;
+                                    var token = context.HttpContext.Session.GetString("JWT");
+                                    if (!string.IsNullOrEmpty(token))
+                                    {
+                                        context.Token = token;
+                                    }
+                                }
+                                catch (InvalidOperationException)
+                                {
+                                    // Session not configured - skip session token retrieval
+                                    // This is expected in test environments
                                 }
                             }
 
