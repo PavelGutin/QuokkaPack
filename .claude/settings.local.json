@@ -41,7 +41,11 @@
       "Bash(dotnet ef database:*)",
       "Bash(dotnet tool install:*)",
       "Bash(dotnet ef migrations:*)",
-      "Bash(dotnet user-secrets:*)"
+      "Bash(dotnet user-secrets:*)",
+      "Bash(del \"C:\\Users\\Pasha\\source\\repos\\PavelGutin\\QuokkaPack\\src\\QuokkaPack.Data\\DbInitializer.cs\")",
+      "Bash(chmod:*)",
+      "Bash(Get-Process)",
+      "Bash(Where-Object { $_rocessName -eq \"dotnet\" -or $_rocessName -eq \"node\" })"
     ],
     "deny": [],
     "ask": []
