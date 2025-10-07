@@ -24,10 +24,37 @@ namespace QuokkaPack.ApiTests.Controllers
         }
 
         [Fact]
+        public async Task GetById_ShouldReturnOk_WhenCategoryExists()
+        {
+            var category = await SeedCategoryAsync();
+
+            var response = await _client.GetAsync($"/api/categories/{category.Id}");
+
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            var result = await response.Content.ReadFromJsonAsync<Category>();
+            result.Should().NotBeNull();
+            result!.Id.Should().Be(category.Id);
+            result.Name.Should().Be(category.Name);
+        }
+
+        [Fact]
         public async Task GetById_ShouldReturnNotFound_WhenIdDoesNotExist()
         {
             var response = await _client.GetAsync("/api/categories/9999");
             response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        }
+
+        [Fact]
+        public async Task GetAll_ShouldReturnCategories()
+        {
+            var category = await SeedCategoryAsync();
+
+            var response = await _client.GetAsync("/api/categories");
+
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            var results = await response.Content.ReadFromJsonAsync<List<Category>>();
+            results.Should().NotBeNull();
+            results.Should().Contain(c => c.Id == category.Id);
         }
 
         [Fact]

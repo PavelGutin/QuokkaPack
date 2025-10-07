@@ -26,10 +26,37 @@ namespace QuokkaPack.ApiTests.Controllers
         }
 
         [Fact]
+        public async Task GetById_ShouldReturnOk_WhenTripExists()
+        {
+            var trip = await SeedTripAsync();
+
+            var response = await _client.GetAsync($"/api/trips/{trip.Id}");
+
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            var result = await response.Content.ReadFromJsonAsync<TripDetailsReadDto>();
+            result.Should().NotBeNull();
+            result!.Id.Should().Be(trip.Id);
+            result.Destination.Should().Be(trip.Destination);
+        }
+
+        [Fact]
         public async Task GetById_ShouldReturnNotFound_WhenIdDoesNotExist()
         {
             var response = await _client.GetAsync("/api/trips/9999");
             response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        }
+
+        [Fact]
+        public async Task GetAll_ShouldReturnTrips()
+        {
+            var trip = await SeedTripAsync();
+
+            var response = await _client.GetAsync("/api/trips");
+
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            var results = await response.Content.ReadFromJsonAsync<List<TripSummaryReadDto>>();
+            results.Should().NotBeNull();
+            results.Should().Contain(t => t.Id == trip.Id);
         }
 
         [Fact]
