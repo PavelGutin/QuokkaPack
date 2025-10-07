@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -66,12 +67,14 @@ namespace QuokkaPack.ServerCommon.Extensions
                         },
                         OnAuthenticationFailed = context =>
                         {
-                            Console.WriteLine($"AUTH FAIL: {context.Exception.Message}");
+                            var log = context.HttpContext.RequestServices.GetService<ILogger<JwtBearerEvents>>();
+                            log?.LogWarning("JWT authentication failed: {Message}", context.Exception.Message);
                             return Task.CompletedTask;
                         },
                         OnTokenValidated = context =>
                         {
-                            Console.WriteLine($"AUTH OK: {context.SecurityToken}");
+                            var log = context.HttpContext.RequestServices.GetService<ILogger<JwtBearerEvents>>();
+                            log?.LogDebug("JWT token validated successfully");
                             return Task.CompletedTask;
                         }
                     };
