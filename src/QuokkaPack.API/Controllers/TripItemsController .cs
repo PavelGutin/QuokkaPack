@@ -93,7 +93,7 @@ namespace QuokkaPack.API.Controllers
             _context.TripItems.Add(newTripItem);
             await _context.SaveChangesAsync();
 
-            return NoContent();
+            return CreatedAtAction(nameof(GetTripItems), new { tripId }, new { id = newTripItem.Id });
         }
 
         /// <summary>
