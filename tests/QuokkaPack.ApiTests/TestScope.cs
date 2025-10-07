@@ -35,7 +35,7 @@ public class TestScope : IAsyncDisposable
         return new ClaimsPrincipal(new ClaimsIdentity(new[]
         {
             new Claim(ClaimTypes.Name, "TestUser"),
-            new Claim(ClaimTypes.NameIdentifier, "test-user-id"),
+            new Claim("sub", "test-user-id"),
             new Claim("preferred_username", "test@example.com"),
             new Claim("http://schemas.microsoft.com/identity/claims/objectidentifier", "11111111-1111-1111-1111-111111111111"),
             new Claim("iss", "https://login.microsoftonline.com/your-tenant-id/v2.0")
