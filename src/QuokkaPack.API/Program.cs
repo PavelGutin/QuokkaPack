@@ -40,9 +40,13 @@ builder.Services.AddCors(options =>
     });
 });
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? 
-    throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
+// Only configure SQL Server if not in Testing environment
+if (!builder.Environment.IsEnvironment("Testing"))
+{
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ??
+        throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+    builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
+}
 
 builder.Services.AddIdentity<IdentityUser, IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>()
@@ -72,7 +76,12 @@ builder.Host.UseSerilog((ctx, lc) => lc
     .ReadFrom.Configuration(ctx.Configuration)
 );
 
-builder.Services.AddJwtAuthentication(builder.Configuration);
+// Skip JWT authentication in Testing environment (tests will configure their own auth)
+if (!builder.Environment.IsEnvironment("Testing"))
+{
+    builder.Services.AddJwtAuthentication(builder.Configuration);
+}
+
 builder.Services.AddScoped<IUserResolver, UserResolver>();
 
 // Rate limiting configuration
