@@ -28,10 +28,11 @@ EndProject
 Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "QuokkaPack.Angular", "src\QuokkaPack.Angular\QuokkaPack.Angular.esproj", "{06363C1C-8C78-CA27-F375-774062789C4C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{A1F7A5F6-A301-4F44-A0A6-F2AB99715482}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "codegen", "codegen", "{790EFB4A-280A-4B52-BE73-EA04B2B01265}"
 	ProjectSection(SolutionItems) = preProject
-		tools\codegen\openapi.nswag.json = tools\codegen\openapi.nswag.json
+		tools\generate-openapi.ps1 = tools\generate-openapi.ps1
+		tools\generate-openapi.sh = tools\generate-openapi.sh
+		tools\seed-demo-data.ps1 = tools\seed-demo-data.ps1
+		tools\seed-demo-data.sh = tools\seed-demo-data.sh
 	EndProjectSection
 EndProject
 Global
@@ -81,7 +82,6 @@ Global
 		{4E91935F-5043-9116-3072-2848829D4A80} = {170078B7-4B0E-4BBF-B95D-5C93650C9EE1}
 		{1A497445-6502-4263-B852-1D736AD54F86} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{06363C1C-8C78-CA27-F375-774062789C4C} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
-		{790EFB4A-280A-4B52-BE73-EA04B2B01265} = {A1F7A5F6-A301-4F44-A0A6-F2AB99715482}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DCA49A4D-3FBD-4E27-AD47-FF317F2F8E9B}
