@@ -5,7 +5,7 @@
       {
         "Path": "src\\QuokkaPack.API\\QuokkaPack.API.csproj",
         "Action": "Start",
-        "DebugTarget": "https"
+        "DebugTarget": "BareMetal HTTPS"
       },
       {
         "Path": "src\\QuokkaPack.Angular\\QuokkaPack.Angular.esproj",

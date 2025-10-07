@@ -18,24 +18,26 @@ export class TripCard {
   @Output() remove = new EventEmitter<number | string>();
 
   get packingProgress(): string {
-    if (this.trip.totalItems === 0) return '0%';
-    const percent = Math.round((this.trip.packedItems / this.trip.totalItems) * 100);
+    if ((this.trip.totalItems ?? 0) === 0) return '0%';
+    const percent = Math.round(((this.trip.packedItems ?? 0) / (this.trip.totalItems ?? 1)) * 100);
     return `${percent}%`;
   }
 
   get itemsSummary(): string {
-    return `${this.trip.packedItems}/${this.trip.totalItems} packed`;
+    return `${this.trip.packedItems ?? 0}/${this.trip.totalItems ?? 0} packed`;
   }
 
   // Simple date helpers (keep same display as grid)
-  fmt(raw: string | Date): string {
+  fmt(raw: string | Date | undefined): string {
+    if (!raw) return '';
     const d = new Date(raw);
     return isNaN(d.getTime())
       ? String(raw)
       : new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'short', day: '2-digit' }).format(d);
   }
 
-  iso(raw: string | Date): string {
+  iso(raw: string | Date | undefined): string {
+    if (!raw) return '';
     const d = new Date(raw);
     return isNaN(d.getTime()) ? '' : d.toISOString().substring(0, 10);
   }

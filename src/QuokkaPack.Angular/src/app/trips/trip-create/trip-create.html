@@ -56,8 +56,8 @@
                 <label
                   [for]="'category_' + category.id"
                   class="card"
-                  [class.border-primary]="isCategorySelected(category.id)"
-                  [class.bg-light]="isCategorySelected(category.id)"
+                  [class.border-primary]="isCategorySelected(category.id!)"
+                  [class.bg-light]="isCategorySelected(category.id!)"
                   style="cursor: pointer; transition: all 0.2s;">
                   <div class="card-body">
                     <div class="d-flex align-items-center gap-2 mb-2">
@@ -65,13 +65,13 @@
                         type="checkbox"
                         class="form-check-input m-0"
                         [id]="'category_' + category.id"
-                        [checked]="isCategorySelected(category.id)"
-                        (change)="toggleCategory(category.id)"
+                        [checked]="isCategorySelected(category.id!)"
+                        (change)="toggleCategory(category.id!)"
                         (click)="$event.stopPropagation()" />
                       <span class="fw-semibold">{{ category.name }}</span>
                     </div>
                     <div class="d-flex flex-wrap gap-1 ms-4">
-                      @for (item of getItemsForCategory(category.id); track item.id) {
+                      @for (item of getItemsForCategory(category.id!); track item.id) {
                         <span class="badge bg-secondary">{{ item.name }}</span>
                       } @empty {
                         <span class="text-muted small fst-italic">No items</span>

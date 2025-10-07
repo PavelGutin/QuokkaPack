@@ -60,7 +60,7 @@ export class ItemsComponent {
 
     // seed groups so empty categories still render
     for (const c of cats) {
-      map.set(c.id, { key: c.id, category: c, items: [] });
+      map.set(c.id!, { key: c.id!, category: c, items: [] });
     }
 
     // place each item into its category group

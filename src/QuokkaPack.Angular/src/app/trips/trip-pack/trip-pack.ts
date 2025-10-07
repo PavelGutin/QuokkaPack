@@ -90,7 +90,7 @@ export class TripPack implements OnInit, OnChanges {
     const t = this.trip();
     if (!t) return;
     this.edit = {
-      id: t.id,
+      id: t.id!,
       startDate: this.formatDateToInput(t.startDate),
       endDate: this.formatDateToInput(t.endDate),
       destination: t.destination ?? '',

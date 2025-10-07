@@ -47,7 +47,8 @@ export class TripCreate implements OnInit {
         // Pre-select default categories
         this.selectedCategoryIds = categories
           .filter(c => c.isDefault)
-          .map(c => c.id);
+          .map(c => c.id!)
+          .filter((id): id is number => id !== undefined);
         this.loadItems();
       },
       error: (err) => {

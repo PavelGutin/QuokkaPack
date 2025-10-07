@@ -89,7 +89,7 @@ export class TripJoinService {
   ): TripEditViewModel {
     // Create lookup map for fast joining
     const tripItemsMap = new Map<number, TripItemReadDto>(
-      trip.items.map(ti => [ti.itemId, ti])
+      (trip.items ?? []).map(ti => [ti.itemId!, ti])
     );
 
     // Group catalog by category
@@ -111,24 +111,27 @@ export class TripJoinService {
 
     for (const item of catalog) {
       // Initialize category group if needed
-      if (!byCategory.has(item.categoryId)) {
-        byCategory.set(item.categoryId, {
-          categoryId: item.categoryId,
-          categoryName: item.categoryName,
+      if (!byCategory.has(item.categoryId!)) {
+        byCategory.set(item.categoryId!, {
+          categoryId: item.categoryId!,
+          categoryName: item.categoryName!,
           itemsInTrip: [],
           itemsNotInTrip: []
         });
       }
 
-      const group = byCategory.get(item.categoryId)!;
-      const tripItem = tripItemsMap.get(item.id);
+      const group = byCategory.get(item.categoryId!)!;
+      const tripItem = tripItemsMap.get(item.id!);
 
       if (tripItem) {
         // Item is in the trip - enhance with trip data
         group.itemsInTrip.push({
-          ...item,
-          tripItemId: tripItem.tripItemId,
-          isPacked: tripItem.isPacked
+          id: item.id!,
+          name: item.name!,
+          categoryId: item.categoryId!,
+          categoryName: item.categoryName!,
+          tripItemId: tripItem.tripItemId!,
+          isPacked: tripItem.isPacked!
         });
       } else {
         // Item is available but not in trip

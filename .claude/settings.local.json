@@ -34,7 +34,14 @@
       "Bash(git rm:*)",
       "Bash(dotnet add package:*)",
       "Bash(dotnet test:*)",
-      "Bash(dotnet clean:*)"
+      "Bash(dotnet clean:*)",
+      "WebSearch",
+      "Bash(dotnet run --launch-profile https)",
+      "Bash(dotnet run:*)",
+      "Bash(dotnet ef database:*)",
+      "Bash(dotnet tool install:*)",
+      "Bash(dotnet ef migrations:*)",
+      "Bash(dotnet user-secrets:*)"
     ],
     "deny": [],
     "ask": []

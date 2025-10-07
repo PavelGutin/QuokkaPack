@@ -14,11 +14,26 @@ else {
 }
 
 Write-Host "Starting API to generate OpenAPI spec..." -ForegroundColor Cyan
-$env:ASPNETCORE_URLS = "http://localhost:5000"
-$apiProcess = Start-Process -FilePath "dotnet" -ArgumentList "run --project $PSScriptRoot\..\..\src\QuokkaPack.API --no-build -c Release --urls http://localhost:5000" -PassThru -NoNewWindow
+
+# Create a new process start info with environment variables
+$psi = New-Object System.Diagnostics.ProcessStartInfo
+$psi.FileName = "dotnet"
+$psi.Arguments = "run --project $PSScriptRoot\..\..\src\QuokkaPack.API --no-build -c Release"
+$psi.UseShellExecute = $false
+$psi.CreateNoWindow = $true
+$psi.EnvironmentVariables["ASPNETCORE_URLS"] = "http://localhost:5000"
+$psi.EnvironmentVariables["ASPNETCORE_ENVIRONMENT"] = "Development"
+
+$apiProcess = [System.Diagnostics.Process]::Start($psi)
 
 try {
-    Write-Host "Fetching OpenAPI spec from http://localhost:5000/swagger/v1/swagger.json..." -ForegroundColor Cyan
+    # Ensure artifacts directory exists
+    $artifactsDir = "$PSScriptRoot\..\..\artifacts"
+    if (-not (Test-Path $artifactsDir)) {
+        New-Item -ItemType Directory -Path $artifactsDir -Force | Out-Null
+    }
+
+    Write-Host "Fetching OpenAPI spec from http://localhost:5000/openapi/v1.json..." -ForegroundColor Cyan
     $maxRetries = 15
     $retryCount = 0
     $success = $false
@@ -26,14 +41,20 @@ try {
     while ($retryCount -lt $maxRetries -and -not $success) {
         try {
             Start-Sleep -Seconds 2
-            $response = Invoke-WebRequest -Uri "http://localhost:5000/swagger/v1/swagger.json" -TimeoutSec 5
-            $response.Content | Out-File -FilePath "$PSScriptRoot\..\..\artifacts\openapi.json" -Encoding UTF8
-            $success = $true
-            Write-Host "OpenAPI spec generated successfully!" -ForegroundColor Green
+            $response = Invoke-WebRequest -Uri "http://localhost:5000/openapi/v1.json" -TimeoutSec 5 -ErrorAction Stop
+
+            if ($response.StatusCode -eq 200) {
+                $response.Content | Out-File -FilePath "$artifactsDir\openapi.json" -Encoding UTF8
+                $success = $true
+                Write-Host "OpenAPI spec generated successfully!" -ForegroundColor Green
+            }
         }
         catch {
             $retryCount++
             Write-Host "Waiting for API to start... (attempt $retryCount/$maxRetries)" -ForegroundColor Yellow
+            if ($retryCount -eq 1) {
+                Write-Host "Error details: $($_.Exception.Message)" -ForegroundColor DarkYellow
+            }
         }
     }
 

@@ -76,7 +76,7 @@
             <button
               class="btn btn-sm border-0"
               title="Delete Category"
-              (click)="removeCategory(g.category.id)"
+              (click)="removeCategory(g.category.id!)"
               style="opacity: 0.3; transition: opacity 0.2s;"
               (mouseenter)="$any($event.target).style.opacity = '1'"
               (mouseleave)="$any($event.target).style.opacity = '0.3'">🗑</button>
