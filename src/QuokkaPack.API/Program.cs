@@ -11,6 +11,16 @@ using System.IdentityModel.Tokens.Jwt;
 
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
+// Configure Serilog early to capture startup errors
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .WriteTo.File("Logs/startup-errors-.txt", rollingInterval: RollingInterval.Day)
+    .CreateBootstrapLogger();
+
+try
+{
+    Log.Information("Starting QuokkaPack.API");
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddCors(options =>
@@ -124,7 +134,26 @@ app.MapControllers();
 
 Log.Information("QuokkaPack.API started successfully.");
 
+// Output to console for Visual Studio to detect successful startup
+Console.WriteLine("Now listening on: https://localhost:7100");
+Console.WriteLine("Now listening on: http://localhost:5000");
+Console.WriteLine("Application started. Press Ctrl+C to shut down.");
+
 app.Run();
+
+    Log.Information("QuokkaPack.API shut down gracefully");
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "QuokkaPack.API failed to start");
+    Console.Error.WriteLine($"FATAL ERROR: {ex.Message}");
+    Console.Error.WriteLine(ex.StackTrace);
+    throw;
+}
+finally
+{
+    Log.CloseAndFlush();
+}
 
 // Make Program class accessible to tests
 public partial class Program { }
