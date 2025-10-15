@@ -5,6 +5,7 @@ import { BehaviorSubject, tap } from 'rxjs';
 import { jwtDecode } from 'jwt-decode';
 
 type LoginDto = { Email: string; Password: string };
+type RegisterDto = { Email: string; Password: string; ConfirmPassword: string };
 type LoginResponse = { token: string };
 type JwtPayload = { exp?: number; email?: string; unique_name?: string };
 
@@ -21,6 +22,15 @@ export class AuthService {
 
   login(body: LoginDto) {
     return this.http.post<LoginResponse>('/api/auth/login', body).pipe(
+      tap(res => {
+        localStorage.setItem(this.key, res.token);
+        this.authChanged.next(true);
+      })
+    );
+  }
+
+  register(body: RegisterDto) {
+    return this.http.post<LoginResponse>('/api/auth/register', body).pipe(
       tap(res => {
         localStorage.setItem(this.key, res.token);
         this.authChanged.next(true);

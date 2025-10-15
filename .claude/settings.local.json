@@ -47,7 +47,21 @@
       "Bash(Get-Process)",
       "Bash(Where-Object { $_rocessName -eq \"dotnet\" -or $_rocessName -eq \"node\" })",
       "Bash(Get-NetTCPConnection -LocalPort 7100 -ErrorAction SilentlyContinue)",
-      "Bash(Select-Object LocalAddress, LocalPort, State, OwningProcess)"
+      "Bash(Select-Object LocalAddress, LocalPort, State, OwningProcess)",
+      "Bash(ASPNETCORE_ENVIRONMENT=Development DOTNET_ENVIRONMENT=Development Logging__LogLevel__Default=Debug Logging__LogLevel__Microsoft.AspNetCore=Information dotnet run --launch-profile \"BareMetal HTTPS\")",
+      "Bash(sqllocaldb info:*)",
+      "Bash(sqllocaldb start:*)",
+      "Bash(curl:*)",
+      "Bash(sqllocaldb stop:*)",
+      "Bash(timeout:*)",
+      "Bash(Get-NetTCPConnection -LocalPort 4200 -ErrorAction SilentlyContinue)",
+      "Bash(del QuokkaPack.slnLaunch)",
+      "Bash(dotnet sln:*)",
+      "Bash(Select-Object -Last 1)",
+      "Bash(sqlcmd:*)",
+      "Bash(Where-Object { $_rocessName -eq \"node\" })",
+      "Bash(npm audit)",
+      "Bash(Select-Object Id, ProcessName, StartTime)"
     ],
     "deny": [],
     "ask": []

@@ -1,0 +1,73 @@
+<div class="container">
+  <div class="row min-vh-100 align-items-center justify-content-center">
+    <div class="col-12 col-sm-10 col-md-8 col-lg-5 col-xl-4">
+      <div class="card shadow">
+        <div class="card-body p-4">
+          <h2 class="card-title text-center mb-1">Create Account</h2>
+          <p class="text-center text-muted mb-4">Start organizing your trips</p>
+
+          <form (ngSubmit)="submit()">
+            <div class="mb-3">
+              <label for="email" class="form-label">Email</label>
+              <input
+                id="email"
+                type="email"
+                class="form-control"
+                [(ngModel)]="email"
+                name="email"
+                required
+                autocomplete="email"
+                placeholder="Enter your email"
+                [disabled]="loading" />
+            </div>
+
+            <div class="mb-3">
+              <label for="password" class="form-label">Password</label>
+              <input
+                id="password"
+                type="password"
+                class="form-control"
+                [(ngModel)]="password"
+                name="password"
+                required
+                autocomplete="new-password"
+                placeholder="Create a password"
+                [disabled]="loading" />
+              <div class="form-text">Minimum 6 characters</div>
+            </div>
+
+            <div class="mb-3">
+              <label for="confirmPassword" class="form-label">Confirm Password</label>
+              <input
+                id="confirmPassword"
+                type="password"
+                class="form-control"
+                [(ngModel)]="confirmPassword"
+                name="confirmPassword"
+                required
+                autocomplete="new-password"
+                placeholder="Confirm your password"
+                [disabled]="loading" />
+            </div>
+
+            <div *ngIf="error" class="alert alert-danger">
+              {{ error }}
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg w-100 mb-3" [disabled]="loading">
+              <span *ngIf="loading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+              {{ loading ? 'Creating account...' : 'Create Account' }}
+            </button>
+          </form>
+
+          <div class="text-center">
+            <p class="text-muted mb-0">
+              Already have an account?
+              <a routerLink="/login" class="text-decoration-none">Sign in</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
