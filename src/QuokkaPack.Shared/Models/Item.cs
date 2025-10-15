@@ -8,5 +8,6 @@ public class Item
     public MasterUser MasterUser { get; set; } = default!;
     public Category Category { get; set; } = default!;
     public int CategoryId { get; set; }
+    public bool IsArchived { get; set; } = false;
     public ICollection<TripItem> TripItems { get; set; } = new List<TripItem>();
 }

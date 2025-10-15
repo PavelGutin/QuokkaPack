@@ -1,8 +1,22 @@
 <div class="container py-4">
-  <div class="mb-4">
-    <h2>Master List</h2>
-    <p class="text-muted">{{ itemCount() }} items</p>
+  <div class="mb-4 d-flex justify-content-between align-items-center">
+    <div>
+      <h2>Master List</h2>
+      <p class="text-muted">{{ itemCount() }} items</p>
+    </div>
+    <div>
+      <button class="btn btn-outline-secondary" (click)="toggleShowArchived()">
+        {{ showArchived() ? 'Hide Archived' : 'Show Archived' }}
+      </button>
+    </div>
   </div>
+
+  @if (error()) {
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      <span [innerHTML]="error()"></span>
+      <button type="button" class="btn-close" (click)="error.set(null)" aria-label="Close"></button>
+    </div>
+  }
 
   <div class="row g-3 mb-4">
     <!-- Add New Category -->
@@ -65,21 +79,41 @@
   <div class="row g-3">
     @for (g of grouped(); track g.key) {
       <div class="col-12 col-md-6 col-lg-4">
-        <div class="card h-100">
+        <div class="card h-100" [class.border-secondary]="g.category.isArchived" [class.opacity-75]="g.category.isArchived">
           <div class="card-header d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center gap-2">
               <span class="fw-semibold">{{ g.category.name }}</span>
               <span class="badge" [class.bg-success]="g.category.isDefault" [class.bg-secondary]="!g.category.isDefault">
                 {{ g.category.isDefault ? 'Default' : 'Optional' }}
               </span>
+              @if (g.category.isArchived) {
+                <span class="badge bg-warning text-dark">Archived</span>
+              }
             </div>
-            <button
-              class="btn btn-sm border-0"
-              title="Delete Category"
-              (click)="removeCategory(g.category.id!)"
-              style="opacity: 0.3; transition: opacity 0.2s;"
-              (mouseenter)="$any($event.target).style.opacity = '1'"
-              (mouseleave)="$any($event.target).style.opacity = '0.3'">🗑</button>
+            <div class="d-flex gap-1">
+              @if (g.category.isArchived) {
+                <button
+                  class="btn btn-sm btn-outline-primary"
+                  title="Restore Category"
+                  (click)="restoreCategory(g.category.id!)">
+                  ↶
+                </button>
+                <button
+                  class="btn btn-sm btn-outline-danger"
+                  title="Delete Permanently"
+                  (click)="removeCategory(g.category.id!)">
+                  🗑
+                </button>
+              } @else {
+                <button
+                  class="btn btn-sm border-0"
+                  title="Archive Category"
+                  (click)="archiveCategory(g.category.id!)"
+                  style="opacity: 0.3; transition: opacity 0.2s;"
+                  (mouseenter)="$any($event.target).style.opacity = '1'"
+                  (mouseleave)="$any($event.target).style.opacity = '0.3'">🗑</button>
+              }
+            </div>
           </div>
 
           <div class="card-body">
@@ -88,15 +122,38 @@
             } @else {
               <div class="list-group list-group-flush">
                 @for (it of g.items; track it.id) {
-                  <div class="list-group-item d-flex justify-content-between align-items-center px-0">
-                    <span>{{ it.name }}</span>
-                    <button
-                      class="btn btn-sm border-0"
-                      title="Delete Item"
-                      (click)="removeItem(it.id!)"
-                      style="opacity: 0.3; transition: opacity 0.2s;"
-                      (mouseenter)="$any($event.target).style.opacity = '1'"
-                      (mouseleave)="$any($event.target).style.opacity = '0.3'">🗑</button>
+                  <div class="list-group-item d-flex justify-content-between align-items-center px-0"
+                       [class.text-muted]="it.isArchived">
+                    <div class="d-flex align-items-center gap-2">
+                      <span>{{ it.name }}</span>
+                      @if (it.isArchived) {
+                        <span class="badge bg-warning text-dark small">Archived</span>
+                      }
+                    </div>
+                    <div class="d-flex gap-1">
+                      @if (it.isArchived) {
+                        <button
+                          class="btn btn-sm btn-outline-primary"
+                          title="Restore Item"
+                          (click)="restoreItem(it.id!)">
+                          ↶
+                        </button>
+                        <button
+                          class="btn btn-sm btn-outline-danger"
+                          title="Delete Permanently"
+                          (click)="removeItem(it.id!)">
+                          🗑
+                        </button>
+                      } @else {
+                        <button
+                          class="btn btn-sm border-0"
+                          title="Archive Item"
+                          (click)="archiveItem(it.id!)"
+                          style="opacity: 0.3; transition: opacity 0.2s;"
+                          (mouseenter)="$any($event.target).style.opacity = '1'"
+                          (mouseleave)="$any($event.target).style.opacity = '0.3'">🗑</button>
+                      }
+                    </div>
                   </div>
                 }
               </div>

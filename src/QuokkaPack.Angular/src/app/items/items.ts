@@ -39,6 +39,7 @@ export class ItemsComponent {
   categories = signal<CategoryReadDto[]>([]);
   loading = signal(true);
   error = signal<string | null>(null);
+  showArchived = signal(false);
 
   // forms
   addCategoryForm = this.fb.group({
@@ -106,18 +107,25 @@ export class ItemsComponent {
     this.loading.set(true);
     this.error.set(null);
 
+    const includeArchived = this.showArchived();
+
     // load categories first (select options), then items
-    this.categoriesSvc.list().subscribe({
+    this.categoriesSvc.list(includeArchived).subscribe({
       next: cats => this.categories.set(cats),
       error: e => this.error.set(e?.error || e?.message || 'Failed to load categories'),
       complete: () => {
-        this.itemsSvc.list().subscribe({
+        this.itemsSvc.list(includeArchived).subscribe({
           next: items => this.items.set(items),
           error: e => this.error.set(e?.error || e?.message || 'Failed to load items'),
           complete: () => this.loading.set(false),
         });
       },
     });
+  }
+
+  toggleShowArchived() {
+    this.showArchived.update(val => !val);
+    this.loadAll();
   }
 
   // --- category ops ---
@@ -133,11 +141,45 @@ export class ItemsComponent {
     });
   }
 
+  archiveCategory(catId: number) {
+    this.categoriesSvc.archive(catId).subscribe({
+      next: () => this.categories.set(this.categories().filter(c => c.id !== catId)),
+      error: e => {
+        // Handle structured error response with trip information
+        if (e?.error?.trips && Array.isArray(e.error.trips)) {
+          const tripLinks = e.error.trips
+            .map((trip: any) => `<a href="/trips/${trip.id}/pack" class="alert-link">${trip.destination}</a>`)
+            .join(', ');
+          const message = e.error.message || 'Cannot archive category';
+          // Replace the plain trip list with clickable links
+          const enhancedMessage = message.replace(/Remove them from trips first: .*$/, `Remove them from trips first: ${tripLinks}`);
+          this.error.set(enhancedMessage);
+        } else {
+          const errorMsg = e?.error?.message || e?.error || e?.message || 'Failed to archive category';
+          this.error.set(errorMsg);
+        }
+      },
+    });
+  }
+
+  restoreCategory(catId: number) {
+    this.categoriesSvc.restore(catId).subscribe({
+      next: () => {
+        // Reload to get updated data
+        this.loadAll();
+      },
+      error: e => this.error.set(e?.error || e?.message || 'Failed to restore category'),
+    });
+  }
+
   removeCategory(catId: number) {
-    if (!confirm('Delete this category?')) return;
+    if (!confirm('Permanently delete this category? This cannot be undone.')) return;
     this.categoriesSvc.remove(catId).subscribe({
       next: () => this.categories.set(this.categories().filter(c => c.id !== catId)),
-      error: e => this.error.set(e?.error || e?.message || 'Failed to delete category'),
+      error: e => {
+        const errorMsg = e?.error || e?.message || 'Failed to delete category';
+        this.error.set(errorMsg);
+      },
     });
   }
 
@@ -159,11 +201,53 @@ export class ItemsComponent {
     });
   }
 
+  archiveItem(itemId: number) {
+    this.itemsSvc.archive(itemId).subscribe({
+      next: () => this.items.set(this.items().filter(i => i.id !== itemId)),
+      error: e => {
+        // Handle structured error response with trip information
+        if (e?.error?.trips && Array.isArray(e.error.trips)) {
+          const tripLinks = e.error.trips
+            .map((trip: any) => `<a href="/trips/${trip.id}/pack" class="alert-link">${trip.destination}</a>`)
+            .join(', ');
+          const message = e.error.message || 'Cannot archive item that is in use';
+          // Replace the plain trip list with clickable links
+          const enhancedMessage = message.replace(/Remove it from these trips first: .*$/, `Remove it from these trips first: ${tripLinks}`);
+          this.error.set(enhancedMessage);
+        } else {
+          const errorMsg = e?.error?.message || e?.error || e?.message || 'Failed to archive item';
+          this.error.set(errorMsg);
+        }
+      },
+    });
+  }
+
+  restoreItem(itemId: number) {
+    this.itemsSvc.restore(itemId).subscribe({
+      next: () => {
+        // Reload to get updated data
+        this.loadAll();
+      },
+      error: e => this.error.set(e?.error || e?.message || 'Failed to restore item'),
+    });
+  }
+
   removeItem(itemId: number) {
-    if (!confirm('Delete this item?')) return;
+    if (!confirm('Permanently delete this item? This cannot be undone.')) return;
     this.itemsSvc.remove(itemId).subscribe({
       next: () => this.items.set(this.items().filter(i => i.id !== itemId)),
-      error: e => this.error.set(e?.error || e?.message || 'Failed to delete item'),
+      error: e => {
+        // Handle structured error response with trip information
+        if (e?.error?.trips && Array.isArray(e.error.trips)) {
+          const tripLinks = e.error.trips
+            .map((trip: any) => `<a href="/trips/${trip.id}/pack" class="alert-link">${trip.destination}</a>`)
+            .join(', ');
+          this.error.set(`Cannot delete item that is used in trips: ${tripLinks}`);
+        } else {
+          const errorMsg = e?.error?.message || e?.error || e?.message || 'Failed to delete item';
+          this.error.set(errorMsg);
+        }
+      },
     });
   }
 

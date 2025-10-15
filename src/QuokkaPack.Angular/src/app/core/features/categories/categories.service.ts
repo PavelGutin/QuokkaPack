@@ -14,8 +14,9 @@ export class CategoriesService {
   private base = '/api/categories';
 
   /** GET /api/Categories */
-  list(): Observable<CategoryReadDto[]> {
-    return this.http.get<CategoryReadDto[]>(this.base).pipe(
+  list(includeArchived: boolean = false): Observable<CategoryReadDto[]> {
+    const url = includeArchived ? `${this.base}?includeArchived=true` : this.base;
+    return this.http.get<CategoryReadDto[]>(url).pipe(
       map(dtos => (Array.isArray(dtos) ? dtos.map(categoryFromDto) : []))
     );
   }
@@ -34,6 +35,16 @@ export class CategoriesService {
   update(dto: CategoryEditDto): Observable<void> {
     // Controller expects id in route and same id in body
     return this.http.put<void>(`${this.base}/${dto.id}`, dto);
+  }
+
+  /** PUT /api/Categories/{id}/archive */
+  archive(id: number): Observable<void> {
+    return this.http.put<void>(`${this.base}/${id}/archive`, {});
+  }
+
+  /** PUT /api/Categories/{id}/restore */
+  restore(id: number): Observable<void> {
+    return this.http.put<void>(`${this.base}/${id}/restore`, {});
   }
 
   /** DELETE /api/Categories/{id} */

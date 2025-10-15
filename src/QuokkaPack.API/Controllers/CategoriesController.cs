@@ -26,18 +26,26 @@ namespace QuokkaPack.API.Controllers
         /// GET /api/categories - Get all categories for user
         /// </summary>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<CategoryReadDto>>> GetCategories()
+        public async Task<ActionResult<IEnumerable<CategoryReadDto>>> GetCategories([FromQuery] bool includeArchived = false)
         {
             var user = await _userResolver.GetOrCreateAsync(User);
 
-            var categories = await _context.Categories
-                .Where(c => c.MasterUserId == user.Id)
+            var query = _context.Categories
+                .Where(c => c.MasterUserId == user.Id);
+
+            if (!includeArchived)
+            {
+                query = query.Where(c => !c.IsArchived);
+            }
+
+            var categories = await query
                 .AsNoTracking()
                 .Select(c => new CategoryReadDto
                 {
                     Id = c.Id,
                     Name = c.Name,
-                    IsDefault = c.IsDefault
+                    IsDefault = c.IsDefault,
+                    IsArchived = c.IsArchived
                 })
                 .ToListAsync();
 
@@ -115,10 +123,64 @@ namespace QuokkaPack.API.Controllers
         }
 
         /// <summary>
-        /// DELETE /api/categories/{id} - Delete category
+        /// PUT /api/categories/{id}/archive - Archive (soft delete) category
         /// </summary>
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCategory(int id)
+        [HttpPut("{id}/archive")]
+        public async Task<IActionResult> ArchiveCategory(int id)
+        {
+            var user = await _userResolver.GetOrCreateAsync(User);
+
+            var category = await _context.Categories
+                .Include(c => c.Items)
+                    .ThenInclude(i => i.TripItems)
+                        .ThenInclude(ti => ti.Trip)
+                .Where(c => c.Id == id && c.MasterUserId == user.Id)
+                .FirstOrDefaultAsync();
+
+            if (category == null)
+                return NotFound();
+
+            // Check if any items in this category are used in trips
+            var itemsInTrips = category.Items
+                .Where(i => i.TripItems.Any())
+                .Select(i => new {
+                    ItemName = i.Name,
+                    Trips = i.TripItems
+                        .Select(ti => new { ti.Trip.Id, ti.Trip.Destination })
+                        .Distinct()
+                        .ToList()
+                })
+                .ToList();
+
+            if (itemsInTrips.Any())
+            {
+                var itemList = string.Join(", ", itemsInTrips.Select(x => x.ItemName));
+                var allTrips = itemsInTrips
+                    .SelectMany(x => x.Trips)
+                    .GroupBy(t => t.Id)
+                    .Select(g => g.First())
+                    .ToList();
+
+                var tripList = string.Join(", ", allTrips.Select(t => t.Destination));
+
+                return BadRequest(new {
+                    message = $"Cannot archive category. These items are in use: {itemList}. Remove them from trips first: {tripList}",
+                    items = itemsInTrips.Select(x => x.ItemName).ToList(),
+                    trips = allTrips
+                });
+            }
+
+            category.IsArchived = true;
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        /// <summary>
+        /// PUT /api/categories/{id}/restore - Restore archived category
+        /// </summary>
+        [HttpPut("{id}/restore")]
+        public async Task<IActionResult> RestoreCategory(int id)
         {
             var user = await _userResolver.GetOrCreateAsync(User);
 
@@ -128,6 +190,34 @@ namespace QuokkaPack.API.Controllers
 
             if (category == null)
                 return NotFound();
+
+            category.IsArchived = false;
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        /// <summary>
+        /// DELETE /api/categories/{id} - Permanently delete category
+        /// </summary>
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteCategory(int id)
+        {
+            var user = await _userResolver.GetOrCreateAsync(User);
+
+            var category = await _context.Categories
+                .Include(c => c.Items)
+                .Where(c => c.Id == id && c.MasterUserId == user.Id)
+                .FirstOrDefaultAsync();
+
+            if (category == null)
+                return NotFound();
+
+            // Check if category contains any items
+            if (category.Items.Any())
+            {
+                return BadRequest("Cannot delete category that contains items");
+            }
 
             _context.Categories.Remove(category);
             await _context.SaveChangesAsync();

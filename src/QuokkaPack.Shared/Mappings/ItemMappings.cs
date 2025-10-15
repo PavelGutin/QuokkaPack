@@ -21,7 +21,8 @@ namespace QuokkaPack.Shared.Mappings
                 Id = item.Id,
                 Name = item.Name,
                 CategoryId = item.CategoryId,
-                CategoryName = item.Category?.Name ?? string.Empty
+                CategoryName = item.Category?.Name ?? string.Empty,
+                IsArchived = item.IsArchived
             };
         }
 

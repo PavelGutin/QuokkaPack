@@ -26,12 +26,19 @@ namespace QuokkaPack.API.Controllers
         /// GET /api/items - Get entire user catalog (for client-side joins)
         /// </summary>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ItemReadDto>>> GetItems()
+        public async Task<ActionResult<IEnumerable<ItemReadDto>>> GetItems([FromQuery] bool includeArchived = false)
         {
             var user = await _userResolver.GetOrCreateAsync(User);
 
-            var items = await _context.Items
-                .Where(item => item.MasterUserId == user.Id)
+            var query = _context.Items
+                .Where(item => item.MasterUserId == user.Id);
+
+            if (!includeArchived)
+            {
+                query = query.Where(item => !item.IsArchived);
+            }
+
+            var items = await query
                 .Include(item => item.Category)
                 .AsNoTracking()
                 .Select(item => new ItemReadDto
@@ -39,7 +46,8 @@ namespace QuokkaPack.API.Controllers
                     Id = item.Id,
                     Name = item.Name,
                     CategoryId = item.CategoryId,
-                    CategoryName = item.Category.Name
+                    CategoryName = item.Category.Name,
+                    IsArchived = item.IsArchived
                 })
                 .ToListAsync();
 
@@ -120,10 +128,48 @@ namespace QuokkaPack.API.Controllers
         }
 
         /// <summary>
-        /// DELETE /api/items/{id} - Delete catalog item
+        /// PUT /api/items/{id}/archive - Archive (soft delete) catalog item
         /// </summary>
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteItem(int id)
+        [HttpPut("{id}/archive")]
+        public async Task<IActionResult> ArchiveItem(int id)
+        {
+            var user = await _userResolver.GetOrCreateAsync(User);
+
+            var item = await _context.Items
+                .Include(i => i.TripItems)
+                    .ThenInclude(ti => ti.Trip)
+                .Where(i => i.Id == id && i.MasterUserId == user.Id)
+                .FirstOrDefaultAsync();
+
+            if (item == null)
+                return NotFound();
+
+            // Check if item is used in any trips
+            if (item.TripItems.Any())
+            {
+                var tripInfo = item.TripItems
+                    .Select(ti => new { ti.Trip.Id, ti.Trip.Destination })
+                    .Distinct()
+                    .ToList();
+
+                var tripList = string.Join(", ", tripInfo.Select(t => t.Destination));
+                return BadRequest(new {
+                    message = $"Cannot archive item that is in use. Remove it from these trips first: {tripList}",
+                    trips = tripInfo
+                });
+            }
+
+            item.IsArchived = true;
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        /// <summary>
+        /// PUT /api/items/{id}/restore - Restore archived catalog item
+        /// </summary>
+        [HttpPut("{id}/restore")]
+        public async Task<IActionResult> RestoreItem(int id)
         {
             var user = await _userResolver.GetOrCreateAsync(User);
 
@@ -133,6 +179,44 @@ namespace QuokkaPack.API.Controllers
 
             if (item == null)
                 return NotFound();
+
+            item.IsArchived = false;
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        /// <summary>
+        /// DELETE /api/items/{id} - Permanently delete catalog item
+        /// </summary>
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteItem(int id)
+        {
+            var user = await _userResolver.GetOrCreateAsync(User);
+
+            var item = await _context.Items
+                .Include(i => i.TripItems)
+                    .ThenInclude(ti => ti.Trip)
+                .Where(i => i.Id == id && i.MasterUserId == user.Id)
+                .FirstOrDefaultAsync();
+
+            if (item == null)
+                return NotFound();
+
+            // Check if item is used in any trips
+            if (item.TripItems.Any())
+            {
+                var tripInfo = item.TripItems
+                    .Select(ti => new { ti.Trip.Id, ti.Trip.Destination })
+                    .Distinct()
+                    .ToList();
+
+                var tripList = string.Join(", ", tripInfo.Select(t => $"{t.Destination} (id:{t.Id})"));
+                return BadRequest(new {
+                    message = $"Cannot delete item that is used in trips: {tripList}",
+                    trips = tripInfo
+                });
+            }
 
             _context.Items.Remove(item);
             await _context.SaveChangesAsync();

@@ -2,7 +2,7 @@
 # Note: Skip build if called from MSBuild (already built)
 if (-not $env:MSBUILD_RUNNING) {
     Write-Host "Building API project..." -ForegroundColor Cyan
-    dotnet build $PSScriptRoot\..\..\src\QuokkaPack.API\QuokkaPack.API.csproj -c Release
+    dotnet build $PSScriptRoot\..\src\QuokkaPack.API\QuokkaPack.API.csproj -c Release
 
     if ($LASTEXITCODE -ne 0) {
         Write-Host "Build failed!" -ForegroundColor Red
@@ -18,7 +18,7 @@ Write-Host "Starting API to generate OpenAPI spec..." -ForegroundColor Cyan
 # Create a new process start info with environment variables
 $psi = New-Object System.Diagnostics.ProcessStartInfo
 $psi.FileName = "dotnet"
-$psi.Arguments = "run --project $PSScriptRoot\..\..\src\QuokkaPack.API --no-build -c Release"
+$psi.Arguments = "run --project $PSScriptRoot\..\src\QuokkaPack.API --no-build -c Release"
 $psi.UseShellExecute = $false
 $psi.CreateNoWindow = $true
 $psi.EnvironmentVariables["ASPNETCORE_URLS"] = "http://localhost:5000"
@@ -28,7 +28,7 @@ $apiProcess = [System.Diagnostics.Process]::Start($psi)
 
 try {
     # Ensure artifacts directory exists
-    $artifactsDir = "$PSScriptRoot\..\..\artifacts"
+    $artifactsDir = "$PSScriptRoot\..\artifacts"
     if (-not (Test-Path $artifactsDir)) {
         New-Item -ItemType Directory -Path $artifactsDir -Force | Out-Null
     }
@@ -65,7 +65,7 @@ try {
 
     # Generate TypeScript client using NSwag
     Write-Host "Generating TypeScript client..." -ForegroundColor Cyan
-    Push-Location $PSScriptRoot\..\..\src\QuokkaPack.Angular
+    Push-Location $PSScriptRoot\..\src\QuokkaPack.Angular
     try {
         dotnet nswag run codegen/nswag.json
         if ($LASTEXITCODE -eq 0) {

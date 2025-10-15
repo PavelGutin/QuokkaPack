@@ -20,7 +20,8 @@ public static class CategoryMappings
         {
             Id = category.Id,
             Name = category.Name,
-            IsDefault = category.IsDefault
+            IsDefault = category.IsDefault,
+            IsArchived = category.IsArchived
         };
     }
 
