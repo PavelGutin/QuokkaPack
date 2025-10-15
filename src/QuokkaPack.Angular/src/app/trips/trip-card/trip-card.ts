@@ -41,4 +41,9 @@ export class TripCard {
     const d = new Date(raw);
     return isNaN(d.getTime()) ? '' : d.toISOString().substring(0, 10);
   }
+
+  onDelete(event: Event) {
+    event.stopPropagation(); // Prevent card click from firing
+    this.remove.emit(this.trip.id);
+  }
 }

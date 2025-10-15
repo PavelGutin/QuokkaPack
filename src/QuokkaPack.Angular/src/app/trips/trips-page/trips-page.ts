@@ -52,5 +52,22 @@ private fetchTrips() {
   //packTrip(id: number | string) { alert(`Pack Trip ${id} (stub)`); }
   packTrip(id: number | string) { this.router.navigate(['/trips', id, 'pack']); }
   editTrip(id: number | string) { this.router.navigate(['/trips', id, 'edit']); }
-  deleteTrip(id: number | string) { alert(`Delete Trip ${id} (stub)`); }
+
+  deleteTrip(id: number | string) {
+    const trip = this.trips.find(t => t.id === +id);
+    const tripName = trip?.destination || `Trip ${id}`;
+
+    if (!confirm(`Delete trip "${tripName}"? This cannot be undone.`)) {
+      return;
+    }
+
+    this.tripsSvc.remove(+id).subscribe({
+      next: () => {
+        this.trips = this.trips.filter(t => t.id !== +id);
+      },
+      error: e => {
+        this.error = e?.error?.message || e?.error || e?.message || 'Failed to delete trip';
+      }
+    });
+  }
 }

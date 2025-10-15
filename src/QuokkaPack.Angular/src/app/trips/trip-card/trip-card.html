@@ -1,18 +1,30 @@
 <div
   class="card h-100 shadow-sm"
   [attr.aria-labelledby]="'trip-' + trip.id + '-title'"
-  [attr.aria-label]="'Open packing view for ' + trip.destination"
-  role="button"
-  tabindex="0"
-  (click)="pack.emit(trip.id)"
-  (keydown.enter)="pack.emit(trip.id)"
-  (keydown.space)="pack.emit(trip.id)"
-  style="cursor: pointer; transition: all 0.2s;"
+  style="transition: all 0.2s;"
   (mouseenter)="$any($event.target).style.transform = 'translateY(-4px)'"
   (mouseleave)="$any($event.target).style.transform = 'translateY(0)'"
 >
-  <div class="card-body">
-    <h5 class="card-title mb-2" id="trip-{{ trip.id }}-title">{{ trip.destination }}</h5>
+  <div
+    class="card-body"
+    [attr.aria-label]="'Open packing view for ' + trip.destination"
+    role="button"
+    tabindex="0"
+    (click)="pack.emit(trip.id)"
+    (keydown.enter)="pack.emit(trip.id)"
+    (keydown.space)="pack.emit(trip.id)"
+    style="cursor: pointer;"
+  >
+    <div class="d-flex justify-content-between align-items-start mb-2">
+      <h5 class="card-title mb-0" id="trip-{{ trip.id }}-title">{{ trip.destination }}</h5>
+      <button
+        class="btn btn-sm border-0"
+        title="Delete Trip"
+        (click)="onDelete($event)"
+        style="opacity: 0.3; transition: opacity 0.2s; margin-top: -0.25rem;"
+        (mouseenter)="$any($event.target).style.opacity = '1'"
+        (mouseleave)="$any($event.target).style.opacity = '0.3'">🗑</button>
+    </div>
     <p class="card-text text-muted mb-0">
       <small>
         <time [attr.datetime]="iso(trip.startDate)">{{ fmt(trip.startDate) }}</time>
