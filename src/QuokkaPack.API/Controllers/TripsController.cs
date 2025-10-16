@@ -171,7 +171,7 @@ namespace QuokkaPack.API.Controllers
         }
 
         /// <summary>
-        /// DELETE /api/trips/{id} - Delete a trip and all its items
+        /// DELETE /api/trips/{id} - Delete a trip (TripItems cascade automatically)
         /// </summary>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTrip(int id)
@@ -179,13 +179,12 @@ namespace QuokkaPack.API.Controllers
             var user = await _userResolver.GetOrCreateAsync(User);
 
             var trip = await _context.Trips
-                .Include(t => t.TripItems)
                 .FirstOrDefaultAsync(t => t.Id == id && t.MasterUserId == user.Id);
 
             if (trip == null)
                 return NotFound();
 
-            _context.TripItems.RemoveRange(trip.TripItems);
+            // TripItems will cascade delete automatically
             _context.Trips.Remove(trip);
             await _context.SaveChangesAsync();
 

@@ -28,7 +28,7 @@ namespace QuokkaPack.Data
                 .HasOne(ti => ti.Trip)
                 .WithMany(t => t.TripItems)
                 .HasForeignKey(ti => ti.TripId)
-                .OnDelete(DeleteBehavior.Restrict); // Prevent cascade cycles
+                .OnDelete(DeleteBehavior.Cascade); // Auto-delete TripItems when Trip is deleted
 
             // TripItem → Item
             modelBuilder.Entity<TripItem>()
