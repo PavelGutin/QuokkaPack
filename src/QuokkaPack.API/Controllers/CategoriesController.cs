@@ -170,6 +170,12 @@ namespace QuokkaPack.API.Controllers
                 });
             }
 
+            // Archive all items in the category
+            foreach (var item in category.Items)
+            {
+                item.IsArchived = true;
+            }
+
             category.IsArchived = true;
             await _context.SaveChangesAsync();
 
@@ -185,11 +191,18 @@ namespace QuokkaPack.API.Controllers
             var user = await _userResolver.GetOrCreateAsync(User);
 
             var category = await _context.Categories
+                .Include(c => c.Items)
                 .Where(c => c.Id == id && c.MasterUserId == user.Id)
                 .FirstOrDefaultAsync();
 
             if (category == null)
                 return NotFound();
+
+            // Restore all items in the category
+            foreach (var item in category.Items)
+            {
+                item.IsArchived = false;
+            }
 
             category.IsArchived = false;
             await _context.SaveChangesAsync();

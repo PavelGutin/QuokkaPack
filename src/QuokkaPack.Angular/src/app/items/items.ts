@@ -142,6 +142,7 @@ export class ItemsComponent {
   }
 
   archiveCategory(catId: number) {
+    if (!confirm('Archive this category and all its items?')) return;
     this.categoriesSvc.archive(catId).subscribe({
       next: () => this.categories.set(this.categories().filter(c => c.id !== catId)),
       error: e => {
@@ -202,6 +203,7 @@ export class ItemsComponent {
   }
 
   archiveItem(itemId: number) {
+    if (!confirm('Archive this item?')) return;
     this.itemsSvc.archive(itemId).subscribe({
       next: () => this.items.set(this.items().filter(i => i.id !== itemId)),
       error: e => {
