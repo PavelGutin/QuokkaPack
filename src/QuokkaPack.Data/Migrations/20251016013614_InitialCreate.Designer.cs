@@ -12,8 +12,8 @@ using QuokkaPack.Data;
 namespace QuokkaPack.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251015184034_AddIsArchivedToItemsAndCategories")]
-    partial class AddIsArchivedToItemsAndCategories
+    [Migration("20251016013614_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -502,7 +502,7 @@ namespace QuokkaPack.Data.Migrations
                     b.HasOne("QuokkaPack.Shared.Models.Trip", "Trip")
                         .WithMany("TripItems")
                         .HasForeignKey("TripId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Item");

@@ -61,7 +61,10 @@
       "Bash(sqlcmd:*)",
       "Bash(Where-Object { $_rocessName -eq \"node\" })",
       "Bash(npm audit)",
-      "Bash(Select-Object Id, ProcessName, StartTime)"
+      "Bash(Select-Object Id, ProcessName, StartTime)",
+      "Bash(Where-Object { $_rocessName -eq \"dotnet\" })",
+      "Bash(del \"C:\\repos\\QuokkaPack\\cleanup_tripitems.sql\")",
+      "Bash(del \"C:\\repos\\QuokkaPack\\src\\QuokkaPack.Data\\Migrations\\*.cs\")"
     ],
     "deny": [],
     "ask": []
