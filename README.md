@@ -27,13 +27,13 @@ All your trips, categories, and items are private and secure. Each user has thei
 Run QuokkaPack using the pre-built Docker image:
 
 ```bash
-docker pull yourdockerhub/quokkapack:latest
-docker run -d -p 7100:80 \
-  -e JwtSettings__Secret="your-super-secret-key-min-32-chars" \
-  yourdockerhub/quokkapack:latest
+docker pull ghcr.io/pavelgutin/quokkapack:latest
+docker run -d -p 8080:8080 \
+  -e JWT_SECRET="your-super-secret-key-min-32-chars" \
+  ghcr.io/pavelgutin/quokkapack:latest
 ```
 
-Then access the application at `http://localhost:7100`
+Then access the application at `http://localhost:8080`
 
 ---
 

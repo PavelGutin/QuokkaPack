@@ -9,13 +9,13 @@ This guide covers everything you need to set up, run, and develop QuokkaPack loc
 The fastest way to run QuokkaPack is using the pre-built Docker image:
 
 ```bash
-docker pull yourdockerhub/quokkapack:latest
-docker run -d -p 7100:80 \
-  -e JwtSettings__Secret="your-super-secret-key-min-32-chars" \
-  yourdockerhub/quokkapack:latest
+docker pull ghcr.io/pavelgutin/quokkapack:latest
+docker run -d -p 8080:8080 \
+  -e JWT_SECRET="your-super-secret-key-min-32-chars" \
+  ghcr.io/pavelgutin/quokkapack:latest
 ```
 
-Then access the application at `http://localhost:7100`
+Then access the application at `http://localhost:8080`
 
 **For full Docker Compose setup with database**, see the [Docker Deployment](#docker-deployment) section below.
 
