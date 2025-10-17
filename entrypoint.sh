@@ -14,7 +14,7 @@ if [ -f "/app/efbundle" ]; then
     MIGRATION_COUNT=0
 
     while [ $MIGRATION_COUNT -lt $MIGRATION_RETRIES ]; do
-        if /app/efbundle --connection "$ConnectionStrings__DefaultConnection" 2>&1; then
+        if /app/efbundle 2>&1; then
             echo "Migrations applied successfully!"
             break
         fi
