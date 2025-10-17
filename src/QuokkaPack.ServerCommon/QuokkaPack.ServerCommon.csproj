@@ -13,4 +13,8 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.7" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\QuokkaPack.Data\QuokkaPack.Data.csproj" />
+  </ItemGroup>
+
 </Project>

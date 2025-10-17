@@ -50,12 +50,10 @@ builder.Services.AddCors(options =>
     });
 });
 
-// Only configure SQL Server if not in Testing environment
+// Only configure database if not in Testing environment
 if (!builder.Environment.IsEnvironment("Testing"))
 {
-    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ??
-        throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-    builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
+    builder.Services.AddQuokkaPackDatabase(builder.Configuration);
 }
 
 builder.Services.AddIdentity<IdentityUser, IdentityRole>()

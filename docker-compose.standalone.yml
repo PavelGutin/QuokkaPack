@@ -1,0 +1,15 @@
+services:
+  quokkapack:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    environment:
+      - JwtSettings__Secret=${JWT_SECRET}
+    volumes:
+      - quokkapack_data:/app/data
+    restart: unless-stopped
+
+volumes:
+  quokkapack_data:
