@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(git rebase:*)",
-      "Bash(docker builder:*)"
+      "Bash(docker builder:*)",
+      "Bash(gh run list:*)",
+      "WebFetch(domain:api.github.com)"
     ],
     "deny": [],
     "ask": []
