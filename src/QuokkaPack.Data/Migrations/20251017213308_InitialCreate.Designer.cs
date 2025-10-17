@@ -11,7 +11,7 @@ using QuokkaPack.Data;
 namespace QuokkaPack.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251017212736_InitialCreate")]
+    [Migration("20251017213308_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
