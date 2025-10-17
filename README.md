@@ -22,10 +22,25 @@ All your trips, categories, and items are private and secure. Each user has thei
 
 ---
 
+## 🚀 Quick Start with Docker
+
+Run QuokkaPack using the pre-built Docker image:
+
+```bash
+docker pull yourdockerhub/quokkapack:latest
+docker run -d -p 7100:80 \
+  -e JwtSettings__Secret="your-super-secret-key-min-32-chars" \
+  yourdockerhub/quokkapack:latest
+```
+
+Then access the application at `http://localhost:7100`
+
+---
+
 ## 📚 Documentation
 
-- **📖 [Architecture Guide](ARCHITECTURE.md)** - Technical architecture, system design, and API reference
-- **🛠️ [Developer Guide](DEVELOPER_GUIDE.md)** - Setup instructions and development workflow
+- **🏗️ [Architecture Guide](ARCHITECTURE.md)** - Technical architecture, system design, and API reference
+- **🛠️ [Developer Guide](DEVELOPER_GUIDE.md)** - Setup instructions, development workflow, and deployment guide
 
 ---
 
@@ -411,6 +426,8 @@ Contributions are welcome! Please feel free to submit issues or pull requests.
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
+See the [Developer Guide](DEVELOPER_GUIDE.md) for detailed setup instructions.
+
 ---
 
 ## 📄 License
@@ -422,7 +439,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🐨 Why "QuokkaPack"?
 
 Quokkas are known as the happiest animals on earth - always smiling and ready for adventure! Just like QuokkaPack helps you prepare for your next adventure with a smile. 🦘✨
-
----
-
-**Built with ❤️ using modern web technologies**

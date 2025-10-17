@@ -4,6 +4,23 @@ This guide covers everything you need to set up, run, and develop QuokkaPack loc
 
 ---
 
+## 🐳 Quick Start with Docker (Easiest)
+
+The fastest way to run QuokkaPack is using the pre-built Docker image:
+
+```bash
+docker pull yourdockerhub/quokkapack:latest
+docker run -d -p 7100:80 \
+  -e JwtSettings__Secret="your-super-secret-key-min-32-chars" \
+  yourdockerhub/quokkapack:latest
+```
+
+Then access the application at `http://localhost:7100`
+
+**For full Docker Compose setup with database**, see the [Docker Deployment](#docker-deployment) section below.
+
+---
+
 ## Prerequisites
 
 Before you begin, ensure you have the following installed:
