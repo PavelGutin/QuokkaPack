@@ -31,19 +31,21 @@ RUN dotnet run --no-build --configuration Release --urls "http://localhost:5000"
     pkill -f QuokkaPack.API || true
 
 # Stage 2: Generate TypeScript API client
-FROM node:20-alpine AS codegen
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS codegen
 
 WORKDIR /codegen
 
-# Install NSwag
-RUN npm install -g nswag
+# Install NSwag.ConsoleCore
+RUN dotnet tool install --global NSwag.ConsoleCore
+ENV PATH="${PATH}:/root/.dotnet/tools"
 
 # Copy OpenAPI spec and nswag config
 COPY --from=api-build /src/openapi.json ./openapi.json
 COPY src/QuokkaPack.Angular/codegen/nswag.json ./nswag.json
 
-# Update nswag config to use local openapi.json
-RUN sed -i 's|../../../artifacts/openapi.json|./openapi.json|g' nswag.json
+# Update nswag config to use local openapi.json and correct runtime
+RUN sed -i 's|../../../artifacts/openapi.json|./openapi.json|g' nswag.json && \
+    sed -i 's|"../src/app/api/api-client.ts"|"./api-client.ts"|g' nswag.json
 
 # Generate TypeScript client
 RUN nswag run nswag.json
