@@ -1,4 +1,16 @@
-# Stage 1: Build .NET API and generate OpenAPI spec
+# Stage 1: Build Angular application
+FROM node:20-alpine AS angular-build
+
+WORKDIR /app
+
+# Copy Angular project files
+COPY src/QuokkaPack.Angular/package*.json ./
+RUN npm ci
+
+COPY src/QuokkaPack.Angular/ ./
+RUN npm run build
+
+# Stage 2: Build .NET API
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS api-build
 
 WORKDIR /src
@@ -14,91 +26,20 @@ RUN dotnet restore "src/QuokkaPack.API/QuokkaPack.API.csproj"
 # Install dotnet-ef tool for migrations
 RUN dotnet tool install --global dotnet-ef
 
-# Copy source code
+# Copy source code and build
 COPY src/QuokkaPack.API/ src/QuokkaPack.API/
 COPY src/QuokkaPack.Data/ src/QuokkaPack.Data/
 COPY src/QuokkaPack.Shared/ src/QuokkaPack.Shared/
 COPY src/QuokkaPack.ServerCommon/ src/QuokkaPack.ServerCommon/
 
-# Build API to generate OpenAPI spec
-WORKDIR "/src/src/QuokkaPack.API"
-RUN dotnet build "QuokkaPack.API.csproj" -c Release
-
-# Generate OpenAPI spec
-RUN dotnet run --no-build --configuration Release --urls "http://localhost:5000" & \
-    sleep 5 && \
-    curl -o /src/openapi.json http://localhost:5000/openapi/v1.json && \
-    pkill -f QuokkaPack.API || true
-
-# Stage 2: Generate TypeScript API client
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS codegen
-
-WORKDIR /codegen
-
-# Install NSwag.ConsoleCore
-RUN dotnet tool install --global NSwag.ConsoleCore
-ENV PATH="${PATH}:/root/.dotnet/tools"
-
-# Copy OpenAPI spec and nswag config
-COPY --from=api-build /src/openapi.json ./openapi.json
-COPY src/QuokkaPack.Angular/codegen/nswag.json ./nswag.json
-
-# Update nswag config to use local openapi.json, output path, and correct runtime
-RUN sed -i 's|../../../artifacts/openapi.json|./openapi.json|g' nswag.json && \
-    sed -i 's|"../src/app/api/api-client.ts"|"./api-client.ts"|g' nswag.json && \
-    sed -i 's|"Net100"|"Net90"|g' nswag.json
-
-# Generate TypeScript client
-RUN nswag run nswag.json
-
-# Stage 3: Build Angular application
-FROM node:20-alpine AS angular-build
-
-WORKDIR /app
-
-# Copy Angular project files
-COPY src/QuokkaPack.Angular/package*.json ./
-RUN npm ci
-
-COPY src/QuokkaPack.Angular/ ./
-
-# Copy generated API client
-COPY --from=codegen /codegen/api-client.ts ./src/app/api/api-client.ts
-
-# Build Angular app
-RUN npm run build
-
-# Stage 4: Publish .NET API
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS api-publish
-
-WORKDIR /src
-
-# Copy project files and restore dependencies
-COPY ["src/QuokkaPack.API/QuokkaPack.API.csproj", "src/QuokkaPack.API/"]
-COPY ["src/QuokkaPack.Data/QuokkaPack.Data.csproj", "src/QuokkaPack.Data/"]
-COPY ["src/QuokkaPack.Shared/QuokkaPack.Shared.csproj", "src/QuokkaPack.Shared/"]
-COPY ["src/QuokkaPack.ServerCommon/QuokkaPack.ServerCommon.csproj", "src/QuokkaPack.ServerCommon/"]
-
-RUN dotnet restore "src/QuokkaPack.API/QuokkaPack.API.csproj"
-
-# Install dotnet-ef tool
-RUN dotnet tool install --global dotnet-ef
-
-# Copy source code
-COPY src/QuokkaPack.API/ src/QuokkaPack.API/
-COPY src/QuokkaPack.Data/ src/QuokkaPack.Data/
-COPY src/QuokkaPack.Shared/ src/QuokkaPack.Shared/
-COPY src/QuokkaPack.ServerCommon/ src/QuokkaPack.ServerCommon/
-
-# Publish API
 WORKDIR "/src/src/QuokkaPack.API"
 RUN dotnet publish "QuokkaPack.API.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
-# Generate migration bundle
+# Generate migration bundle for runtime execution
 ENV PATH="${PATH}:/root/.dotnet/tools"
 RUN dotnet ef migrations bundle --configuration Release -o /app/efbundle --self-contained
 
-# Stage 5: Final runtime image with nginx and dotnet
+# Stage 3: Final runtime image with nginx and dotnet
 FROM mcr.microsoft.com/dotnet/aspnet:9.0
 
 # Install nginx and supervisor
@@ -121,10 +62,10 @@ RUN sed -i 's/\r$//' /entrypoint.sh && chmod +x /entrypoint.sh
 COPY --from=angular-build /app/dist/QuokkaPack.Angular/browser /usr/share/nginx/html
 
 # Copy .NET API build output
-COPY --from=api-publish /app/publish /app
+COPY --from=api-build /app/publish /app
 
 # Copy the EF migration bundle
-COPY --from=api-publish /app/efbundle /app/efbundle
+COPY --from=api-build /app/efbundle /app/efbundle
 
 # Create directory for SQLite database
 RUN mkdir -p /app/data && chmod 777 /app/data
