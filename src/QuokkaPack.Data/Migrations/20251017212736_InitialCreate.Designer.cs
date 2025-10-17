@@ -11,7 +11,7 @@ using QuokkaPack.Data;
 namespace QuokkaPack.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251017204111_InitialCreate")]
+    [Migration("20251017212736_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -252,6 +252,9 @@ namespace QuokkaPack.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("IsDefault")
                         .HasColumnType("INTEGER");
 
@@ -276,6 +279,9 @@ namespace QuokkaPack.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("CategoryId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsArchived")
                         .HasColumnType("INTEGER");
 
                     b.Property<Guid>("MasterUserId")
@@ -475,7 +481,7 @@ namespace QuokkaPack.Data.Migrations
                     b.HasOne("QuokkaPack.Shared.Models.Trip", "Trip")
                         .WithMany("TripItems")
                         .HasForeignKey("TripId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Item");

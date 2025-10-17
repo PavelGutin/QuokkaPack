@@ -250,7 +250,7 @@ namespace QuokkaPack.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("IsArchived")
-                        .HasColumnType("bit");
+                        .HasColumnType("INTEGER");
 
                     b.Property<bool>("IsDefault")
                         .HasColumnType("INTEGER");
@@ -279,7 +279,7 @@ namespace QuokkaPack.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("IsArchived")
-                        .HasColumnType("bit");
+                        .HasColumnType("INTEGER");
 
                     b.Property<Guid>("MasterUserId")
                         .HasColumnType("TEXT");
