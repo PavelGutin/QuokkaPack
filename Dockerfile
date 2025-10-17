@@ -43,9 +43,10 @@ ENV PATH="${PATH}:/root/.dotnet/tools"
 COPY --from=api-build /src/openapi.json ./openapi.json
 COPY src/QuokkaPack.Angular/codegen/nswag.json ./nswag.json
 
-# Update nswag config to use local openapi.json and correct runtime
+# Update nswag config to use local openapi.json, output path, and correct runtime
 RUN sed -i 's|../../../artifacts/openapi.json|./openapi.json|g' nswag.json && \
-    sed -i 's|"../src/app/api/api-client.ts"|"./api-client.ts"|g' nswag.json
+    sed -i 's|"../src/app/api/api-client.ts"|"./api-client.ts"|g' nswag.json && \
+    sed -i 's|"Net100"|"Net90"|g' nswag.json
 
 # Generate TypeScript client
 RUN nswag run nswag.json
