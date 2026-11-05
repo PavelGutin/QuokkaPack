@@ -1,0 +1,176 @@
+@if (trip(); as t) {
+  <a routerLink="/" class="small text-decoration-none"><i class="bi bi-arrow-left me-1"></i>All trips</a>
+
+  @if (editingDetails()) {
+    <form class="card shadow-sm my-3" (ngSubmit)="saveDetails()" #f="ngForm">
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-12">
+            <label for="tname" class="form-label">Trip name</label>
+            <input id="tname" name="name" class="form-control" [(ngModel)]="draft.name" required autofocus />
+          </div>
+          <div class="col-6">
+            <label for="tstart" class="form-label">Start</label>
+            <input id="tstart" name="start" type="date" class="form-control" [(ngModel)]="draft.startDate" (change)="onStartChange()" />
+          </div>
+          <div class="col-6">
+            <label for="tend" class="form-label">End</label>
+            <input id="tend" name="end" type="date" class="form-control" [(ngModel)]="draft.endDate" [min]="draft.startDate" />
+          </div>
+          <div class="col-12">
+            <label for="tnotes" class="form-label">Notes</label>
+            <textarea id="tnotes" name="notes" class="form-control" rows="2" [(ngModel)]="draft.notes" placeholder="Flight times, reminders, things to buy…"></textarea>
+          </div>
+        </div>
+        <div class="d-flex gap-2 mt-3">
+          <button type="submit" class="btn btn-primary" [disabled]="!f.valid">Save</button>
+          <button type="button" class="btn btn-outline-secondary" (click)="closeDetails()">Cancel</button>
+        </div>
+      </div>
+    </form>
+  } @else {
+    <div class="d-flex align-items-start gap-2 mt-2 mb-3">
+      <div class="flex-grow-1 min-w-0">
+        <h1 class="h2 mb-1">{{ t.name }}</h1>
+        <div class="text-muted">
+          <i class="bi bi-calendar3 me-1"></i>{{ dateRange(t) }}
+          @if (whenLabel(t); as w) { <span class="badge text-bg-light ms-1">{{ w }}</span> }
+        </div>
+        @if (t.notes) { <p class="mt-2 mb-0 notes">{{ t.notes }}</p> }
+      </div>
+      <div class="qp-menu" (qpClickOutside)="menuOpen.set(false)">
+        <button type="button" class="btn btn-outline-secondary btn-sm" aria-label="Trip actions" (click)="menuOpen.set(!menuOpen())">
+          <i class="bi bi-three-dots"></i>
+        </button>
+        @if (menuOpen()) {
+          <div class="dropdown-menu show shadow-sm">
+            <button type="button" class="dropdown-item" (click)="openDetails()"><i class="bi bi-pencil me-2"></i>Edit details</button>
+            <button type="button" class="dropdown-item" (click)="duplicate()"><i class="bi bi-copy me-2"></i>Duplicate trip</button>
+            <button type="button" class="dropdown-item" (click)="resetPacking()" [disabled]="!stats().packed"><i class="bi bi-arrow-counterclockwise me-2"></i>Uncheck everything</button>
+            <div class="dropdown-divider"></div>
+            <button type="button" class="dropdown-item text-danger" (click)="remove()"><i class="bi bi-trash me-2"></i>Delete trip</button>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  @if (stats().total) {
+    <div class="d-flex justify-content-between small mb-1">
+      <span>{{ stats().packed }} of {{ stats().total }} packed</span>
+      <span class="fw-semibold">{{ stats().percent }}%</span>
+    </div>
+    <div class="progress progress-thin mb-3" role="progressbar" [attr.aria-valuenow]="stats().percent" aria-valuemin="0" aria-valuemax="100" aria-label="Packing progress">
+      <div class="progress-bar" [class.bg-success]="stats().percent === 100" [style.width.%]="stats().percent"></div>
+    </div>
+  }
+
+  <div class="sticky-tools d-flex flex-wrap gap-2 align-items-center mb-2">
+    <div class="btn-group" role="group" aria-label="Mode">
+      <button type="button" class="btn" [class.btn-primary]="mode() === 'pack'" [class.btn-outline-primary]="mode() !== 'pack'" (click)="setMode('pack')">
+        <i class="bi bi-check2-square me-1"></i>Pack
+      </button>
+      <button type="button" class="btn" [class.btn-primary]="mode() === 'edit'" [class.btn-outline-primary]="mode() !== 'edit'" (click)="setMode('edit')">
+        <i class="bi bi-pencil-square me-1"></i>Choose items
+      </button>
+    </div>
+    <div class="flex-grow-1" style="min-width: 10rem">
+      <input type="search" class="form-control" placeholder="Search items…" aria-label="Search items" [value]="query()" (input)="query.set($any($event.target).value)" />
+    </div>
+    @if (mode() === 'pack') {
+      <div class="form-check form-switch mb-0">
+        <input class="form-check-input" type="checkbox" id="hidePacked" [checked]="hidePacked()" (change)="hidePacked.set(!hidePacked())" />
+        <label class="form-check-label" for="hidePacked">Hide packed</label>
+      </div>
+    }
+  </div>
+
+  @if (mode() === 'pack') {
+    @if (!stats().total) {
+      <div class="empty-state">
+        <i class="bi bi-bag"></i>
+        <p class="lead mt-3">Nothing on this trip yet</p>
+        <button type="button" class="btn btn-primary" (click)="setMode('edit')">Choose items</button>
+      </div>
+    } @else if (!packGroups().length) {
+      <p class="text-muted text-center py-4">
+        @if (hidePacked() && !q()) { Everything is packed 🎉 } @else { No items match “{{ query() }}”. }
+      </p>
+    } @else {
+      <div class="pack-grid">
+        @for (g of packGroups(); track g.category.id) {
+          <div class="card shadow-sm">
+            <div class="card-header d-flex align-items-center gap-2">
+              <span class="fw-semibold flex-grow-1">{{ g.category.name }}</span>
+              <span class="small" [class.text-success]="g.packed === g.lines.length" [class.text-muted]="g.packed !== g.lines.length">
+                {{ g.packed }}/{{ g.lines.length }}
+              </span>
+              <button type="button" class="icon-btn" [title]="allPacked(g.lines) ? 'Uncheck all in ' + g.category.name : 'Check all in ' + g.category.name"
+                (click)="packGroup(g.lines, !allPacked(g.lines))">
+                <i class="bi" [class.bi-check2-all]="!allPacked(g.lines)" [class.bi-x-lg]="allPacked(g.lines)"></i>
+              </button>
+            </div>
+            <div class="list-group list-group-flush">
+              @for (l of g.visible; track l.tripItem.id) {
+                <label class="list-group-item pack-line" [class.packed]="l.tripItem.packed">
+                  <input type="checkbox" class="form-check-input" [checked]="l.tripItem.packed" (change)="togglePacked(l.tripItem)" />
+                  <span class="name flex-grow-1">{{ l.item.name }}</span>
+                  @if (l.tripItem.quantity > 1) { <span class="badge text-bg-light">×{{ l.tripItem.quantity }}</span> }
+                </label>
+              } @empty {
+                <div class="list-group-item small text-muted">All packed</div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+  } @else {
+    <p class="small text-muted">Tick what to bring on this trip. Adding an item here also saves it to your catalog for next time.</p>
+    <div class="pack-grid">
+      @for (g of editGroups(); track g.category.id) {
+        <div class="card shadow-sm">
+          <div class="card-header d-flex align-items-center gap-2">
+            <span class="fw-semibold flex-grow-1">{{ g.category.name }}</span>
+            <span class="small text-muted">{{ g.included }}/{{ g.rows.length }}</span>
+            @if (g.included < g.rows.length) {
+              <button type="button" class="btn btn-sm btn-outline-primary py-0" (click)="includeAll(g, true)">Add all</button>
+            } @else if (g.rows.length) {
+              <button type="button" class="btn btn-sm btn-outline-secondary py-0" (click)="includeAll(g, false)">Remove all</button>
+            }
+          </div>
+          <div class="list-group list-group-flush">
+            @for (r of g.rows; track r.item.id) {
+              <div class="list-group-item edit-line" [class.excluded]="!r.tripItem">
+                <input type="checkbox" class="form-check-input" [id]="'inc-' + r.item.id" [checked]="!!r.tripItem" (change)="toggleIncluded(r)" />
+                <label class="name flex-grow-1 mb-0" [for]="'inc-' + r.item.id">
+                  {{ r.item.name }}
+                  @if (r.item.archived) { <span class="badge text-bg-light">archived</span> }
+                </label>
+                @if (r.tripItem; as ti) {
+                  <span class="qty" aria-label="Quantity">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" (click)="qty(ti, -1)" [disabled]="ti.quantity <= 1" aria-label="Fewer">−</button>
+                    <span>{{ ti.quantity }}</span>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" (click)="qty(ti, 1)" aria-label="More">+</button>
+                  </span>
+                }
+              </div>
+            }
+            <div class="list-group-item px-2 py-2">
+              <input #box type="text" class="form-control form-control-sm" [placeholder]="'Add to ' + g.category.name + '…'" (keydown.enter)="quickAdd(g.category.id, box)" [attr.aria-label]="'Add item to ' + g.category.name" />
+            </div>
+          </div>
+        </div>
+      }
+      <div class="card border-dashed">
+        <div class="card-body">
+          <label for="newcat" class="form-label small text-muted">New category</label>
+          <div class="input-group input-group-sm">
+            <input id="newcat" type="text" class="form-control" placeholder="e.g. Ski gear" [(ngModel)]="newCategory" (keydown.enter)="addCategory()" />
+            <button type="button" class="btn btn-outline-primary" (click)="addCategory()" [disabled]="!newCategory.trim()">Add</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+}

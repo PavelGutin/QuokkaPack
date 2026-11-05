@@ -1,6 +1,0 @@
-@QuokkaPack.API_HostAddress = http://localhost:5000
-
-GET {{QuokkaPack.API_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

@@ -1,0 +1,97 @@
+<div class="page-header">
+  <h1>Trips</h1>
+  <a class="btn btn-primary" routerLink="/trips/new"><i class="bi bi-plus-lg me-1"></i>New trip</a>
+</div>
+
+@if (showOnboarding()) {
+  <div class="card border-primary shadow-sm mb-4">
+    <div class="card-body p-4">
+      <h2 class="h4">Welcome to QuokkaPack 👋</h2>
+      <p class="mb-3">
+        Your catalog is the list of things you might pack, grouped into categories. Each trip picks from it, and you check
+        items off as you pack. Want a head start with about 50 common items? You can edit or remove any of them.
+      </p>
+      <div class="d-flex flex-wrap gap-2">
+        <button type="button" class="btn btn-primary" (click)="useStarter()">Use the starter catalog</button>
+        <button type="button" class="btn btn-outline-secondary" (click)="skipStarter()">Start empty</button>
+      </div>
+      <p class="small text-muted mt-3 mb-0">
+        <i class="bi bi-shield-lock me-1"></i>Everything is stored in this browser only. Use <a routerLink="/backup">Backup</a> to save a copy.
+      </p>
+    </div>
+  </div>
+}
+
+@if (store.trips().length === 0) {
+  <div class="empty-state">
+    <i class="bi bi-suitcase2"></i>
+    <p class="lead mt-3 mb-1">No trips yet</p>
+    <p class="text-muted">Create a trip and choose which categories to bring.</p>
+    <a class="btn btn-primary" routerLink="/trips/new">Plan your first trip</a>
+  </div>
+} @else {
+  <div class="row g-3">
+    @for (t of sorted().active; track t.id) {
+      <ng-container *ngTemplateOutlet="card; context: { $implicit: t }" />
+    }
+  </div>
+
+  @if (sorted().past.length) {
+    <button type="button" class="btn btn-link text-decoration-none px-0 mt-4 mb-2" (click)="showPast.set(!showPast())">
+      <i class="bi" [class.bi-chevron-right]="!showPast()" [class.bi-chevron-down]="showPast()"></i>
+      Past trips ({{ sorted().past.length }})
+    </button>
+    @if (showPast()) {
+      <div class="row g-3">
+        @for (t of sorted().past; track t.id) {
+          <ng-container *ngTemplateOutlet="card; context: { $implicit: t }" />
+        }
+      </div>
+    }
+  }
+}
+
+<ng-template #card let-t>
+  @let s = stats(t);
+  <div class="col-12 col-md-6 col-xl-4">
+    <div class="card trip-card h-100 shadow-sm" [class.opacity-75]="phase(t) === 'past'">
+      <div class="card-body">
+        <div class="d-flex align-items-start gap-2">
+          <div class="flex-grow-1 min-w-0">
+            <h2 class="h5 card-title mb-1 text-truncate">
+              <a class="stretched-link text-reset text-decoration-none" [routerLink]="['/trips', t.id]">{{ t.name }}</a>
+            </h2>
+            <div class="small text-muted">
+              <i class="bi bi-calendar3 me-1"></i>{{ dateRange(t) }}
+              @if (whenLabel(t); as w) {
+                <span class="badge ms-1" [class.text-bg-success]="phase(t) === 'ongoing'" [class.text-bg-light]="phase(t) !== 'ongoing'">{{ w }}</span>
+              }
+            </div>
+          </div>
+          <div class="qp-menu card-menu" (qpClickOutside)="openMenu() === t.id && openMenu.set(null)">
+            <button type="button" class="icon-btn" aria-label="Trip actions" (click)="toggleMenu(t.id, $event)"><i class="bi bi-three-dots-vertical"></i></button>
+            @if (openMenu() === t.id) {
+              <div class="dropdown-menu show shadow-sm">
+                <button type="button" class="dropdown-item" (click)="duplicate(t)"><i class="bi bi-copy me-2"></i>Duplicate</button>
+                <button type="button" class="dropdown-item text-danger" (click)="remove(t)"><i class="bi bi-trash me-2"></i>Delete</button>
+              </div>
+            }
+          </div>
+        </div>
+        <div class="mt-3">
+          @if (s.total) {
+            <div class="d-flex justify-content-between small mb-1">
+              <span>{{ s.packed }} of {{ s.total }} packed</span>
+              <span class="fw-semibold">{{ s.percent }}%</span>
+            </div>
+            <div class="progress progress-thin" role="progressbar" [attr.aria-valuenow]="s.percent" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" [class.bg-success]="s.percent === 100" [style.width.%]="s.percent"></div>
+            </div>
+          } @else {
+            <span class="small text-muted">No items yet</span>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-template>

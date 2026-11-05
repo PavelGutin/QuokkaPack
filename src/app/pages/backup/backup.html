@@ -1,0 +1,63 @@
+<div class="page-header">
+  <h1>Backup</h1>
+</div>
+
+<div class="row g-3">
+  <div class="col-12 col-lg-6">
+    <div class="card shadow-sm h-100">
+      <div class="card-body">
+        <h2 class="h5"><i class="bi bi-hdd me-2"></i>Where your data lives</h2>
+        <p>
+          QuokkaPack keeps everything in this browser on this device: {{ store.trips().length }} trips,
+          {{ store.categories().length }} categories and {{ store.items().length }} items. Nothing is sent anywhere.
+        </p>
+        <p class="mb-0 small text-muted">
+          Clearing site data, or using a private window, removes it. Download a backup now and then. You can also use a backup
+          to move your lists to another browser.
+        </p>
+        @if (persisted() === false) {
+          <button type="button" class="btn btn-sm btn-outline-primary mt-3" (click)="requestPersist()">Ask the browser to keep my data</button>
+        } @else if (persisted()) {
+          <p class="small text-success mt-3 mb-0"><i class="bi bi-check-circle me-1"></i>This browser has agreed to keep your data.</p>
+        }
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-lg-6">
+    <div class="card shadow-sm h-100">
+      <div class="card-body">
+        <h2 class="h5"><i class="bi bi-arrow-down-up me-2"></i>Export and import</h2>
+        <p>The backup is a single JSON file holding everything.</p>
+        <div class="d-flex flex-wrap gap-2">
+          <button type="button" class="btn btn-primary" (click)="export()"><i class="bi bi-download me-1"></i>Download backup</button>
+          <label class="btn btn-outline-primary mb-0">
+            <i class="bi bi-upload me-1"></i>Restore from file
+            <input #file type="file" accept="application/json,.json" hidden (change)="import(file)" />
+          </label>
+        </div>
+        <p class="small text-muted mt-2 mb-0">Restoring replaces what’s here. You can undo right after.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-lg-6">
+    <div class="card shadow-sm h-100">
+      <div class="card-body">
+        <h2 class="h5"><i class="bi bi-stars me-2"></i>Starter catalog</h2>
+        <p>Adds about 50 common items in 8 categories. Items you already have are skipped.</p>
+        <button type="button" class="btn btn-outline-primary" (click)="addStarter()">Add starter catalog</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-lg-6">
+    <div class="card shadow-sm h-100 border-danger-subtle">
+      <div class="card-body">
+        <h2 class="h5 text-danger"><i class="bi bi-exclamation-triangle me-2"></i>Start over</h2>
+        <p>Deletes all trips and the whole catalog from this browser.</p>
+        <button type="button" class="btn btn-outline-danger" (click)="eraseAll()">Erase everything</button>
+      </div>
+    </div>
+  </div>
+</div>
