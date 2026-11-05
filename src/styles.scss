@@ -1,4 +1,12 @@
-@import 'bootswatch/dist/sandstone/bootstrap.min.css';
+@import '@fontsource/roboto/400.css';
+@import '@fontsource/roboto/500.css';
+@import '@fontsource/roboto/700.css';
+
+/* Sandstone theme from source, with the font bundled instead of loaded from Google Fonts. */
+$web-font-path: false;
+@import 'bootswatch/dist/sandstone/variables';
+@import 'bootstrap/scss/bootstrap';
+@import 'bootswatch/dist/sandstone/bootswatch';
 @import 'bootstrap-icons/font/bootstrap-icons.css';
 
 body {
