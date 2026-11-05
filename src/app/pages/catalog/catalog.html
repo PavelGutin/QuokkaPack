@@ -1,0 +1,89 @@
+<div class="page-header">
+  <h1>Catalog</h1>
+</div>
+<p class="text-muted">Everything you might pack, by category. Trips pick from this list. Archive things you no longer use to hide them from new trips without changing old ones.</p>
+
+<div class="sticky-tools d-flex flex-wrap gap-2 align-items-center mb-3">
+  <div class="input-group" style="max-width: 24rem">
+    <input type="text" class="form-control" placeholder="New category" aria-label="New category name" [(ngModel)]="newCategory" (keydown.enter)="addCategory()" />
+    <button type="button" class="btn btn-primary" (click)="addCategory()" [disabled]="!newCategory.trim()"><i class="bi bi-plus-lg"></i> Add</button>
+  </div>
+  <input type="search" class="form-control flex-grow-1" style="min-width: 10rem; max-width: 20rem" placeholder="Search…" aria-label="Search catalog" [value]="query()" (input)="query.set($any($event.target).value)" />
+  @if (archivedCount()) {
+    <div class="form-check form-switch mb-0">
+      <input class="form-check-input" type="checkbox" id="showArchived" [checked]="showArchived()" (change)="showArchived.set(!showArchived())" />
+      <label class="form-check-label" for="showArchived">Show archived ({{ archivedCount() }})</label>
+    </div>
+  }
+</div>
+
+@if (!store.categories().length) {
+  <div class="empty-state">
+    <i class="bi bi-list-check"></i>
+    <p class="lead mt-3">No categories yet</p>
+    <p class="text-muted">Add one above, like “Toiletries” or “Camping gear”. You can also load a starter catalog from <strong>Backup</strong>.</p>
+  </div>
+} @else if (!groups().length) {
+  <p class="text-muted text-center py-4">Nothing matches “{{ query() }}”.</p>
+}
+
+<div class="pack-grid">
+  @for (g of groups(); track g.category.id) {
+    <div class="card shadow-sm" [class.opacity-50]="g.category.archived">
+      <div class="card-header d-flex align-items-center gap-1">
+        <span class="fw-semibold flex-grow-1 min-w-0">
+          <qp-inline-edit [value]="g.category.name" label="Category name" (save)="renameCategory(g.category, $event)" />
+        </span>
+        <span class="badge text-bg-light me-1">{{ g.items.length }}</span>
+        @if (g.category.archived) {
+          <button type="button" class="icon-btn" title="Restore" (click)="archiveCategory(g.category, false)"><i class="bi bi-arrow-counterclockwise"></i></button>
+        } @else {
+          <button type="button" class="icon-btn" title="Archive category" (click)="archiveCategory(g.category, true)"><i class="bi bi-archive"></i></button>
+        }
+        <button type="button" class="icon-btn danger" title="Delete category and its items" (click)="deleteCategory(g.category, g.items.length)"><i class="bi bi-trash"></i></button>
+      </div>
+      <ul class="list-group list-group-flush">
+        @for (i of g.items; track i.id) {
+          <li class="list-group-item d-flex align-items-center gap-2 py-1" [class.text-muted]="i.archived">
+            <span class="flex-grow-1 min-w-0 text-truncate">
+              <qp-inline-edit [value]="i.name" label="Item name" (save)="renameItem(i, $event)" />
+              @if (i.archived) { <span class="badge text-bg-light ms-1">archived</span> }
+            </span>
+            @if (usage().get(i.id); as n) {
+              <span class="small text-muted" [title]="'On ' + n + ' trip' + (n === 1 ? '' : 's')"><i class="bi bi-suitcase2"></i>{{ n }}</span>
+            }
+            <div class="qp-menu" (qpClickOutside)="openMenu() === i.id && openMenu.set(null)">
+              <button type="button" class="icon-btn" [attr.aria-label]="'Actions for ' + i.name" (click)="openMenu.set(openMenu() === i.id ? null : i.id)">
+                <i class="bi bi-three-dots-vertical"></i>
+              </button>
+              @if (openMenu() === i.id) {
+                <div class="dropdown-menu show shadow-sm item-menu">
+                  @if (i.archived) {
+                    <button type="button" class="dropdown-item" (click)="archiveItem(i, false)"><i class="bi bi-arrow-counterclockwise me-2"></i>Restore</button>
+                  } @else {
+                    <button type="button" class="dropdown-item" (click)="archiveItem(i, true)"><i class="bi bi-archive me-2"></i>Archive</button>
+                  }
+                  <button type="button" class="dropdown-item text-danger" (click)="deleteItem(i)"><i class="bi bi-trash me-2"></i>Delete</button>
+                  @if (activeCategories().length > 1) {
+                    <div class="dropdown-divider"></div>
+                    <h6 class="dropdown-header">Move to</h6>
+                    @for (c of activeCategories(); track c.id) {
+                      @if (c.id !== i.categoryId) {
+                        <button type="button" class="dropdown-item" (click)="moveItem(i, c.id)">{{ c.name }}</button>
+                      }
+                    }
+                  }
+                </div>
+              }
+            </div>
+          </li>
+        }
+        @if (!g.category.archived) {
+          <li class="list-group-item px-2 py-2">
+            <input #box type="text" class="form-control form-control-sm" [placeholder]="'Add to ' + g.category.name + '…'" (keydown.enter)="addItem(g.category, box)" [attr.aria-label]="'Add item to ' + g.category.name" />
+          </li>
+        }
+      </ul>
+    </div>
+  }
+</div>
