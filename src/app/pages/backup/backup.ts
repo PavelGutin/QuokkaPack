@@ -2,6 +2,7 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { emptyDoc } from '../../data/model';
 import * as ops from '../../data/ops';
 import { Store } from '../../data/store';
+import { DriveSync } from '../../sync/drive-sync.service';
 import { ToastService } from '../../ui/toast.service';
 
 @Component({
@@ -10,15 +11,22 @@ import { ToastService } from '../../ui/toast.service';
 })
 export class BackupPage implements OnInit {
   store = inject(Store);
+  sync = inject(DriveSync);
   private toast = inject(ToastService);
   persisted = signal<boolean | null>(null);
 
   async ngOnInit() {
+    this.sync.preload();
     try {
       this.persisted.set((await navigator.storage?.persisted?.()) ?? null);
     } catch {
       /* unsupported */
     }
+  }
+
+  lastSynced(): string {
+    const at = this.sync.lastSyncedAt();
+    return at ? new Date(at).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : 'never';
   }
 
   async requestPersist() {

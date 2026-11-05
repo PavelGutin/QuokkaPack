@@ -10,13 +10,19 @@ import { provideRouter, withComponentInputBinding, withInMemoryScrolling } from 
 import { provideServiceWorker } from '@angular/service-worker';
 import { routes } from './app.routes';
 import { Store } from './data/store';
+import { DriveSync } from './sync/drive-sync.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes, withComponentInputBinding(), withInMemoryScrolling({ scrollPositionRestoration: 'top' })),
-    provideAppInitializer(() => inject(Store).load()),
+    provideAppInitializer(() => {
+      const sync = inject(DriveSync);
+      return inject(Store)
+        .load()
+        .then(() => sync.start());
+    }),
     provideServiceWorker('ngsw-worker.js', {
       enabled: !isDevMode(),
       registrationStrategy: 'registerWhenStable:30000',
