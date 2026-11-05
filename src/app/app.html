@@ -28,6 +28,10 @@
   <router-outlet />
 </main>
 
+<footer class="container pb-4 text-center small text-muted">
+  <a class="text-muted" href="privacy.html">Privacy</a>
+</footer>
+
 <div class="toast-stack" aria-live="polite">
   @for (t of toasts.toasts(); track t.id) {
     <div class="qp-toast text-bg-{{ t.kind }} shadow" role="status">
