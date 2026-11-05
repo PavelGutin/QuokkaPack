@@ -9,7 +9,7 @@
         <h2 class="h5"><i class="bi bi-hdd me-2"></i>Where your data lives</h2>
         <p>
           QuokkaPack keeps everything in this browser on this device: {{ store.trips().length }} trips,
-          {{ store.categories().length }} categories and {{ store.items().length }} items. Nothing is sent anywhere.
+          {{ store.categories().length }} categories and {{ store.items().length }} items. Nothing is sent anywhere unless you turn on Google Drive sync.
         </p>
         <p class="mb-0 small text-muted">
           Clearing site data, or using a private window, removes it. Download a backup now and then. You can also use a backup
@@ -37,6 +37,55 @@
           </label>
         </div>
         <p class="small text-muted mt-2 mb-0">Restoring replaces what’s here. You can undo right after.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-lg-6">
+    <div class="card shadow-sm h-100">
+      <div class="card-body">
+        <h2 class="h5"><i class="bi bi-google me-2"></i>Google Drive sync</h2>
+        @if (!sync.connected()) {
+          <p>
+            Keep a copy in your Google Drive and sync it between your browsers and devices. QuokkaPack can only see its own
+            hidden file, not your other Drive files.
+          </p>
+          <button type="button" class="btn btn-primary" (click)="sync.connect()"><i class="bi bi-link-45deg me-1"></i>Connect Google Drive</button>
+        } @else {
+          <p class="mb-2">
+            @if (sync.status() === 'syncing') {
+              <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>Syncing…
+            } @else {
+              <i class="bi bi-check-circle text-success me-1"></i>Connected. Last synced: {{ lastSynced() }}
+            }
+          </p>
+          @if (sync.choice(); as c) {
+            <div class="alert alert-info small">
+              <p class="mb-2">
+                Google Drive already has {{ c.remote.trips.length }} trips and {{ c.remote.items.length }} items. This browser has
+                {{ store.trips().length }} trips and {{ store.items().length }} items. Which copy do you want to keep?
+              </p>
+              <div class="d-flex flex-wrap gap-2">
+                <button type="button" class="btn btn-sm btn-primary" (click)="sync.choose('drive')">Use the Drive copy</button>
+                <button type="button" class="btn btn-sm btn-outline-primary" (click)="sync.choose('local')">Keep this browser’s copy</button>
+              </div>
+              <p class="mb-0 mt-2 text-muted">The other copy is replaced. You can undo right after.</p>
+            </div>
+          }
+          <div class="d-flex flex-wrap gap-2">
+            @if (sync.status() === 'reconnect') {
+              <button type="button" class="btn btn-primary" (click)="sync.connect()"><i class="bi bi-arrow-repeat me-1"></i>Reconnect</button>
+            } @else {
+              <button type="button" class="btn btn-outline-primary" [disabled]="sync.status() === 'syncing'" (click)="sync.syncNow()">
+                <i class="bi bi-arrow-repeat me-1"></i>Sync now
+              </button>
+            }
+            <button type="button" class="btn btn-outline-secondary" (click)="sync.disconnect()">Disconnect</button>
+          </div>
+        }
+        @if (sync.error(); as err) {
+          <p class="small text-danger mt-2 mb-0" role="alert"><i class="bi bi-exclamation-circle me-1"></i>{{ err }}</p>
+        }
       </div>
     </div>
   </div>

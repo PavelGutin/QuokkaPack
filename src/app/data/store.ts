@@ -26,6 +26,8 @@ export class Store {
   readonly items = computed(() => this.doc().items);
   readonly trips = computed(() => this.doc().trips);
 
+  private localListeners: ((doc: QuokkaDoc) => void)[] = [];
+
   async load(): Promise<void> {
     try {
       const stored = await idbGet<QuokkaDoc>(KEY);
@@ -56,14 +58,34 @@ export class Store {
       return false;
     }
     if (after === before) return true;
-    this.commit(after);
-    if (undo) this.toast.show(undo, { action: { label: 'Undo', run: () => this.commit(before) } });
+    this.commitLocal(after);
+    if (undo) this.toast.show(undo, { action: { label: 'Undo', run: () => this.commitLocal(before) } });
     return true;
   }
 
-  /** Replaces the whole document (import / erase). */
+  /**
+   * Replaces the whole document with one that came from elsewhere (sync). Its updatedAt is kept and
+   * local-change listeners are not told, so it is not pushed straight back.
+   */
   replace(doc: QuokkaDoc): void {
     this.commit(doc);
+  }
+
+  /** Restores a previous document as a new local change (stamped now, so it wins the next sync). */
+  restore(doc: QuokkaDoc): void {
+    this.commitLocal(doc);
+  }
+
+  /** Called after every local change (not after replace()). Returns an unsubscribe function. */
+  onLocalChange(fn: (doc: QuokkaDoc) => void): () => void {
+    this.localListeners.push(fn);
+    return () => (this.localListeners = this.localListeners.filter((f) => f !== fn));
+  }
+
+  private commitLocal(doc: QuokkaDoc): void {
+    const stamped = { ...doc, updatedAt: new Date().toISOString() };
+    this.commit(stamped);
+    for (const fn of this.localListeners) fn(stamped);
   }
 
   private commit(doc: QuokkaDoc): void {

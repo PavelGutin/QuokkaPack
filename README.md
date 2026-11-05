@@ -23,9 +23,17 @@ use "Add to Home Screen" to install it like an app.
 ## Where data lives
 
 Everything is one JSON document stored in the browser's IndexedDB (`src/app/data`). Open tabs stay in sync. Each
-browser keeps its own copy, so use **Backup** to move data between devices. Syncing across devices (for example
-through Google Drive) is planned. Because the data is a single document, that will mostly mean storing that one
-file somewhere.
+browser keeps its own copy. To move data between devices, use **Backup**, or turn on **Google Drive sync** on
+the Backup page.
+
+### Google Drive sync (optional)
+
+`src/app/sync` keeps the document as one `quokkapack.json` file in the hidden app data folder of the person's
+Google Drive (scope `drive.appdata` only). It signs in with Google Identity Services, keeps the access token in
+memory, and calls the Drive REST v3 API with `fetch`. On connect, app start and window focus it pulls; after local
+changes it pushes after about 2 seconds. Conflicts are last-writer-wins on the whole document by `updatedAt`, with
+Undo after a pull. On the first sync in a browser where both sides already hold data, it asks which copy to keep.
+The OAuth client ID is in `src/app/sync/config.ts`.
 
 ## Development
 
