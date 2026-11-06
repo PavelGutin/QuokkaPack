@@ -1,90 +1,90 @@
-# 🦘📦 QuokkaPack
+# QuokkaPack
 
-Packing lists for every trip. Keep a catalog of everything you might bring, pick from it for each trip, and check
+Packing lists for every trip. Keep one catalog of everything you might bring, pick from it for each trip, and check
 things off as you pack.
 
-It runs entirely in the browser. There is no server and no account, and it works offline once loaded. On a phone,
-use "Add to Home Screen" to install it like an app.
+**Open the app: [pavelgutin.github.io/QuokkaPack](https://pavelgutin.github.io/QuokkaPack/)**
 
-## Features
+No account needed. It works offline once it has loaded, and your lists stay on your device unless you turn on Google
+Drive sync.
 
-- **Trips** with optional dates, notes, a countdown and a packing progress bar. Upcoming trips come first; past
-  trips are folded away.
-- **Pack mode:** check items off by category, search, hide packed items, or check off a whole category at once.
-- **Choose items mode:** add or remove items or whole categories, set quantities, and add new items on the spot.
-  New items are saved to the catalog too.
-- **Start a trip from categories** or **copy a previous trip**. You can also duplicate any trip.
-- **Catalog:** rename by clicking, move items between categories, and archive what you no longer use. Archived
-  items stay on old trips but are hidden from new ones.
-- **Welcome flow:** new people pick this device only or this device + Google Drive (local storage is explained before the
-  browser is asked to keep it); returning people bring their lists in from Google Drive or a backup file.
-- **Undo** for deletes, moves and resets.
-- **Sync & settings:** download everything as one JSON file and restore it in any browser. First-time users can load a
-  starter catalog.
+## Getting started
 
-## Where data lives
+The first time you open QuokkaPack, it asks whether you're new or already use it on another device.
 
-Everything is one JSON document stored in the browser's IndexedDB (`src/app/data`). Open tabs stay in sync. Each
-browser keeps its own copy. To move data between devices, use a backup file or turn on **Google Drive sync**,
-both under **Sync & settings**. The app follows the system light or dark theme unless you pick one there.
+- **New:** choose where your lists live, either on this device only or on this device plus your Google Drive. Then
+  start with a ready-made catalog of about 50 common items, or start empty.
+- **Already using it:** connect the same Google Drive account to bring your lists over, or restore a backup file.
 
-### Google Drive sync (optional)
+## Install it on your phone or computer
 
-`src/app/sync` keeps the document as one `quokkapack.json` file in the hidden app data folder of the person's
-Google Drive (scope `drive.appdata` only). It signs in with Google Identity Services, keeps the access token in
-memory, and calls the Drive REST v3 API with `fetch`. On connect, app start and window focus it pulls; after local
-changes it pushes after about 2 seconds. Those background syncs run only while a token is in memory, because getting a
-new one opens a Google window that phones block without a tap; otherwise a chip on the Trips header shows the data
-isn't backed up and tapping it syncs. **Sync automatically** in Sync & settings lets background syncs request a token
-anyway, at the cost of a possible popup prompt. Conflicts are last-writer-wins on the whole document by `updatedAt`, with
-Undo after a pull. On the first sync in a browser where both sides already hold data, it asks which copy to keep.
-The OAuth client ID is in `src/app/sync/config.ts`.
+- **Android (Chrome):** open the app, then tap **⋮ → Install app** (or **Add to Home screen**).
+- **iPhone or iPad (Safari):** tap **Share → Add to Home Screen**.
+- **Desktop Chrome or Edge:** click the install icon at the right end of the address bar.
 
-## Development
+Installed, it opens in its own window like any other app.
 
-Requires Node 22+.
+## What you can do
 
-```bash
-npm install
-```
+**Plan trips**
+- Create a trip with a name and optional dates and notes.
+- Start it from whole categories (Clothing, Toiletries, and so on), or copy the list from an earlier trip.
+- Your next trip is shown at the top with a countdown and how much is left to pack. Past trips are tucked away.
 
-Start the dev server at http://localhost:4200:
+**Choose what to bring**
+- Switch a trip to **Choose items** to add or remove things, set quantities, or add a whole category at once.
+- Type a name that isn't in your catalog yet and add it on the spot. It's saved to the catalog for future trips.
 
-```bash
-npm start
-```
+**Pack**
+- Check items off as they go in the bag. Each category shows how many are done, and a finished category folds
+  away.
+- Search the list, hide what's already packed, or check off a whole category in one tap.
+- Jump between categories with the letters on the right edge.
 
-Run the unit tests for the data layer:
+**Keep your catalog tidy**
+- Rename anything by tapping its name, move items between categories, and archive what you no longer use. Archived
+  items stay on old trips but don't show up for new ones.
 
-```bash
-npm test
-```
+**Undo**
+- Deleting, archiving, moving, unchecking everything, restoring a backup or erasing can be undone from the message
+  that pops up.
 
-Make a production build in `dist/quokkapack/browser`:
+**Light or dark**
+- QuokkaPack follows your device's light or dark setting. You can pick one under **Sync & settings → Appearance**.
 
-```bash
-npm run build
-```
+## Your data and backups
 
-The production build includes a service worker for offline use. The dev server does not.
+Your lists are saved in the browser on the device you're using. Clearing the browser's site data, using a private
+window, or switching to a new phone means starting over, unless you have a backup or Google Drive sync.
 
-### Layout
+**Google Drive sync (optional)**
+- Turn it on during setup or later under **Sync & settings**. Use the same Google account on each device to keep them
+  in step.
+- QuokkaPack keeps one hidden file in your Drive. It can't see any of your other files, and the file doesn't appear in
+  your Drive's file list. You can see it, and delete it, in Google Drive under **Settings → Manage apps**.
+- The cloud button at the top of your trips shows whether everything is backed up. **Not backed up** means there are
+  changes on this device that aren't in Drive yet. Tap it to sync. **Sync** checks Drive for changes from your other
+  devices.
+- Want it to sync on its own? Turn on **Sync automatically** in Sync & settings. Your browser may then sometimes show
+  an "Allow this site to open?" prompt or a brief Google window when QuokkaPack signs in again.
+- **Disconnect** stops syncing. Your lists stay on the device.
 
-| Path | What |
-| --- | --- |
-| `src/app/data/model.ts` | Document types |
-| `src/app/data/ops.ts` | Every change, as a pure function `(doc) => doc` (unit-tested in `ops.test.ts`) |
-| `src/app/data/store.ts` | Signal-based store: persistence, undo, cross-tab sync |
-| `src/app/pages/*` | Trips, trip, new trip, catalog, backup |
+**Backup file**
+- **Sync & settings → Download backup** saves everything as one file. **Restore file** loads it in any browser.
 
-Built with Angular 20 (standalone components, signals) and Bootstrap 5 with the Sandstone theme.
+**Keeping your data on a device**
+- Browsers can clear website data to free up space. **Ask the browser to keep my data** in Sync & settings asks it
+  not to. Some browsers decide on their own, and installing the app makes a yes more likely.
 
-## Deploying
+**Starting over**
+- **Sync & settings → Erase everything on this device** deletes your trips and catalog from that browser.
 
-Pushing to `master` runs the tests, builds the app, and publishes it to GitHub Pages
-(`.github/workflows/pages.yml`). Enable it once under **Settings → Pages → Source: GitHub Actions**. The build is a
-static folder, so any static host works.
+## Privacy
 
-## License
+QuokkaPack has no server and no account, and it doesn't collect analytics. Your lists only leave your device if you
+turn on Google Drive sync, and then they go to your own Drive. Read the full
+[privacy policy](https://pavelgutin.github.io/QuokkaPack/privacy.html).
 
-MIT
+---
+
+Building or changing QuokkaPack? See [DEVELOPMENT.md](DEVELOPMENT.md). Licensed under [MIT](LICENSE).
