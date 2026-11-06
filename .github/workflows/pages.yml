@@ -29,6 +29,13 @@ jobs:
       - run: npx ng build --base-href "/${{ github.event.repository.name }}/"
       # GitHub Pages has no SPA fallback; serve the app for unknown paths too.
       - run: cp dist/quokkapack/browser/index.html dist/quokkapack/browser/404.html
+      # Pull requests keep the built site for a week, for previews and screenshots.
+      - uses: actions/upload-artifact@v4
+        if: github.ref != 'refs/heads/master'
+        with:
+          name: site
+          path: dist/quokkapack/browser
+          retention-days: 7
       - uses: actions/upload-pages-artifact@v3
         if: github.ref == 'refs/heads/master'
         with:
