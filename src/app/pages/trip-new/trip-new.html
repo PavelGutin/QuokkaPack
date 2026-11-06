@@ -1,68 +1,73 @@
-<div class="page-header">
-  <h1>New trip</h1>
-</div>
+<form class="qp-page" (ngSubmit)="submit()" #f="ngForm">
+  <header class="qp-bar">
+    <div class="row1">
+      <a class="qp-icon-btn" routerLink="/" aria-label="Cancel, back to trips"><i class="bi bi-x-lg" aria-hidden="true"></i></a>
+      <div class="title"><h1>New trip</h1></div>
+    </div>
+  </header>
 
-<form class="card shadow-sm" (ngSubmit)="submit()" #f="ngForm">
-  <div class="card-body p-4">
-    <div class="row g-3">
-      <div class="col-12">
-        <label for="name" class="form-label">Where are you going?</label>
-        <input id="name" name="name" class="form-control form-control-lg" [(ngModel)]="name" required placeholder="e.g. Lisbon, Camping at Big Sur" autofocus autocomplete="off" />
+  <main class="px-3 pt-4 pb-4 d-flex flex-column gap-4">
+    <div>
+      <label for="name" class="qp-field-label d-block">Where are you going?</label>
+      <input id="name" name="name" class="qp-input lg" [(ngModel)]="name" required placeholder="e.g. Lisbon, Camping at Big Sur" autofocus autocomplete="off" />
+    </div>
+
+    <div class="d-grid gap-2" style="grid-template-columns: repeat(2, minmax(0, 1fr))">
+      <div>
+        <label for="start" class="qp-field-label d-block">Start <span class="fw-normal">(optional)</span></label>
+        <input id="start" name="start" type="date" class="qp-input" [(ngModel)]="startDate" (change)="onStartChange()" />
       </div>
-      <div class="col-6">
-        <label for="start" class="form-label">Start <span class="text-muted small">(optional)</span></label>
-        <input id="start" name="start" type="date" class="form-control" [(ngModel)]="startDate" (change)="onStartChange()" />
-      </div>
-      <div class="col-6">
-        <label for="end" class="form-label">End <span class="text-muted small">(optional)</span></label>
-        <input id="end" name="end" type="date" class="form-control" [(ngModel)]="endDate" [min]="startDate" />
+      <div>
+        <label for="end" class="qp-field-label d-block">End <span class="fw-normal">(optional)</span></label>
+        <input id="end" name="end" type="date" class="qp-input" [(ngModel)]="endDate" [min]="startDate" />
       </div>
     </div>
 
-    <h2 class="h5 mt-4 mb-2">What to bring</h2>
+    <fieldset class="m-0 p-0 border-0 d-flex flex-column gap-3">
+      <legend class="qp-field-label mb-0">Start from</legend>
 
-    @if (otherTrips().length) {
-      <div class="mb-3">
-        <label for="copy" class="form-label small text-muted mb-1">Copy the list from a previous trip</label>
-        <select id="copy" name="copy" class="form-select" [(ngModel)]="copyFrom">
-          <option value="">Don’t copy</option>
-          @for (t of otherTrips(); track t.id) {
-            <option [value]="t.id">{{ t.name }} ({{ t.items.length }} items)</option>
-          }
-        </select>
-      </div>
-    }
+      @if (otherTrips().length) {
+        <div class="qp-seg block" role="group" aria-label="Start from">
+          <button type="button" [class.on]="source() === 'categories'" [attr.aria-pressed]="source() === 'categories'" (click)="source.set('categories')">Categories</button>
+          <button type="button" [class.on]="source() === 'copy'" [attr.aria-pressed]="source() === 'copy'" (click)="source.set('copy')">Copy a trip</button>
+        </div>
+      }
 
-    @if (categories().length) {
-      <div class="d-flex align-items-baseline justify-content-between mb-1">
-        <span class="small text-muted">{{ otherTrips().length ? 'And/or add' : 'Add' }} whole categories</span>
-        <span class="small">
-          <button type="button" class="btn btn-link btn-sm p-0" (click)="selectAll(true)">All</button> ·
-          <button type="button" class="btn btn-link btn-sm p-0" (click)="selectAll(false)">None</button>
-        </span>
-      </div>
-      <div class="list-group mb-2">
-        @for (c of categories(); track c.id) {
-          <label class="list-group-item list-group-item-action d-flex gap-3 align-items-start" [class.active-soft]="selected().has(c.id)">
-            <input type="checkbox" class="form-check-input mt-1 flex-none" [checked]="selected().has(c.id)" (change)="toggle(c.id)" />
-            <span class="min-w-0">
-              <span class="fw-semibold">{{ c.name }}</span> <span class="badge text-bg-light">{{ c.items.length }}</span>
-              <span class="d-block small text-muted text-truncate">{{ preview(c.items) }}</span>
-            </span>
-          </label>
+      @if (source() === 'categories') {
+        @if (categories().length) {
+          <div class="d-flex flex-wrap gap-2">
+            @for (c of categories(); track c.id) {
+              <button type="button" class="qp-chip" [attr.aria-pressed]="selected().has(c.id)" (click)="toggle(c.id)">{{ c.name }} · {{ c.count }}</button>
+            }
+          </div>
+          <p class="small text-body-secondary mb-0">
+            {{ selectedCount() ? selectedCount() + ' items.' : 'Pick categories, or start empty.' }} You can add or remove items after.
+            <button type="button" class="btn btn-link btn-sm p-0 align-baseline" (click)="selectAll(true)">All</button> ·
+            <button type="button" class="btn btn-link btn-sm p-0 align-baseline" (click)="selectAll(false)">None</button>
+          </p>
+        } @else {
+          <p class="small text-body-secondary mb-0">
+            Your catalog is empty. You can add items right on the trip, or set up categories in the <a routerLink="/catalog">Catalog</a>.
+          </p>
         }
-      </div>
-      <p class="small text-muted">You can fine-tune individual items after creating the trip.</p>
-    } @else {
-      <p class="text-muted">
-        Your catalog is empty. You’ll be able to add items right on the trip, or set up categories in the
-        <a routerLink="/catalog">Catalog</a>.
-      </p>
-    }
+      } @else {
+        <div class="qp-menu-list" style="background: var(--qp-sunken)">
+          @for (t of otherTrips(); track t.id) {
+            <label>
+              <span class="min-w-0">
+                <span class="d-block fw-semibold text-truncate">{{ t.name }}</span>
+                <span class="d-block small text-body-secondary">{{ dateRange(t) }} · {{ t.items.length }} items</span>
+              </span>
+              <input type="radio" class="form-check-input flex-none m-0" name="copy" [value]="t.id" [checked]="copyFrom() === t.id" (change)="copyFrom.set(t.id)" />
+            </label>
+          }
+        </div>
+        <p class="small text-body-secondary mb-0">Copies the item list, all unpacked.</p>
+      }
+    </fieldset>
+  </main>
 
-    <div class="d-flex gap-2 pt-3 mt-2 border-top">
-      <button type="submit" class="btn btn-primary" [disabled]="!f.valid">Create trip</button>
-      <a class="btn btn-outline-secondary" routerLink="/">Cancel</a>
-    </div>
+  <div class="qp-bottom">
+    <button type="submit" class="qp-btn primary big" [disabled]="!f.valid || (source() === 'copy' && !copyFrom())">Create trip</button>
   </div>
 </form>

@@ -1,36 +1,8 @@
-<nav class="navbar navbar-expand-sm navbar-dark bg-primary sticky-top">
-  <div class="container">
-    <a class="navbar-brand fw-bold" routerLink="/" (click)="menuOpen.set(false)">🦘📦 QuokkaPack</a>
-    <button class="navbar-toggler" type="button" (click)="menuOpen.set(!menuOpen())" [attr.aria-expanded]="menuOpen()" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" [class.show]="menuOpen()">
-      <ul class="navbar-nav ms-auto">
-        <li class="nav-item">
-          <a class="nav-link" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="menuOpen.set(false)"><i class="bi bi-suitcase2 me-1"></i>Trips</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" routerLink="/catalog" routerLinkActive="active" (click)="menuOpen.set(false)"><i class="bi bi-list-check me-1"></i>Catalog</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" routerLink="/backup" routerLinkActive="active" (click)="menuOpen.set(false)"><i class="bi bi-cloud-arrow-down me-1"></i>Backup</a>
-        </li>
-      </ul>
-    </div>
-  </div>
-</nav>
-
 @if (store.storageError(); as err) {
-  <div class="alert alert-warning rounded-0 mb-0 text-center small" role="alert">{{ err }}</div>
+  <div class="qp-banner" role="alert">{{ err }}</div>
 }
 
-<main class="container py-4">
-  <router-outlet />
-</main>
-
-<footer class="container pb-4 text-center small text-muted">
-  <a class="text-muted" href="privacy.html">Privacy</a>
-</footer>
+<router-outlet />
 
 <div class="toast-stack" aria-live="polite">
   @for (t of toasts.toasts(); track t.id) {

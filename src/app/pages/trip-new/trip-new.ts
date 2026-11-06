@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import * as ops from '../../data/ops';
 import { Store } from '../../data/store';
+import { dateRange } from '../../ui/format';
 
 @Component({
   selector: 'qp-trip-new',
@@ -19,8 +20,8 @@ export class TripNewPage implements OnInit {
   name = '';
   startDate = '';
   endDate = '';
-  notes = '';
-  copyFrom = '';
+  source = signal<'categories' | 'copy'>('categories');
+  copyFrom = signal('');
   selected = signal<Set<string>>(new Set());
 
   categories = computed(() => {
@@ -28,8 +29,8 @@ export class TripNewPage implements OnInit {
     return this.store
       .categories()
       .filter((c) => !c.archived)
-      .map((c) => ({ ...c, items: items.filter((i) => i.categoryId === c.id).sort(ops.byName) }))
-      .filter((c) => c.items.length)
+      .map((c) => ({ ...c, count: items.filter((i) => i.categoryId === c.id).length }))
+      .filter((c) => c.count)
       .sort(ops.byName);
   });
 
@@ -38,8 +39,15 @@ export class TripNewPage implements OnInit {
     return [...active, ...past].filter((t) => t.items.length);
   });
 
+  selectedCount = computed(() => this.categories().filter((c) => this.selected().has(c.id)).reduce((n, c) => n + c.count, 0));
+
+  dateRange = dateRange;
+
   ngOnInit() {
-    if (this.from() && this.store.trips().some((t) => t.id === this.from())) this.copyFrom = this.from()!;
+    if (this.from() && this.store.trips().some((t) => t.id === this.from())) {
+      this.copyFrom.set(this.from()!);
+      this.source.set('copy');
+    }
   }
 
   toggle(id: string) {
@@ -52,28 +60,25 @@ export class TripNewPage implements OnInit {
     this.selected.set(on ? new Set(this.categories().map((c) => c.id)) : new Set());
   }
 
-  preview(items: { name: string }[]) {
-    const names = items.slice(0, 6).map((i) => i.name);
-    return names.join(', ') + (items.length > 6 ? ` +${items.length - 6} more` : '');
-  }
-
   onStartChange() {
     if (this.startDate && (!this.endDate || this.endDate < this.startDate)) this.endDate = this.startDate;
   }
 
   submit() {
+    const copy = this.source() === 'copy' ? this.copyFrom() : '';
+    const categoryIds = this.source() === 'categories' ? [...this.selected()] : [];
     let id = '';
     const ok = this.store.update((d) => {
       const r = ops.createTrip(
         d,
-        { name: this.name, startDate: this.startDate, endDate: this.endDate, notes: this.notes },
-        { categoryIds: [...this.selected()], copyFromTripId: this.copyFrom || undefined },
+        { name: this.name, startDate: this.startDate, endDate: this.endDate },
+        { categoryIds, copyFromTripId: copy || undefined },
       );
       id = r.id;
       return r.doc;
     });
     if (!ok) return;
-    const empty = !this.selected().size && !this.copyFrom;
+    const empty = !categoryIds.length && !copy;
     this.router.navigate(['/trips', id], { queryParams: empty ? { mode: 'edit' } : {}, replaceUrl: true });
   }
 }

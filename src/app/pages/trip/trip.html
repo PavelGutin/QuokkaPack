@@ -1,176 +1,193 @@
 @if (trip(); as t) {
-  <a routerLink="/" class="small text-decoration-none"><i class="bi bi-arrow-left me-1"></i>All trips</a>
-
-  @if (editingDetails()) {
-    <form class="card shadow-sm my-3" (ngSubmit)="saveDetails()" #f="ngForm">
-      <div class="card-body">
-        <div class="row g-3">
-          <div class="col-12">
-            <label for="tname" class="form-label">Trip name</label>
-            <input id="tname" name="name" class="form-control" [(ngModel)]="draft.name" required autofocus />
-          </div>
-          <div class="col-6">
-            <label for="tstart" class="form-label">Start</label>
-            <input id="tstart" name="start" type="date" class="form-control" [(ngModel)]="draft.startDate" (change)="onStartChange()" />
-          </div>
-          <div class="col-6">
-            <label for="tend" class="form-label">End</label>
-            <input id="tend" name="end" type="date" class="form-control" [(ngModel)]="draft.endDate" [min]="draft.startDate" />
-          </div>
-          <div class="col-12">
-            <label for="tnotes" class="form-label">Notes</label>
-            <textarea id="tnotes" name="notes" class="form-control" rows="2" [(ngModel)]="draft.notes" placeholder="Flight times, reminders, things to buy…"></textarea>
-          </div>
+  <div class="qp-page">
+    <header class="qp-bar" qpBarHeight>
+      <div class="row1">
+        <a class="qp-icon-btn" routerLink="/" aria-label="All trips"><i class="bi bi-chevron-left" aria-hidden="true"></i></a>
+        <div class="title">
+          <h1>{{ t.name }}</h1>
+          <div class="sub">{{ dateRange(t) }}@if (whenLabel(t); as w) { · {{ w }} }</div>
         </div>
-        <div class="d-flex gap-2 mt-3">
-          <button type="submit" class="btn btn-primary" [disabled]="!f.valid">Save</button>
-          <button type="button" class="btn btn-outline-secondary" (click)="closeDetails()">Cancel</button>
+        <div class="qp-menu" (qpClickOutside)="menuOpen.set(false)">
+          <button type="button" class="qp-icon-btn" aria-label="Trip actions" [attr.aria-expanded]="menuOpen()" (click)="menuOpen.set(!menuOpen())">
+            <i class="bi bi-three-dots" aria-hidden="true"></i>
+          </button>
+          @if (menuOpen()) {
+            <div class="dropdown-menu show shadow-sm">
+              <button type="button" class="dropdown-item" (click)="openDetails()"><i class="bi bi-pencil me-2" aria-hidden="true"></i>Edit details</button>
+              <button type="button" class="dropdown-item" (click)="duplicate()"><i class="bi bi-copy me-2" aria-hidden="true"></i>Duplicate trip</button>
+              <button type="button" class="dropdown-item" (click)="resetPacking()" [disabled]="!stats().packed"><i class="bi bi-arrow-counterclockwise me-2" aria-hidden="true"></i>Uncheck everything</button>
+              <div class="dropdown-divider"></div>
+              <button type="button" class="dropdown-item text-danger" (click)="remove()"><i class="bi bi-trash me-2" aria-hidden="true"></i>Delete trip</button>
+            </div>
+          }
         </div>
       </div>
-    </form>
-  } @else {
-    <div class="d-flex align-items-start gap-2 mt-2 mb-3">
-      <div class="flex-grow-1 min-w-0">
-        <h1 class="h2 mb-1">{{ t.name }}</h1>
-        <div class="text-muted">
-          <i class="bi bi-calendar3 me-1"></i>{{ dateRange(t) }}
-          @if (whenLabel(t); as w) { <span class="badge text-bg-light ms-1">{{ w }}</span> }
-        </div>
-        @if (t.notes) { <p class="mt-2 mb-0 notes">{{ t.notes }}</p> }
-      </div>
-      <div class="qp-menu" (qpClickOutside)="menuOpen.set(false)">
-        <button type="button" class="btn btn-outline-secondary btn-sm" aria-label="Trip actions" (click)="menuOpen.set(!menuOpen())">
-          <i class="bi bi-three-dots"></i>
-        </button>
-        @if (menuOpen()) {
-          <div class="dropdown-menu show shadow-sm">
-            <button type="button" class="dropdown-item" (click)="openDetails()"><i class="bi bi-pencil me-2"></i>Edit details</button>
-            <button type="button" class="dropdown-item" (click)="duplicate()"><i class="bi bi-copy me-2"></i>Duplicate trip</button>
-            <button type="button" class="dropdown-item" (click)="resetPacking()" [disabled]="!stats().packed"><i class="bi bi-arrow-counterclockwise me-2"></i>Uncheck everything</button>
-            <div class="dropdown-divider"></div>
-            <button type="button" class="dropdown-item text-danger" (click)="remove()"><i class="bi bi-trash me-2"></i>Delete trip</button>
+      <div class="row2">
+        <nav class="qp-seg" aria-label="Mode">
+          <a [routerLink]="[]" [queryParams]="{ mode: null }" queryParamsHandling="merge" [replaceUrl]="true" [class.on]="mode() === 'pack'" [attr.aria-current]="mode() === 'pack' ? 'page' : null">Pack</a>
+          <a [routerLink]="[]" [queryParams]="{ mode: 'edit' }" queryParamsHandling="merge" [replaceUrl]="true" [class.on]="mode() === 'edit'" [attr.aria-current]="mode() === 'edit' ? 'page' : null">Choose items</a>
+        </nav>
+        @if (mode() === 'pack') {
+          <div class="qp-progress" role="progressbar" aria-label="Packing progress" [attr.aria-valuenow]="stats().percent" aria-valuemin="0" aria-valuemax="100">
+            <div [style.width.%]="stats().percent"></div>
           </div>
+          <span class="small text-body-secondary">{{ stats().packed }}/{{ stats().total }}</span>
+        } @else {
+          <span class="small text-body-secondary flex-grow-1 text-end">{{ stats().total }} on this trip</span>
         }
       </div>
-    </div>
-  }
+    </header>
 
-  @if (stats().total) {
-    <div class="d-flex justify-content-between small mb-1">
-      <span>{{ stats().packed }} of {{ stats().total }} packed</span>
-      <span class="fw-semibold">{{ stats().percent }}%</span>
-    </div>
-    <div class="progress progress-thin mb-3" role="progressbar" [attr.aria-valuenow]="stats().percent" aria-valuemin="0" aria-valuemax="100" aria-label="Packing progress">
-      <div class="progress-bar" [class.bg-success]="stats().percent === 100" [style.width.%]="stats().percent"></div>
-    </div>
-  }
-
-  <div class="sticky-tools d-flex flex-wrap gap-2 align-items-center mb-2">
-    <div class="btn-group" role="group" aria-label="Mode">
-      <button type="button" class="btn" [class.btn-primary]="mode() === 'pack'" [class.btn-outline-primary]="mode() !== 'pack'" (click)="setMode('pack')">
-        <i class="bi bi-check2-square me-1"></i>Pack
-      </button>
-      <button type="button" class="btn" [class.btn-primary]="mode() === 'edit'" [class.btn-outline-primary]="mode() !== 'edit'" (click)="setMode('edit')">
-        <i class="bi bi-pencil-square me-1"></i>Choose items
-      </button>
-    </div>
-    <div class="flex-grow-1" style="min-width: 10rem">
-      <input type="search" class="form-control" placeholder="Search items…" aria-label="Search items" [value]="query()" (input)="query.set($any($event.target).value)" />
-    </div>
-    @if (mode() === 'pack') {
-      <div class="form-check form-switch mb-0">
-        <input class="form-check-input" type="checkbox" id="hidePacked" [checked]="hidePacked()" (change)="hidePacked.set(!hidePacked())" />
-        <label class="form-check-label" for="hidePacked">Hide packed</label>
-      </div>
+    @if (editingDetails()) {
+      <form class="qp-card m-3" style="background: var(--qp-sunken)" (ngSubmit)="saveDetails()" #f="ngForm">
+        <div>
+          <label for="tname" class="qp-field-label d-block">Trip name</label>
+          <input id="tname" name="name" class="qp-input lg" [(ngModel)]="draft.name" required autofocus />
+        </div>
+        <div class="d-grid gap-2" style="grid-template-columns: repeat(2, minmax(0, 1fr))">
+          <div>
+            <label for="tstart" class="qp-field-label d-block">Start</label>
+            <input id="tstart" name="start" type="date" class="qp-input" [(ngModel)]="draft.startDate" (change)="onStartChange()" />
+          </div>
+          <div>
+            <label for="tend" class="qp-field-label d-block">End</label>
+            <input id="tend" name="end" type="date" class="qp-input" [(ngModel)]="draft.endDate" [min]="draft.startDate" />
+          </div>
+        </div>
+        <div>
+          <label for="tnotes" class="qp-field-label d-block">Notes</label>
+          <textarea id="tnotes" name="notes" class="qp-input" rows="2" [(ngModel)]="draft.notes" placeholder="Flight times, reminders, things to buy…"></textarea>
+        </div>
+        <div class="d-flex gap-2 mt-1">
+          <button type="submit" class="qp-btn primary" [disabled]="!f.valid">Save</button>
+          <button type="button" class="qp-btn" (click)="closeDetails()">Cancel</button>
+        </div>
+      </form>
+    } @else if (t.notes) {
+      <p class="notes">{{ t.notes }}</p>
     }
-  </div>
 
-  @if (mode() === 'pack') {
-    @if (!stats().total) {
-      <div class="empty-state">
-        <i class="bi bi-bag"></i>
-        <p class="lead mt-3">Nothing on this trip yet</p>
-        <button type="button" class="btn btn-primary" (click)="setMode('edit')">Choose items</button>
-      </div>
-    } @else if (!packGroups().length) {
-      <p class="text-muted text-center py-4">
-        @if (hidePacked() && !q()) { Everything is packed 🎉 } @else { No items match “{{ query() }}”. }
-      </p>
-    } @else {
-      <div class="pack-grid">
-        @for (g of packGroups(); track g.category.id) {
-          <div class="card shadow-sm">
-            <div class="card-header d-flex align-items-center gap-2">
-              <span class="fw-semibold flex-grow-1">{{ g.category.name }}</span>
-              <span class="small" [class.text-success]="g.packed === g.lines.length" [class.text-muted]="g.packed !== g.lines.length">
-                {{ g.packed }}/{{ g.lines.length }}
-              </span>
-              <button type="button" class="icon-btn" [title]="allPacked(g.lines) ? 'Uncheck all in ' + g.category.name : 'Check all in ' + g.category.name"
-                (click)="packGroup(g.lines, !allPacked(g.lines))">
-                <i class="bi" [class.bi-check2-all]="!allPacked(g.lines)" [class.bi-x-lg]="allPacked(g.lines)"></i>
-              </button>
-            </div>
-            <div class="list-group list-group-flush">
-              @for (l of g.visible; track l.tripItem.id) {
-                <label class="list-group-item pack-line" [class.packed]="l.tripItem.packed">
-                  <input type="checkbox" class="form-check-input" [checked]="l.tripItem.packed" (change)="togglePacked(l.tripItem)" />
-                  <span class="name flex-grow-1">{{ l.item.name }}</span>
-                  @if (l.tripItem.quantity > 1) { <span class="badge text-bg-light">×{{ l.tripItem.quantity }}</span> }
-                </label>
-              } @empty {
-                <div class="list-group-item small text-muted">All packed</div>
+    <main class="qp-list" [class.no-rail]="!rail().length">
+      @if (mode() === 'pack') {
+        @if (!stats().total) {
+          <div class="qp-empty">
+            <i class="bi bi-bag" aria-hidden="true"></i>
+            <p class="lead">Nothing on this trip yet</p>
+            <a class="qp-btn primary mt-2" [routerLink]="[]" [queryParams]="{ mode: 'edit' }" [replaceUrl]="true">Choose items</a>
+          </div>
+        } @else if (!packGroups().length) {
+          <p class="qp-empty mb-0">
+            @if (hidePacked() && !q()) { Everything is packed. } @else { No items match “{{ query() }}”. }
+          </p>
+        } @else {
+          @for (g of packGroups(); track g.category.id) {
+            <h2 class="qp-section-h" [id]="'cat-' + g.category.id">
+              <span class="name">{{ g.category.name }}</span>
+              @if (g.done) {
+                <span class="done"><i class="bi bi-check-lg me-1" aria-hidden="true"></i>All {{ g.lines.length }} packed</span>
+                @if (!q()) {
+                  <button type="button" class="qp-btn sm" (click)="toggleExpanded(g.category.id)" [attr.aria-expanded]="!g.collapsed">{{ g.collapsed ? 'Show' : 'Hide' }}</button>
+                }
+              } @else {
+                <span class="count">{{ g.packed }}/{{ g.lines.length }}</span>
+                <button type="button" class="qp-icon-btn sm" [attr.aria-label]="'Check all in ' + g.category.name" [title]="'Check all in ' + g.category.name" (click)="packGroup(g.lines, true)">
+                  <i class="bi bi-check2-all" aria-hidden="true"></i>
+                </button>
+              }
+            </h2>
+            @for (l of g.visible; track l.tripItem.id) {
+              <label class="qp-row" [class.done]="l.tripItem.packed">
+                <input type="checkbox" class="form-check-input" [checked]="l.tripItem.packed" (change)="togglePacked(l.tripItem)" />
+                <span class="name">{{ l.item.name }}</span>
+                @if (l.tripItem.quantity > 1) { <span class="meta">×{{ l.tripItem.quantity }}</span> }
+              </label>
+            }
+          }
+        }
+      } @else {
+        @for (g of editGroups(); track g.category.id) {
+          <h2 class="qp-section-h" [id]="'cat-' + g.category.id">
+            <span class="name">{{ g.category.name }}</span>
+            <span class="count">{{ g.included }}/{{ g.rows.length }}</span>
+            @if (g.included < g.rows.length) {
+              <button type="button" class="qp-btn sm accent-text" (click)="includeAll(g, true)">Add all</button>
+            } @else if (g.rows.length) {
+              <button type="button" class="qp-btn sm" (click)="includeAll(g, false)">Remove all</button>
+            }
+          </h2>
+          @for (r of g.rows; track r.item.id) {
+            <div class="qp-row tall" [class.off]="!r.tripItem">
+              <input type="checkbox" class="form-check-input" [id]="'inc-' + r.item.id" [checked]="!!r.tripItem" (change)="toggleIncluded(r)" />
+              <label class="name mb-0" [for]="'inc-' + r.item.id">
+                {{ r.item.name }}
+                @if (r.item.archived) { <span class="badge text-bg-secondary ms-1">archived</span> }
+              </label>
+              @if (r.tripItem; as ti) {
+                <span class="qp-stepper">
+                  <button type="button" (click)="qty(ti, -1)" [disabled]="ti.quantity <= 1" [attr.aria-label]="'Fewer ' + r.item.name">−</button>
+                  <span [attr.aria-label]="'Quantity ' + ti.quantity">{{ ti.quantity }}</span>
+                  <button type="button" (click)="qty(ti, 1)" [attr.aria-label]="'More ' + r.item.name">+</button>
+                </span>
               }
             </div>
+          } @empty {
+            <div class="qp-row off small">No items in this category yet.</div>
+          }
+        } @empty {
+          @if (!q()) {
+            <div class="qp-empty">
+              <i class="bi bi-list-check" aria-hidden="true"></i>
+              <p class="lead">Your catalog is empty</p>
+              <p class="small mb-0">Add a category below, then type item names in the box at the bottom.</p>
+            </div>
+          }
+        }
+        @if (!q()) {
+          <div class="d-flex gap-2 p-3">
+            <input type="text" class="qp-input" placeholder="New category, e.g. Ski gear" aria-label="New category name" [(ngModel)]="newCategory" (keydown.enter)="addCategory()" />
+            <button type="button" class="qp-btn" (click)="addCategory()" [disabled]="!newCategory.trim()">Add</button>
           </div>
         }
-      </div>
+      }
+    </main>
+
+    @if (rail().length) {
+      <nav class="qp-rail" aria-label="Jump to category">
+        @for (c of rail(); track c.id) {
+          <button type="button" [attr.aria-label]="c.name" [title]="c.name" (click)="jump(c.id)">{{ c.label }}</button>
+        }
+      </nav>
     }
-  } @else {
-    <p class="small text-muted">Tick what to bring on this trip. Adding an item here also saves it to your catalog for next time.</p>
-    <div class="pack-grid">
-      @for (g of editGroups(); track g.category.id) {
-        <div class="card shadow-sm">
-          <div class="card-header d-flex align-items-center gap-2">
-            <span class="fw-semibold flex-grow-1">{{ g.category.name }}</span>
-            <span class="small text-muted">{{ g.included }}/{{ g.rows.length }}</span>
-            @if (g.included < g.rows.length) {
-              <button type="button" class="btn btn-sm btn-outline-primary py-0" (click)="includeAll(g, true)">Add all</button>
-            } @else if (g.rows.length) {
-              <button type="button" class="btn btn-sm btn-outline-secondary py-0" (click)="includeAll(g, false)">Remove all</button>
-            }
+
+    <div class="qp-bottom">
+      @if (mode() === 'pack') {
+        <div class="line">
+          <label class="qp-search">
+            <i class="bi bi-search" aria-hidden="true"></i>
+            <input type="search" placeholder="Search this trip" aria-label="Search this trip" [value]="query()" (input)="query.set($any($event.target).value)" />
+          </label>
+          <button type="button" class="qp-toggle" [attr.aria-pressed]="hidePacked()" (click)="hidePacked.set(!hidePacked())">Hide packed</button>
+        </div>
+      } @else {
+        @if (newItemName() && categories().length) {
+          <div class="qp-add-row">
+            <span class="label">Add “{{ newItemName() }}” to</span>
+            <select class="form-select" aria-label="Category for the new item" [value]="addCategoryId()" (change)="addCategoryId.set($any($event.target).value)">
+              @for (c of categories(); track c.id) {
+                <option [value]="c.id" [selected]="c.id === addCategoryId()">{{ c.name }}</option>
+              }
+            </select>
+            <button type="button" class="qp-btn sm primary" (click)="addTyped()">Add</button>
           </div>
-          <div class="list-group list-group-flush">
-            @for (r of g.rows; track r.item.id) {
-              <div class="list-group-item edit-line" [class.excluded]="!r.tripItem">
-                <input type="checkbox" class="form-check-input" [id]="'inc-' + r.item.id" [checked]="!!r.tripItem" (change)="toggleIncluded(r)" />
-                <label class="name flex-grow-1 mb-0" [for]="'inc-' + r.item.id">
-                  {{ r.item.name }}
-                  @if (r.item.archived) { <span class="badge text-bg-light">archived</span> }
-                </label>
-                @if (r.tripItem; as ti) {
-                  <span class="qty" aria-label="Quantity">
-                    <button type="button" class="btn btn-sm btn-outline-secondary" (click)="qty(ti, -1)" [disabled]="ti.quantity <= 1" aria-label="Fewer">−</button>
-                    <span>{{ ti.quantity }}</span>
-                    <button type="button" class="btn btn-sm btn-outline-secondary" (click)="qty(ti, 1)" aria-label="More">+</button>
-                  </span>
-                }
-              </div>
-            }
-            <div class="list-group-item px-2 py-2">
-              <input #box type="text" class="form-control form-control-sm" [placeholder]="'Add to ' + g.category.name + '…'" (keydown.enter)="quickAdd(g.category.id, box)" [attr.aria-label]="'Add item to ' + g.category.name" />
-            </div>
-          </div>
+        }
+        <div class="line">
+          <label class="qp-search">
+            <i class="bi bi-plus-lg" aria-hidden="true"></i>
+            <input type="search" placeholder="Find or add an item" aria-label="Find or add an item" [value]="query()" (input)="query.set($any($event.target).value)" (keydown.enter)="addTyped()" />
+          </label>
+          <a class="qp-btn pill primary" [routerLink]="[]" [queryParams]="{ mode: null }" queryParamsHandling="merge" [replaceUrl]="true">Done</a>
         </div>
       }
-      <div class="card border-dashed">
-        <div class="card-body">
-          <label for="newcat" class="form-label small text-muted">New category</label>
-          <div class="input-group input-group-sm">
-            <input id="newcat" type="text" class="form-control" placeholder="e.g. Ski gear" [(ngModel)]="newCategory" (keydown.enter)="addCategory()" />
-            <button type="button" class="btn btn-outline-primary" (click)="addCategory()" [disabled]="!newCategory.trim()">Add</button>
-          </div>
-        </div>
-      </div>
     </div>
-  }
+  </div>
 }
