@@ -8,6 +8,8 @@ import { DriveSync } from '../../sync/drive-sync.service';
 import { dateRange, shortWhen, whenLabel } from '../../ui/format';
 import { needsWelcome } from '../welcome/needs-welcome';
 
+const monthFmt = new Intl.DateTimeFormat(undefined, { month: 'short' });
+
 @Component({
   selector: 'qp-trips',
   imports: [RouterLink, NgTemplateOutlet],
@@ -47,12 +49,22 @@ export class TripsPage {
     return w ? `Next trip · ${w.toLocaleLowerCase()}` : 'Next trip';
   }
 
+  phase = (t: Trip) => ops.tripPhase(t);
+
+  /** Month and day for the date block on a trip row, or null when undated. */
+  dateBlock(t: Trip): { m: string; d: string } | null {
+    const iso = t.startDate || t.endDate;
+    if (!iso) return null;
+    const [y, m, d] = iso.split('-').map(Number);
+    return { m: monthFmt.format(new Date(y, m - 1, d)), d: String(d) };
+  }
+
+  /** "2 of 22 packed · in 13 days" — the date itself is in the block. */
   rowSub(t: Trip): string {
     const s = ops.tripStats(t);
-    const when = dateRange(t);
-    if (!s.total) return `${when} · no items yet`;
-    if (!s.packed) return `${when} · ${s.total} items`;
-    return `${when} · ${s.packed} of ${s.total} packed`;
+    const when = whenLabel(t).toLocaleLowerCase();
+    const count = s.packed ? `${s.packed} of ${s.total} packed` : `${s.total} items`;
+    return when ? `${count} · ${when}` : `${count} · ${dateRange(t)}`;
   }
 
 }
