@@ -1,97 +1,93 @@
-<div class="page-header">
-  <h1>Trips</h1>
-  <a class="btn btn-primary" routerLink="/trips/new"><i class="bi bi-plus-lg me-1"></i>New trip</a>
+<div class="qp-page">
+  <section class="qp-hero">
+    <div class="top">
+      <span class="brand">QuokkaPack</span>
+      <a class="qp-icon-btn" routerLink="/catalog" aria-label="Catalog" title="Catalog"><i class="bi bi-list-ul" aria-hidden="true"></i></a>
+      <a class="qp-icon-btn" routerLink="/backup" [attr.aria-label]="sync.connected() ? 'Sync and settings, Google Drive connected' : 'Sync and settings'" title="Sync and settings">
+        <i class="bi" [class.bi-cloud-check]="sync.connected()" [class.bi-gear]="!sync.connected()" aria-hidden="true"></i>
+      </a>
+    </div>
+
+    @if (next(); as t) {
+      @let s = nextStats()!;
+      <div>
+        <div class="kicker">{{ kicker(t) }}</div>
+        <h1>{{ t.name }}</h1>
+        <div class="dates">{{ dateRange(t) }}</div>
+      </div>
+      @if (s.total) {
+        <div class="stats">
+          <div><b>{{ s.left }}</b><span>left to pack</span></div>
+          <div><b>{{ s.packed }}</b><span>packed</span></div>
+          <div><b>{{ s.groupsDone }}/{{ s.groups }}</b><span>categories done</span></div>
+        </div>
+        <a class="cta" [routerLink]="['/trips', t.id]">
+          {{ s.percent === 100 ? 'All packed · see the list' : s.packed ? 'Finish packing' : 'Start packing' }}
+        </a>
+      } @else {
+        <p class="note">Nothing on this trip yet.</p>
+        <a class="cta" [routerLink]="['/trips', t.id]" [queryParams]="{ mode: 'edit' }">Choose items</a>
+      }
+    } @else {
+      <div>
+        <div class="kicker">No trips coming up</div>
+        <h1>Where to next?</h1>
+      </div>
+      <a class="cta" routerLink="/trips/new">Plan a trip</a>
+    }
+  </section>
+
+  <main class="px-3 pt-4 pb-5">
+    @if (showOnboarding()) {
+      <div class="qp-card mb-4" style="background: var(--qp-sunken)">
+        <h2>Welcome to QuokkaPack</h2>
+        <p>
+          Your catalog is the list of things you might pack, grouped into categories. Each trip picks from it, and you check
+          items off as you pack. Start with about 50 common items? You can edit or remove any of them.
+        </p>
+        <div class="d-flex flex-wrap gap-2 mt-2">
+          <button type="button" class="qp-btn primary" (click)="useStarter()">Use the starter catalog</button>
+          <button type="button" class="qp-btn" (click)="skipStarter()">Start empty</button>
+        </div>
+        <p class="small mt-2"><i class="bi bi-shield-lock me-1" aria-hidden="true"></i>Everything stays in this browser unless you turn on Google Drive sync.</p>
+      </div>
+    }
+
+    <div class="d-flex align-items-center mb-2">
+      <h2 class="qp-h2 flex-grow-1">{{ next() ? 'Other trips' : 'Trips' }}</h2>
+      <a class="qp-btn pill accent-text" routerLink="/trips/new"><i class="bi bi-plus-lg" aria-hidden="true"></i>New trip</a>
+    </div>
+
+    @for (t of others(); track t.id) {
+      <ng-container *ngTemplateOutlet="row; context: { $implicit: t }" />
+    } @empty {
+      @if (!sorted().past.length) {
+        <p class="text-body-secondary small py-3 mb-0">{{ next() ? 'No other trips planned.' : 'Create a trip and choose which categories to bring.' }}</p>
+      }
+    }
+
+    @if (sorted().past.length) {
+      <button type="button" class="btn btn-link px-0 py-3 text-body-secondary text-decoration-none" (click)="showPast.set(!showPast())" [attr.aria-expanded]="showPast()">
+        <i class="bi me-1" [class.bi-chevron-right]="!showPast()" [class.bi-chevron-down]="showPast()" aria-hidden="true"></i>
+        {{ showPast() ? 'Hide' : 'Show' }} {{ sorted().past.length }} past trip{{ sorted().past.length === 1 ? '' : 's' }}
+      </button>
+      @if (showPast()) {
+        @for (t of sorted().past; track t.id) {
+          <ng-container *ngTemplateOutlet="row; context: { $implicit: t }" />
+        }
+      }
+    }
+  </main>
 </div>
 
-@if (showOnboarding()) {
-  <div class="card border-primary shadow-sm mb-4">
-    <div class="card-body p-4">
-      <h2 class="h4">Welcome to QuokkaPack 👋</h2>
-      <p class="mb-3">
-        Your catalog is the list of things you might pack, grouped into categories. Each trip picks from it, and you check
-        items off as you pack. Want a head start with about 50 common items? You can edit or remove any of them.
-      </p>
-      <div class="d-flex flex-wrap gap-2">
-        <button type="button" class="btn btn-primary" (click)="useStarter()">Use the starter catalog</button>
-        <button type="button" class="btn btn-outline-secondary" (click)="skipStarter()">Start empty</button>
-      </div>
-      <p class="small text-muted mt-3 mb-0">
-        <i class="bi bi-shield-lock me-1"></i>Everything is stored in this browser only. Use <a routerLink="/backup">Backup</a> to save a copy.
-      </p>
-    </div>
-  </div>
-}
-
-@if (store.trips().length === 0) {
-  <div class="empty-state">
-    <i class="bi bi-suitcase2"></i>
-    <p class="lead mt-3 mb-1">No trips yet</p>
-    <p class="text-muted">Create a trip and choose which categories to bring.</p>
-    <a class="btn btn-primary" routerLink="/trips/new">Plan your first trip</a>
-  </div>
-} @else {
-  <div class="row g-3">
-    @for (t of sorted().active; track t.id) {
-      <ng-container *ngTemplateOutlet="card; context: { $implicit: t }" />
-    }
-  </div>
-
-  @if (sorted().past.length) {
-    <button type="button" class="btn btn-link text-decoration-none px-0 mt-4 mb-2" (click)="showPast.set(!showPast())">
-      <i class="bi" [class.bi-chevron-right]="!showPast()" [class.bi-chevron-down]="showPast()"></i>
-      Past trips ({{ sorted().past.length }})
-    </button>
-    @if (showPast()) {
-      <div class="row g-3">
-        @for (t of sorted().past; track t.id) {
-          <ng-container *ngTemplateOutlet="card; context: { $implicit: t }" />
-        }
-      </div>
-    }
-  }
-}
-
-<ng-template #card let-t>
+<ng-template #row let-t>
   @let s = stats(t);
-  <div class="col-12 col-md-6 col-xl-4">
-    <div class="card trip-card h-100 shadow-sm" [class.opacity-75]="phase(t) === 'past'">
-      <div class="card-body">
-        <div class="d-flex align-items-start gap-2">
-          <div class="flex-grow-1 min-w-0">
-            <h2 class="h5 card-title mb-1 text-truncate">
-              <a class="stretched-link text-reset text-decoration-none" [routerLink]="['/trips', t.id]">{{ t.name }}</a>
-            </h2>
-            <div class="small text-muted">
-              <i class="bi bi-calendar3 me-1"></i>{{ dateRange(t) }}
-              @if (whenLabel(t); as w) {
-                <span class="badge ms-1" [class.text-bg-success]="phase(t) === 'ongoing'" [class.text-bg-light]="phase(t) !== 'ongoing'">{{ w }}</span>
-              }
-            </div>
-          </div>
-          <div class="qp-menu card-menu" (qpClickOutside)="openMenu() === t.id && openMenu.set(null)">
-            <button type="button" class="icon-btn" aria-label="Trip actions" (click)="toggleMenu(t.id, $event)"><i class="bi bi-three-dots-vertical"></i></button>
-            @if (openMenu() === t.id) {
-              <div class="dropdown-menu show shadow-sm">
-                <button type="button" class="dropdown-item" (click)="duplicate(t)"><i class="bi bi-copy me-2"></i>Duplicate</button>
-                <button type="button" class="dropdown-item text-danger" (click)="remove(t)"><i class="bi bi-trash me-2"></i>Delete</button>
-              </div>
-            }
-          </div>
-        </div>
-        <div class="mt-3">
-          @if (s.total) {
-            <div class="d-flex justify-content-between small mb-1">
-              <span>{{ s.packed }} of {{ s.total }} packed</span>
-              <span class="fw-semibold">{{ s.percent }}%</span>
-            </div>
-            <div class="progress progress-thin" role="progressbar" [attr.aria-valuenow]="s.percent" aria-valuemin="0" aria-valuemax="100">
-              <div class="progress-bar" [class.bg-success]="s.percent === 100" [style.width.%]="s.percent"></div>
-            </div>
-          } @else {
-            <span class="small text-muted">No items yet</span>
-          }
-        </div>
-      </div>
-    </div>
-  </div>
+  <a class="qp-trip-row" [routerLink]="['/trips', t.id]" [queryParams]="s.total ? {} : { mode: 'edit' }">
+    <span class="qp-ring" [class.empty]="!s.total" [style.--p]="s.percent" role="img" [attr.aria-label]="s.total ? s.percent + '% packed' : 'No items'"></span>
+    <span class="info">
+      <span class="name d-block">{{ t.name }}</span>
+      <span class="sub d-block">{{ rowSub(t) }}</span>
+    </span>
+    <span class="when">{{ shortWhen(t) }}</span>
+  </a>
 </ng-template>

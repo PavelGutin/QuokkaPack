@@ -1,112 +1,91 @@
-<div class="page-header">
-  <h1>Backup</h1>
-</div>
-
-<div class="row g-3">
-  <div class="col-12 col-lg-6">
-    <div class="card shadow-sm h-100">
-      <div class="card-body">
-        <h2 class="h5"><i class="bi bi-hdd me-2"></i>Where your data lives</h2>
-        <p>
-          QuokkaPack keeps everything in this browser on this device: {{ store.trips().length }} trips,
-          {{ store.categories().length }} categories and {{ store.items().length }} items. Nothing is sent anywhere unless you turn on Google Drive sync.
-        </p>
-        <p class="mb-0 small text-muted">
-          Clearing site data, or using a private window, removes it. Download a backup now and then. You can also use a backup
-          to move your lists to another browser.
-        </p>
-        @if (persisted() === false) {
-          <button type="button" class="btn btn-sm btn-outline-primary mt-3" (click)="requestPersist()">Ask the browser to keep my data</button>
-        } @else if (persisted()) {
-          <p class="small text-success mt-3 mb-0"><i class="bi bi-check-circle me-1"></i>This browser has agreed to keep your data.</p>
-        }
-      </div>
+<div class="qp-page sunken">
+  <header class="qp-bar">
+    <div class="row1">
+      <a class="qp-icon-btn" routerLink="/" aria-label="Back to trips"><i class="bi bi-chevron-left" aria-hidden="true"></i></a>
+      <div class="title"><h1>Sync &amp; settings</h1></div>
     </div>
-  </div>
+  </header>
 
-  <div class="col-12 col-lg-6">
-    <div class="card shadow-sm h-100">
-      <div class="card-body">
-        <h2 class="h5"><i class="bi bi-arrow-down-up me-2"></i>Export and import</h2>
-        <p>The backup is a single JSON file holding everything.</p>
-        <div class="d-flex flex-wrap gap-2">
-          <button type="button" class="btn btn-primary" (click)="export()"><i class="bi bi-download me-1"></i>Download backup</button>
-          <label class="btn btn-outline-primary mb-0">
-            <i class="bi bi-upload me-1"></i>Restore from file
-            <input #file type="file" accept="application/json,.json" hidden (change)="import(file)" />
-          </label>
-        </div>
-        <p class="small text-muted mt-2 mb-0">Restoring replaces what’s here. You can undo right after.</p>
-      </div>
-    </div>
-  </div>
-
-  <div class="col-12 col-lg-6">
-    <div class="card shadow-sm h-100">
-      <div class="card-body">
-        <h2 class="h5"><i class="bi bi-google me-2"></i>Google Drive sync</h2>
-        @if (!sync.connected()) {
-          <p>
-            Keep a copy in your Google Drive and sync it between your browsers and devices. QuokkaPack can only see its own
-            hidden file, not your other Drive files.
-          </p>
-          <button type="button" class="btn btn-primary" (click)="sync.connect()"><i class="bi bi-link-45deg me-1"></i>Connect Google Drive</button>
-        } @else {
-          <p class="mb-2">
-            @if (sync.status() === 'syncing') {
-              <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>Syncing…
-            } @else {
-              <i class="bi bi-check-circle text-success me-1"></i>Connected. Last synced: {{ lastSynced() }}
-            }
-          </p>
-          @if (sync.choice(); as c) {
-            <div class="alert alert-info small">
-              <p class="mb-2">
-                Google Drive already has {{ c.remote.trips.length }} trips and {{ c.remote.items.length }} items. This browser has
-                {{ store.trips().length }} trips and {{ store.items().length }} items. Which copy do you want to keep?
-              </p>
-              <div class="d-flex flex-wrap gap-2">
-                <button type="button" class="btn btn-sm btn-primary" (click)="sync.choose('drive')">Use the Drive copy</button>
-                <button type="button" class="btn btn-sm btn-outline-primary" (click)="sync.choose('local')">Keep this browser’s copy</button>
-              </div>
-              <p class="mb-0 mt-2 text-muted">The other copy is replaced. You can undo right after.</p>
-            </div>
+  <main class="p-3 d-flex flex-column gap-3 pb-5">
+    <section class="qp-card" [class.accent]="sync.connected()" aria-labelledby="drive-h">
+      <div class="d-flex align-items-center gap-3">
+        <span class="qp-ico"><i class="bi" [class.bi-cloud-check]="sync.connected()" [class.bi-cloud]="!sync.connected()" aria-hidden="true"></i></span>
+        <div class="flex-grow-1 min-w-0">
+          <h2 id="drive-h">{{ sync.connected() ? 'Google Drive sync is on' : 'Google Drive sync' }}</h2>
+          @if (sync.connected()) {
+            <p>
+              @if (sync.status() === 'syncing') {
+                <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>Syncing…
+              } @else {
+                Last synced: {{ lastSynced() }}
+              }
+            </p>
           }
-          <div class="d-flex flex-wrap gap-2">
-            @if (sync.status() === 'reconnect') {
-              <button type="button" class="btn btn-primary" (click)="sync.connect()"><i class="bi bi-arrow-repeat me-1"></i>Reconnect</button>
-            } @else {
-              <button type="button" class="btn btn-outline-primary" [disabled]="sync.status() === 'syncing'" (click)="sync.syncNow()">
-                <i class="bi bi-arrow-repeat me-1"></i>Sync now
-              </button>
-            }
-            <button type="button" class="btn btn-outline-secondary" (click)="sync.disconnect()">Disconnect</button>
+        </div>
+      </div>
+
+      @if (!sync.connected()) {
+        <p>Keep a copy in your Google Drive and sync it between your browsers and devices. QuokkaPack can only see its own hidden file, not your other Drive files.</p>
+        <div class="grid2"><button type="button" class="qp-btn primary" style="grid-column: span 2" (click)="sync.connect()"><i class="bi bi-link-45deg" aria-hidden="true"></i>Connect Google Drive</button></div>
+      } @else {
+        @if (sync.choice(); as c) {
+          <div class="rounded-3 p-3" style="background: rgba(255, 255, 255, 0.14)">
+            <p class="mb-2">
+              Google Drive already has {{ c.remote.trips.length }} trips and {{ c.remote.items.length }} items. This browser has
+              {{ store.trips().length }} trips and {{ store.items().length }} items. Which copy do you want to keep? The other is replaced, and you can undo right after.
+            </p>
+            <div class="grid2">
+              <button type="button" class="qp-btn" (click)="sync.choose('drive')">Use the Drive copy</button>
+              <button type="button" class="qp-btn ghost" (click)="sync.choose('local')">Keep this one</button>
+            </div>
           </div>
         }
-        @if (sync.error(); as err) {
-          <p class="small text-danger mt-2 mb-0" role="alert"><i class="bi bi-exclamation-circle me-1"></i>{{ err }}</p>
+        <div class="grid2">
+          @if (sync.status() === 'reconnect') {
+            <button type="button" class="qp-btn" (click)="sync.connect()"><i class="bi bi-arrow-repeat" aria-hidden="true"></i>Reconnect</button>
+          } @else {
+            <button type="button" class="qp-btn" [disabled]="sync.status() === 'syncing'" (click)="sync.syncNow()">Sync now</button>
+          }
+          <button type="button" class="qp-btn ghost" (click)="sync.disconnect()">Disconnect</button>
+        </div>
+      }
+      @if (sync.error(); as err) {
+        <p class="small fw-semibold" role="alert" [style.color]="sync.connected() ? null : 'var(--qp-danger)'"><i class="bi bi-exclamation-circle me-1" aria-hidden="true"></i>{{ err }}</p>
+      }
+    </section>
+
+    <section class="qp-card" aria-labelledby="device-h">
+      <h2 id="device-h">On this device</h2>
+      <p>{{ store.trips().length }} trips, {{ store.categories().length }} categories and {{ store.items().length }} items, kept in this browser. Clearing site data removes them, so keep a backup or turn on sync.</p>
+      <div class="grid2">
+        <button type="button" class="qp-btn" (click)="export()"><i class="bi bi-download" aria-hidden="true"></i>Download backup</button>
+        <label class="qp-btn mb-0" style="cursor: pointer">
+          <i class="bi bi-upload" aria-hidden="true"></i>Restore file
+          <input #file type="file" accept="application/json,.json" hidden (change)="import(file)" />
+        </label>
+      </div>
+      @if (persisted()) {
+        <p class="small"><i class="bi bi-check-circle me-1" aria-hidden="true"></i>This browser has agreed to keep your data.</p>
+      }
+    </section>
+
+    <section class="qp-card" aria-labelledby="theme-h">
+      <h2 id="theme-h">Appearance</h2>
+      <div class="qp-seg block mt-1" role="group" aria-labelledby="theme-h">
+        @for (o of themes; track o.value) {
+          <button type="button" [class.on]="theme.pref() === o.value" [attr.aria-pressed]="theme.pref() === o.value" (click)="theme.set(o.value)">{{ o.label }}</button>
         }
       </div>
-    </div>
-  </div>
+      <p class="small">{{ theme.pref() === 'system' ? 'Follows your device: ' + (theme.theme() === 'dark' ? 'dark' : 'light') + ' right now.' : 'Always ' + theme.pref() + ' on this device.' }}</p>
+    </section>
 
-  <div class="col-12 col-lg-6">
-    <div class="card shadow-sm h-100">
-      <div class="card-body">
-        <h2 class="h5"><i class="bi bi-stars me-2"></i>Starter catalog</h2>
-        <p>Adds about 50 common items in 8 categories. Items you already have are skipped.</p>
-        <button type="button" class="btn btn-outline-primary" (click)="addStarter()">Add starter catalog</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="col-12 col-lg-6">
-    <div class="card shadow-sm h-100 border-danger-subtle">
-      <div class="card-body">
-        <h2 class="h5 text-danger"><i class="bi bi-exclamation-triangle me-2"></i>Start over</h2>
-        <p>Deletes all trips and the whole catalog from this browser.</p>
-        <button type="button" class="btn btn-outline-danger" (click)="eraseAll()">Erase everything</button>
-      </div>
-    </div>
-  </div>
+    <nav class="qp-menu-list" aria-label="More">
+      <button type="button" (click)="addStarter()">Add starter catalog<i class="bi bi-chevron-right" aria-hidden="true"></i></button>
+      @if (persisted() === false) {
+        <button type="button" (click)="requestPersist()">Ask the browser to keep my data<i class="bi bi-chevron-right" aria-hidden="true"></i></button>
+      }
+      <a href="privacy.html">Privacy policy<i class="bi bi-chevron-right" aria-hidden="true"></i></a>
+      <button type="button" class="danger" (click)="eraseAll()">Erase everything on this device</button>
+    </nav>
+  </main>
 </div>

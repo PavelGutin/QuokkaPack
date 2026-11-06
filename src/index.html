@@ -6,7 +6,17 @@
     <base href="/" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="description" content="Packing lists for every trip. Reusable categories, check items off as you pack. Works offline." />
-    <meta name="theme-color" content="#325d88" />
+    <meta name="theme-color" content="#FFFFFF" />
+    <script>
+      /* Apply the saved or system theme before the app loads, so there is no flash. Mirrors ui/theme.ts. */
+      (function () {
+        var pref = null;
+        try { pref = localStorage.getItem('quokkapack.theme'); } catch (e) {}
+        var dark = pref === 'dark' || (pref !== 'light' && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
+        document.documentElement.setAttribute('data-bs-theme', dark ? 'dark' : 'light');
+        document.querySelector('meta[name="theme-color"]').setAttribute('content', dark ? '#15171A' : '#FFFFFF');
+      })();
+    </script>
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
     <link rel="icon" type="image/svg+xml" href="icons/icon.svg" />
     <link rel="apple-touch-icon" href="icons/icon-192.png" />

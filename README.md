@@ -17,14 +17,14 @@ use "Add to Home Screen" to install it like an app.
 - **Catalog:** rename by clicking, move items between categories, and archive what you no longer use. Archived
   items stay on old trips but are hidden from new ones.
 - **Undo** for deletes, moves and resets.
-- **Backup:** download everything as one JSON file and restore it in any browser. First-time users can load a
+- **Sync & settings:** download everything as one JSON file and restore it in any browser. First-time users can load a
   starter catalog.
 
 ## Where data lives
 
 Everything is one JSON document stored in the browser's IndexedDB (`src/app/data`). Open tabs stay in sync. Each
-browser keeps its own copy. To move data between devices, use **Backup**, or turn on **Google Drive sync** on
-the Backup page.
+browser keeps its own copy. To move data between devices, use a backup file or turn on **Google Drive sync**,
+both under **Sync & settings**. The app follows the system light or dark theme unless you pick one there.
 
 ### Google Drive sync (optional)
 

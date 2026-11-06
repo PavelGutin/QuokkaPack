@@ -1,17 +1,26 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { emptyDoc } from '../../data/model';
 import * as ops from '../../data/ops';
 import { Store } from '../../data/store';
 import { DriveSync } from '../../sync/drive-sync.service';
+import { ThemePref, ThemeService } from '../../ui/theme';
 import { ToastService } from '../../ui/toast.service';
 
 @Component({
   selector: 'qp-backup',
+  imports: [RouterLink],
   templateUrl: './backup.html',
 })
 export class BackupPage implements OnInit {
   store = inject(Store);
   sync = inject(DriveSync);
+  theme = inject(ThemeService);
+  readonly themes: { value: ThemePref; label: string }[] = [
+    { value: 'system', label: 'System' },
+    { value: 'light', label: 'Light' },
+    { value: 'dark', label: 'Dark' },
+  ];
   private toast = inject(ToastService);
   persisted = signal<boolean | null>(null);
 

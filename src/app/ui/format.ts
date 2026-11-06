@@ -34,3 +34,27 @@ export function whenLabel(trip: Trip): string {
     }
   }
 }
+
+const fmtMonth = new Intl.DateTimeFormat(undefined, { month: 'short' });
+
+/** Compact "when" for list rows: "Tomorrow", "13 d", "2 mo", "Now", or the month of a past trip. */
+export function shortWhen(trip: Trip): string {
+  const today = todayIso();
+  switch (tripPhase(trip, today)) {
+    case 'undated':
+      return '';
+    case 'ongoing':
+      return 'Now';
+    case 'past':
+      return fmtMonth.format(d(trip.endDate || trip.startDate));
+    case 'upcoming': {
+      const n = daysUntil(trip.startDate || trip.endDate, today);
+      return n === 1 ? 'Tomorrow' : n < 60 ? `${n} d` : `${Math.round(n / 30)} mo`;
+    }
+  }
+}
+
+/** Two-letter label for a category on the jump rail. */
+export function railLabel(name: string): string {
+  return name.trim().slice(0, 2);
+}
