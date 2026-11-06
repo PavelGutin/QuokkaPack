@@ -6,5 +6,6 @@ export const routes: Routes = [
   { path: 'trips/:id', loadComponent: () => import('./pages/trip/trip').then((m) => m.TripPage), title: 'Trip · QuokkaPack' },
   { path: 'catalog', loadComponent: () => import('./pages/catalog/catalog').then((m) => m.CatalogPage), title: 'Catalog · QuokkaPack' },
   { path: 'backup', loadComponent: () => import('./pages/backup/backup').then((m) => m.BackupPage), title: 'Sync & settings · QuokkaPack' },
+  { path: 'welcome', loadComponent: () => import('./pages/welcome/welcome').then((m) => m.WelcomePage), title: 'Welcome · QuokkaPack' },
   { path: '**', redirectTo: '' },
 ];

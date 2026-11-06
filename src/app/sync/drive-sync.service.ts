@@ -4,7 +4,7 @@ import { normalizeDoc } from '../data/ops';
 import { Store } from '../data/store';
 import { ToastService } from '../ui/toast.service';
 import { PUSH_DEBOUNCE_MS } from './config';
-import { SyncAction, decideSync } from './decide';
+import { SyncAction, decideSync, hasData } from './decide';
 import * as drive from './drive';
 import { AuthError, GoogleAuth } from './google-auth';
 
@@ -62,15 +62,18 @@ export class DriveSync {
     void this.auth.preload().catch(() => undefined);
   }
 
-  /** Connect / Reconnect. Call from a click. */
-  async connect(): Promise<void> {
+  /**
+   * Connect / Reconnect. Call from a click. Resolves true once connected and the first sync ran without error.
+   * chooseAccount shows Google's account picker even if one account is already signed in.
+   */
+  async connect(chooseAccount = false): Promise<boolean> {
     this.error.set(null);
     try {
-      await this.auth.getToken(true);
+      await this.auth.getToken(true, chooseAccount);
     } catch (e) {
       this.status.set(this.connected() ? 'reconnect' : 'idle');
       this.error.set((e as Error).message);
-      return;
+      return false;
     }
     this.status.set('idle');
     if (!this.connected()) {
@@ -78,6 +81,7 @@ export class DriveSync {
       this.save({ connected: true });
     }
     await this.sync(true);
+    return this.status() === 'idle' && !this.error();
   }
 
   /** Sync now. Call from a click. */
@@ -90,7 +94,7 @@ export class DriveSync {
     await this.sync(true, keep === 'drive' ? 'pull' : 'push');
   }
 
-  async disconnect(): Promise<void> {
+  async disconnect(quiet = false): Promise<void> {
     clearTimeout(this.pushTimer);
     await this.auth.revoke().catch(() => undefined);
     this.connected.set(false);
@@ -99,7 +103,7 @@ export class DriveSync {
     this.choice.set(null);
     this.lastSyncedAt.set(null);
     this.save({ connected: false }, true);
-    this.toast.show('Disconnected from Google Drive. Your data stays in this browser.');
+    if (!quiet) this.toast.show('Disconnected from Google Drive. Your data stays in this browser.');
   }
 
   private schedulePush(): void {
@@ -203,7 +207,9 @@ export class DriveSync {
     if (action === 'pull') {
       const before = local;
       this.store.replace(remote!);
-      this.toast.show('Updated from Google Drive', { action: { label: 'Undo', run: () => this.store.restore(before) } });
+      if (hasData(before)) {
+        this.toast.show('Updated from Google Drive', { action: { label: 'Undo', run: () => this.store.restore(before) } });
+      }
     } else if (action === 'push') {
       const json = JSON.stringify(local);
       if (fileId) {

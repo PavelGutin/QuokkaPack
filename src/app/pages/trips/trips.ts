@@ -1,11 +1,12 @@
 import { NgTemplateOutlet } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { Trip } from '../../data/model';
 import * as ops from '../../data/ops';
 import { Store } from '../../data/store';
 import { DriveSync } from '../../sync/drive-sync.service';
 import { dateRange, shortWhen, whenLabel } from '../../ui/format';
+import { needsWelcome } from '../welcome/needs-welcome';
 
 @Component({
   selector: 'qp-trips',
@@ -15,12 +16,16 @@ import { dateRange, shortWhen, whenLabel } from '../../ui/format';
 export class TripsPage {
   store = inject(Store);
   sync = inject(DriveSync);
+  private router = inject(Router);
+
+  constructor() {
+    if (needsWelcome(this.store, this.sync)) this.router.navigate(['/welcome'], { replaceUrl: true });
+  }
 
   sorted = computed(() => ops.sortTrips(this.store.trips()));
   /** The soonest upcoming or ongoing trip, shown large. */
   next = computed(() => this.sorted().active[0]);
   others = computed(() => this.sorted().active.slice(1));
-  showOnboarding = computed(() => !this.store.doc().onboarded && this.store.items().length === 0);
   showPast = signal(false);
 
   nextStats = computed(() => {
@@ -50,11 +55,4 @@ export class TripsPage {
     return `${when} · ${s.packed} of ${s.total} packed`;
   }
 
-  useStarter() {
-    this.store.update((d) => ops.addStarterCatalog(d));
-  }
-
-  skipStarter() {
-    this.store.update((d) => ops.apply(d, (x) => (x.onboarded = true)));
-  }
 }
