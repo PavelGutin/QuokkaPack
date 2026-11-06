@@ -7,6 +7,7 @@ import { Store } from '../../data/store';
 import { BarHeight } from '../../ui/bar-height';
 import { ClickOutside } from '../../ui/click-outside';
 import { dateRange, railLabel, whenLabel } from '../../ui/format';
+import { SyncChip } from '../../ui/sync-chip';
 import { ToastService } from '../../ui/toast.service';
 
 interface EditRow {
@@ -24,7 +25,7 @@ const same = (a: string, b: string) => a.trim().toLocaleLowerCase() === b.trim()
 
 @Component({
   selector: 'qp-trip',
-  imports: [FormsModule, RouterLink, ClickOutside, BarHeight],
+  imports: [FormsModule, RouterLink, ClickOutside, BarHeight, SyncChip],
   templateUrl: './trip.html',
 })
 export class TripPage {

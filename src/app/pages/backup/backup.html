@@ -16,6 +16,8 @@
             <p>
               @if (sync.status() === 'syncing') {
                 <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>Syncing…
+              } @else if (sync.dirty()) {
+                <i class="bi bi-cloud-arrow-up me-1" aria-hidden="true"></i>Changes here aren’t in Drive yet. Last synced: {{ lastSynced() }}
               } @else {
                 Last synced: {{ lastSynced() }}
               }
@@ -48,6 +50,15 @@
           }
           <button type="button" class="qp-btn ghost" (click)="sync.disconnect()">Disconnect</button>
         </div>
+        <label class="qp-switch-row">
+          <input type="checkbox" class="form-check-input" role="switch" [checked]="sync.auto()" (change)="sync.setAuto($any($event.target).checked)" />
+          <span>
+            <b>Sync automatically</b>
+            When you open the app or come back to it after a while, QuokkaPack has to sign in to Google again. With this on, it
+            does that by itself, and your browser may show an “Allow this site to open?” prompt or flash a Google window.
+            With it off, you tap Sync instead.
+          </span>
+        </label>
       }
       @if (sync.error(); as err) {
         <p class="small fw-semibold" role="alert" [style.color]="sync.connected() ? null : 'var(--qp-danger)'"><i class="bi bi-exclamation-circle me-1" aria-hidden="true"></i>{{ err }}</p>

@@ -6,6 +6,7 @@
         <h1>Catalog</h1>
         <div class="sub">{{ store.items().length }} items in {{ store.categories().length }} categories</div>
       </div>
+      <qp-sync-chip variant="bar" />
       <button type="button" class="qp-btn pill accent-text" (click)="newCategoryOpen.set(!newCategoryOpen())" [attr.aria-expanded]="newCategoryOpen()">New category</button>
     </div>
     @if (newCategoryOpen()) {

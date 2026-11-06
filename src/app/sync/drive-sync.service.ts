@@ -1,4 +1,4 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import { QuokkaDoc } from '../data/model';
 import { normalizeDoc } from '../data/ops';
 import { Store } from '../data/store';
@@ -7,6 +7,7 @@ import { PUSH_DEBOUNCE_MS } from './config';
 import { SyncAction, decideSync, hasData } from './decide';
 import * as drive from './drive';
 import { AuthError, GoogleAuth } from './google-auth';
+import { isDirty, syncIndicator } from './indicator';
 
 const STATE_KEY = 'quokkapack.driveSync';
 
@@ -15,6 +16,10 @@ interface SavedState {
   fileId?: string;
   /** When this browser last finished a sync. Absent means the next sync is a first sync. */
   lastSyncedAt?: string;
+  /** The document's updatedAt at the end of the last sync; a different local stamp means unsynced changes. */
+  syncedUpdatedAt?: string;
+  /** Opted in to background syncs that may open Google's sign-in window without a tap. */
+  auto?: boolean;
 }
 
 export type SyncStatus = 'idle' | 'syncing' | 'reconnect' | 'error';
@@ -26,8 +31,13 @@ export interface SyncChoice {
 
 /**
  * Optional Google Drive sync. Keeps one quokkapack.json in the app's hidden Drive folder and applies
- * last-writer-wins on the whole document, using updatedAt. Pulls on connect, app start and window focus;
- * pushes ~2s after local changes. Local data is never discarded because of a failure.
+ * last-writer-wins on the whole document, using updatedAt.
+ *
+ * Google tokens last an hour and live in memory, and getting a new one opens a Google window, which phones block
+ * unless it follows a tap. So by default background syncs (app start, window focus, ~2s after local changes) run
+ * only while a token is in memory; otherwise the sync chip shows the data isn't backed up and a tap syncs. With
+ * `auto` on, background syncs also ask Google for a token, which may show a popup prompt.
+ * Local data is never discarded because of a failure.
  */
 @Injectable({ providedIn: 'root' })
 export class DriveSync {
@@ -41,6 +51,19 @@ export class DriveSync {
   readonly error = signal<string | null>(null);
   readonly lastSyncedAt = signal<string | null>(this.saved().lastSyncedAt ?? null);
   readonly choice = signal<SyncChoice | null>(null);
+  readonly auto = signal(this.saved().auto === true);
+  /** Drive has been read or written since the app opened. */
+  readonly checked = signal(false);
+  readonly dirty = computed(() => this.connected() && isDirty(this.store.doc().updatedAt, this.saved().syncedUpdatedAt));
+  readonly indicator = computed(() =>
+    syncIndicator({
+      connected: this.connected(),
+      syncing: this.status() === 'syncing',
+      failed: this.status() === 'error' || this.status() === 'reconnect',
+      dirty: this.dirty(),
+      checked: this.checked(),
+    }),
+  );
 
   private running: Promise<void> | null = null;
   private again = false;
@@ -89,6 +112,13 @@ export class DriveSync {
     return this.sync(true);
   }
 
+  /** Turns background syncs that may open Google's window on or off. */
+  setAuto(on: boolean): void {
+    this.auto.set(on);
+    this.save({ auto: on });
+    if (on) void this.sync();
+  }
+
   /** Resolves a first-sync conflict. */
   async choose(keep: 'drive' | 'local'): Promise<void> {
     await this.sync(true, keep === 'drive' ? 'pull' : 'push');
@@ -102,7 +132,8 @@ export class DriveSync {
     this.error.set(null);
     this.choice.set(null);
     this.lastSyncedAt.set(null);
-    this.save({ connected: false }, true);
+    this.checked.set(false);
+    this.save({ connected: false, auto: this.auto() }, true);
     if (!quiet) this.toast.show('Disconnected from Google Drive. Your data stays in this browser.');
   }
 
@@ -133,8 +164,11 @@ export class DriveSync {
   }
 
   private async run(interactive: boolean, force?: 'pull' | 'push'): Promise<void> {
-    // Background runs can't open Google's sign-in window; wait for a click on Reconnect.
-    if (!interactive && this.status() === 'reconnect' && !this.auth.current()) return;
+    if (!interactive && !this.auth.current()) {
+      // Without a token in memory, a background run would have to open Google's window. Only do that when opted in,
+      // and never again after it failed until the person taps Reconnect.
+      if (!this.auto() || this.status() === 'reconnect') return;
+    }
     if (typeof navigator !== 'undefined' && navigator.onLine === false) {
       this.status.set('error');
       this.error.set('You are offline. Changes will sync when you are back online.');
@@ -200,6 +234,7 @@ export class DriveSync {
 
     if (action === 'ask') {
       this.choice.set({ remote: remote! });
+      this.checked.set(true);
       return;
     }
     this.choice.set(null);
@@ -226,7 +261,8 @@ export class DriveSync {
 
     const now = new Date().toISOString();
     this.lastSyncedAt.set(now);
-    this.save({ connected: true, fileId: fileId ?? undefined, lastSyncedAt: now });
+    this.checked.set(true);
+    this.save({ connected: true, fileId: fileId ?? undefined, lastSyncedAt: now, syncedUpdatedAt: this.store.doc().updatedAt });
   }
 
   private save(patch: Partial<SavedState>, reset = false): void {
@@ -243,7 +279,15 @@ export class DriveSync {
 function readState(): SavedState {
   try {
     const s = JSON.parse(localStorage.getItem(STATE_KEY) ?? 'null');
-    if (s && typeof s === 'object') return { connected: s.connected === true, fileId: s.fileId || undefined, lastSyncedAt: s.lastSyncedAt || undefined };
+    if (s && typeof s === 'object') {
+      return {
+        connected: s.connected === true,
+        fileId: s.fileId || undefined,
+        lastSyncedAt: s.lastSyncedAt || undefined,
+        syncedUpdatedAt: typeof s.syncedUpdatedAt === 'string' ? s.syncedUpdatedAt : undefined,
+        auto: s.auto === true,
+      };
+    }
   } catch {
     /* ignore */
   }
