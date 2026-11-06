@@ -1,9 +1,25 @@
-# QuokkaPack
+<p align="center">
+  <img src="public/icons/quokka.png" alt="" width="140" />
+</p>
 
-Packing lists for every trip. Keep one catalog of everything you might bring, pick from it for each trip, and check
-things off as you pack.
+<h1 align="center">QuokkaPack</h1>
 
-**Open the app: [pavelgutin.github.io/QuokkaPack](https://pavelgutin.github.io/QuokkaPack/)**
+<p align="center">
+  Packing lists for every trip. Keep one catalog of everything you might bring, pick from it for each trip, and check
+  things off as you pack.
+</p>
+
+<p align="center"><strong><a href="https://pavelgutin.github.io/QuokkaPack/">Open the app</a></strong></p>
+
+<p align="center">
+  <img src="docs/screenshots/trips-light.jpg" alt="Trips: the next trip with packing progress, and other trips below" width="240" />
+  <img src="docs/screenshots/pack-light.jpg" alt="Packing list grouped by category with items checked off" width="240" />
+  <img src="docs/screenshots/choose-light.jpg" alt="Choose items: pick what to bring and set quantities" width="240" />
+</p>
+<p align="center">
+  <img src="docs/screenshots/trips-dark.jpg" alt="Trips in the dark theme" width="240" />
+  <img src="docs/screenshots/pack-dark.jpg" alt="Packing list in the dark theme" width="240" />
+</p>
 
 No account needed. It works offline once it has loaded, and your lists stay on your device unless you turn on Google
 Drive sync.
