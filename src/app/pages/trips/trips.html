@@ -16,6 +16,9 @@
         <div class="dates">{{ dateRange(t) }}</div>
       </div>
       @if (s.total) {
+        <div class="qp-trail" [style.--p]="s.percent" role="img" [attr.aria-label]="s.percent + '% packed'">
+          <span class="walked"></span><span class="marker"></span><i class="bi bi-flag-fill" aria-hidden="true"></i>
+        </div>
         <div class="stats">
           <div><b>{{ s.left }}</b><span>left to pack</span></div>
           <div><b>{{ s.packed }}</b><span>packed</span></div>
@@ -67,12 +70,18 @@
 
 <ng-template #row let-t>
   @let s = stats(t);
-  <a class="qp-trip-row" [routerLink]="['/trips', t.id]" [queryParams]="s.total ? {} : { mode: 'edit' }">
-    <span class="qp-ring" [class.empty]="!s.total" [style.--p]="s.percent" role="img" [attr.aria-label]="s.total ? s.percent + '% packed' : 'No items'"></span>
+  @let db = dateBlock(t);
+  <a class="qp-trip-row" [class.empty]="!s.total" [class.past]="phase(t) === 'past'" [routerLink]="['/trips', t.id]" [queryParams]="s.total ? {} : { mode: 'edit' }">
+    <span class="date" aria-hidden="true">
+      @if (db) { <span class="m">{{ db.m }}</span><span class="d">{{ db.d }}</span> } @else { <span class="d">–</span> }
+    </span>
     <span class="info">
       <span class="name d-block">{{ t.name }}</span>
-      <span class="sub d-block">{{ rowSub(t) }}</span>
+      @if (s.total) {
+        <span class="sub d-block">{{ rowSub(t) }}</span>
+      } @else {
+        <span class="sub cta-text d-block">Choose items</span>
+      }
     </span>
-    <span class="when">{{ shortWhen(t) }}</span>
   </a>
 </ng-template>
