@@ -18,7 +18,8 @@ The production build includes a service worker for offline use. The dev server d
 
 ## Deploying
 
-Pushing to `master` runs the tests, builds the app, and publishes it to GitHub Pages
+Pull requests run the tests and build, and keep the built site for a week as the `site` artifact. Pushing to
+`master` runs the tests, builds the app, and publishes it to GitHub Pages
 (`.github/workflows/pages.yml`, "Build and deploy"). Pages is set to **Source: GitHub Actions**. The build is a
 static folder, so any static host works.
 
@@ -84,3 +85,5 @@ Code is in `src/app/sync`.
 | `src/app/pages/backup/` | Sync & settings |
 | `src/app/ui/` | Shared pieces: sync chip, theme, toasts, formatting, inline edit |
 | `public/privacy.html` | Privacy policy |
+| `public/icons/` | App icons (regular and maskable), Apple touch icon, favicon, and the transparent `quokka.png` used on the welcome screen and README |
+| `docs/screenshots/` | README screenshots, taken at phone width from the live site with demo data |
