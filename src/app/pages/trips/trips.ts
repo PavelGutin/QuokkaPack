@@ -6,13 +6,14 @@ import * as ops from '../../data/ops';
 import { Store } from '../../data/store';
 import { DriveSync } from '../../sync/drive-sync.service';
 import { dateRange, shortWhen, whenLabel } from '../../ui/format';
+import { SyncChip } from '../../ui/sync-chip';
 import { needsWelcome } from '../welcome/needs-welcome';
 
 const monthFmt = new Intl.DateTimeFormat(undefined, { month: 'short' });
 
 @Component({
   selector: 'qp-trips',
-  imports: [RouterLink, NgTemplateOutlet],
+  imports: [RouterLink, NgTemplateOutlet, SyncChip],
   templateUrl: './trips.html',
 })
 export class TripsPage {

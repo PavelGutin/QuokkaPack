@@ -33,7 +33,10 @@ both under **Sync & settings**. The app follows the system light or dark theme u
 `src/app/sync` keeps the document as one `quokkapack.json` file in the hidden app data folder of the person's
 Google Drive (scope `drive.appdata` only). It signs in with Google Identity Services, keeps the access token in
 memory, and calls the Drive REST v3 API with `fetch`. On connect, app start and window focus it pulls; after local
-changes it pushes after about 2 seconds. Conflicts are last-writer-wins on the whole document by `updatedAt`, with
+changes it pushes after about 2 seconds. Those background syncs run only while a token is in memory, because getting a
+new one opens a Google window that phones block without a tap; otherwise a chip on the Trips header shows the data
+isn't backed up and tapping it syncs. **Sync automatically** in Sync & settings lets background syncs request a token
+anyway, at the cost of a possible popup prompt. Conflicts are last-writer-wins on the whole document by `updatedAt`, with
 Undo after a pull. On the first sync in a browser where both sides already hold data, it asks which copy to keep.
 The OAuth client ID is in `src/app/sync/config.ts`.
 

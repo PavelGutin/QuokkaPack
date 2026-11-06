@@ -6,13 +6,14 @@ import * as ops from '../../data/ops';
 import { Store } from '../../data/store';
 import { BarHeight } from '../../ui/bar-height';
 import { ClickOutside } from '../../ui/click-outside';
+import { SyncChip } from '../../ui/sync-chip';
 import { ToastService } from '../../ui/toast.service';
 import { railLabel } from '../../ui/format';
 import { InlineEdit } from '../../ui/inline-edit';
 
 @Component({
   selector: 'qp-catalog',
-  imports: [FormsModule, InlineEdit, ClickOutside, RouterLink, BarHeight],
+  imports: [FormsModule, InlineEdit, ClickOutside, RouterLink, BarHeight, SyncChip],
   templateUrl: './catalog.html',
 })
 export class CatalogPage {

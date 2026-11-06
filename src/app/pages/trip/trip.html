@@ -7,6 +7,7 @@
           <h1>{{ t.name }}</h1>
           <div class="sub">{{ dateRange(t) }}@if (whenLabel(t); as w) { · {{ w }} }</div>
         </div>
+        <qp-sync-chip variant="bar" />
         <div class="qp-menu" (qpClickOutside)="menuOpen.set(false)">
           <button type="button" class="qp-icon-btn" aria-label="Trip actions" [attr.aria-expanded]="menuOpen()" (click)="menuOpen.set(!menuOpen())">
             <i class="bi bi-three-dots" aria-hidden="true"></i>

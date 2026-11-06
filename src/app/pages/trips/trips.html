@@ -2,10 +2,9 @@
   <section class="qp-hero">
     <div class="top">
       <span class="brand">QuokkaPack</span>
+      <qp-sync-chip />
       <a class="qp-icon-btn" routerLink="/catalog" aria-label="Catalog" title="Catalog"><i class="bi bi-list-ul" aria-hidden="true"></i></a>
-      <a class="qp-icon-btn" routerLink="/backup" [attr.aria-label]="sync.connected() ? 'Sync and settings, Google Drive connected' : 'Sync and settings'" title="Sync and settings">
-        <i class="bi" [class.bi-cloud-check]="sync.connected()" [class.bi-gear]="!sync.connected()" aria-hidden="true"></i>
-      </a>
+      <a class="qp-icon-btn" routerLink="/backup" aria-label="Sync and settings" title="Sync and settings"><i class="bi bi-gear" aria-hidden="true"></i></a>
     </div>
 
     @if (next(); as t) {
