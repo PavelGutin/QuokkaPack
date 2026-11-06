@@ -65,8 +65,8 @@ export class GoogleAuth {
    * Requests a token. interactive=true must be called from a click; it may show Google's account and consent
    * screens. interactive=false asks without a prompt and fails if Google needs the person to act.
    */
-  async getToken(interactive: boolean): Promise<string> {
-    const cached = this.current();
+  async getToken(interactive: boolean, chooseAccount = false): Promise<string> {
+    const cached = chooseAccount ? null : this.current();
     if (cached) return cached;
     const oauth2 = await this.load();
     if (this.pending) this.pending.reject(new AuthError('Superseded', !interactive));
@@ -79,7 +79,7 @@ export class GoogleAuth {
         resolve: (t) => (clearTimeout(timer), resolve(t)),
         reject: (e) => (clearTimeout(timer), reject(e)),
       };
-      this.tokenClient(oauth2).requestAccessToken(interactive ? {} : { prompt: '' });
+      this.tokenClient(oauth2).requestAccessToken(!interactive ? { prompt: '' } : chooseAccount ? { prompt: 'select_account' } : {});
     });
   }
 

@@ -1,0 +1,221 @@
+@switch (step()) {
+  @case ('start') {
+    <div class="qp-page qp-welcome">
+      <div class="brand">QuokkaPack</div>
+      <main>
+        <span class="mark"><i class="bi bi-suitcase2" aria-hidden="true"></i></span>
+        <h1>Packing lists for every trip</h1>
+        <p class="lede">Keep one catalog of everything you might bring. Pick from it for each trip and check things off as you pack.</p>
+      </main>
+      <div class="actions">
+        <button type="button" class="cta" (click)="go('storage')">Get started</button>
+        <button type="button" class="cta ghost" (click)="go('return')">I already use QuokkaPack</button>
+        <p class="fine">No account needed. Your lists aren’t sent to us.</p>
+      </div>
+    </div>
+  }
+
+  @case ('storage') {
+    <div class="qp-page sunken">
+      <ng-container *ngTemplateOutlet="bar; context: { back: 'start', label: 'Step 1 of 2' }" />
+      <main class="qp-welcome-body">
+        <div class="intro">
+          <h1>Where should your lists live?</h1>
+          <p>QuokkaPack always keeps a copy in this browser so it works offline. You can also keep one in your Google Drive.</p>
+        </div>
+        <section class="qp-option rec" aria-labelledby="opt-drive">
+          <div class="head">
+            <span class="qp-ico"><i class="bi bi-cloud" aria-hidden="true"></i></span>
+            <h2 id="opt-drive">This device + Google Drive</h2>
+            <span class="qp-badge">Recommended</span>
+          </div>
+          <ul>
+            <li>Same lists on your phone and computer</li>
+            <li>Safe if this browser’s data is cleared</li>
+            <li>QuokkaPack sees only its own hidden file</li>
+          </ul>
+          <button type="button" class="qp-btn primary" [disabled]="busy()" (click)="connect(false)">
+            @if (busy()) { <span class="spinner-border spinner-border-sm" aria-hidden="true"></span> }
+            Connect Google Drive
+          </button>
+          @if (sync.error(); as err) { <p class="err" role="alert">{{ err }}</p> }
+        </section>
+        <section class="qp-option" aria-labelledby="opt-local">
+          <div class="head">
+            <span class="qp-ico muted"><i class="bi bi-phone" aria-hidden="true"></i></span>
+            <h2 id="opt-local">This device only</h2>
+          </div>
+          <p>Nothing leaves this browser. If its data is cleared, your lists go with it unless you keep a backup file.</p>
+          <button type="button" class="qp-btn" (click)="go('local')">Use this device only</button>
+        </section>
+        <p class="fine">You can change this later in Sync &amp; settings.</p>
+      </main>
+    </div>
+  }
+
+  @case ('local') {
+    <div class="qp-page sunken">
+      <ng-container *ngTemplateOutlet="bar; context: { back: 'storage', label: 'Step 1 of 2' }" />
+      <main class="qp-welcome-body">
+        <div class="intro">
+          <h1>Keeping lists on this device</h1>
+          <p>Your lists are saved in this browser’s storage. A few things to know first.</p>
+        </div>
+        <section class="qp-facts">
+          <div><i class="bi bi-check-lg ok" aria-hidden="true"></i><span><b>Works offline</b>Nothing is sent anywhere.</span></div>
+          <div><i class="bi bi-exclamation-triangle warn" aria-hidden="true"></i><span><b>Clearing site data deletes them</b>So does a private window, or a new phone.</span></div>
+          <div><i class="bi bi-exclamation-triangle warn" aria-hidden="true"></i><span><b>The browser may clear it to save space</b>Unless you ask it to keep QuokkaPack’s data.</span></div>
+        </section>
+        <section class="qp-card">
+          @switch (persist()) {
+            @case ('granted') {
+              <p class="ok-line"><i class="bi bi-check-circle-fill me-2" aria-hidden="true"></i>This browser will keep your data.</p>
+            }
+            @case ('declined') {
+              <p>The browser didn’t agree this time. It may still keep your data, but download a backup now and then from Sync &amp; settings, or use Google Drive.</p>
+            }
+            @default {
+              <button type="button" class="qp-btn primary" (click)="askPersist()">Ask the browser to keep my data</button>
+              <p>Some browsers ask you; others decide on their own. Adding QuokkaPack to your home screen makes a yes more likely.</p>
+            }
+          }
+        </section>
+      </main>
+      <div class="qp-bottom">
+        <button type="button" class="qp-btn big" (click)="go('starter')">Continue</button>
+        <button type="button" class="btn btn-link fw-semibold" style="color: var(--qp-accent)" (click)="go('storage')">Use Google Drive instead</button>
+      </div>
+    </div>
+  }
+
+  @case ('starter') {
+    <div class="qp-page sunken">
+      <header class="qp-bar">
+        <div class="row1">
+          <button type="button" class="qp-icon-btn" aria-label="Back" (click)="go('storage')"><i class="bi bi-chevron-left" aria-hidden="true"></i></button>
+          <div class="title"><span class="sub fw-semibold">Step 2 of 2</span></div>
+          @if (sync.connected()) {
+            <span class="qp-badge me-1"><i class="bi bi-check-lg me-1" aria-hidden="true"></i>Google Drive connected</span>
+          }
+        </div>
+      </header>
+      <main class="qp-welcome-body">
+        <div class="intro">
+          <h1>Start with some items?</h1>
+          <p>Your catalog is everything you might pack, grouped into categories. Each trip picks from it.</p>
+        </div>
+        <section class="qp-option rec" aria-labelledby="st-h">
+          <h2 id="st-h">Starter catalog</h2>
+          <p>About {{ starterCount }} common items in {{ starterNames.length }} categories. Rename, move or remove anything later.</p>
+          <div class="d-flex flex-wrap gap-2">
+            @for (n of starterNames; track n) { <span class="qp-tag">{{ n }}</span> }
+          </div>
+          <button type="button" class="qp-btn primary" (click)="useStarter()">Use the starter catalog</button>
+        </section>
+        <section class="qp-option" aria-labelledby="em-h">
+          <h2 id="em-h">Start empty</h2>
+          <p>Add your own categories and items as you plan your first trip.</p>
+          <button type="button" class="qp-btn" (click)="startEmpty()">Start empty</button>
+        </section>
+      </main>
+    </div>
+  }
+
+  @case ('return') {
+    <div class="qp-page sunken">
+      <ng-container *ngTemplateOutlet="bar; context: { back: 'start', label: '' }" />
+      <main class="qp-welcome-body">
+        <div class="intro">
+          <h1>Welcome back</h1>
+          <p>Bring your trips and catalog to this device.</p>
+        </div>
+        <section class="qp-option rec" aria-labelledby="r-drive">
+          <div class="head">
+            <span class="qp-ico"><i class="bi bi-cloud-download" aria-hidden="true"></i></span>
+            <h2 id="r-drive">From Google Drive</h2>
+          </div>
+          <p>Sign in with the Google account you used on your other device. Your lists load here and keep syncing.</p>
+          <button type="button" class="qp-btn primary" [disabled]="busy()" (click)="connect(true)">
+            @if (busy()) { <span class="spinner-border spinner-border-sm" aria-hidden="true"></span> }
+            Connect Google Drive
+          </button>
+          @if (sync.error(); as err) { <p class="err" role="alert">{{ err }}</p> }
+        </section>
+        <section class="qp-option" aria-labelledby="r-file">
+          <div class="head">
+            <span class="qp-ico muted"><i class="bi bi-file-earmark-arrow-up" aria-hidden="true"></i></span>
+            <h2 id="r-file">From a backup file</h2>
+          </div>
+          <p>On your other device, open Sync &amp; settings and choose Download backup. Then pick that file here.</p>
+          <ng-container *ngTemplateOutlet="filePick; context: { label: 'Choose backup file' }" />
+        </section>
+        <button type="button" class="btn btn-link fw-semibold align-self-center" style="color: var(--qp-accent)" (click)="go('storage')">I’m new here</button>
+      </main>
+    </div>
+  }
+
+  @case ('found') {
+    <div class="qp-page qp-welcome">
+      <main>
+        <span class="mark round"><i class="bi bi-check-lg" aria-hidden="true"></i></span>
+        <h1>Your lists are here</h1>
+        <p class="lede">Loaded from Google Drive{{ savedAt() ? ', last saved ' + savedAt() : '' }}. Changes on this device sync back automatically.</p>
+        <div class="stats">
+          <div><b>{{ store.trips().length }}</b><span>trips</span></div>
+          <div><b>{{ store.categories().length }}</b><span>categories</span></div>
+          <div><b>{{ store.items().length }}</b><span>items</span></div>
+        </div>
+      </main>
+      <div class="actions">
+        <button type="button" class="cta" (click)="finish()">Go to my trips</button>
+      </div>
+    </div>
+  }
+
+  @case ('notfound') {
+    <div class="qp-page sunken">
+      <ng-container *ngTemplateOutlet="bar; context: { back: 'return', label: '' }" />
+      <main class="qp-welcome-body">
+        <div class="intro">
+          <h1>No lists in this Google Drive yet</h1>
+          <p>Drive is connected, but it has no QuokkaPack file. If your other device keeps its lists only in the browser, turn on Google Drive sync there first, then tap Check again.</p>
+        </div>
+        <nav class="qp-menu-list" aria-label="Options">
+          <button type="button" [disabled]="busy()" (click)="checkAgain()">
+            <span><b class="d-block">Check again</b><span class="small text-body-secondary">After turning on sync on the other device</span></span>
+            <i class="bi bi-chevron-right" aria-hidden="true"></i>
+          </button>
+          <button type="button" [disabled]="busy()" (click)="connect(true, true)">
+            <span><b class="d-block">Use a different Google account</b><span class="small text-body-secondary">Disconnects this one first</span></span>
+            <i class="bi bi-chevron-right" aria-hidden="true"></i>
+          </button>
+          <label>
+            <span><b class="d-block">Restore from a backup file</b><span class="small text-body-secondary">It will then sync to this Drive</span></span>
+            <i class="bi bi-chevron-right" aria-hidden="true"></i>
+            <input #f2 type="file" accept="application/json,.json" hidden (change)="restore(f2)" />
+          </label>
+        </nav>
+        @if (sync.error(); as err) { <p class="err" role="alert">{{ err }}</p> }
+      </main>
+      <div class="qp-bottom">
+        <button type="button" class="qp-btn primary big" (click)="go('starter')">Start fresh with Drive sync on</button>
+      </div>
+    </div>
+  }
+}
+
+<ng-template #bar let-back="back" let-label="label">
+  <header class="qp-bar">
+    <div class="row1">
+      <button type="button" class="qp-icon-btn" aria-label="Back" (click)="go(back)"><i class="bi bi-chevron-left" aria-hidden="true"></i></button>
+      <div class="title"><span class="sub fw-semibold">{{ label }}</span></div>
+    </div>
+  </header>
+</ng-template>
+
+<ng-template #filePick let-label="label">
+  <label class="qp-btn mb-0" style="cursor: pointer">
+    {{ label }}
+    <input #f1 type="file" accept="application/json,.json" hidden (change)="restore(f1)" />
+  </label>
+</ng-template>

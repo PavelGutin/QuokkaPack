@@ -16,6 +16,8 @@ use "Add to Home Screen" to install it like an app.
 - **Start a trip from categories** or **copy a previous trip**. You can also duplicate any trip.
 - **Catalog:** rename by clicking, move items between categories, and archive what you no longer use. Archived
   items stay on old trips but are hidden from new ones.
+- **Welcome flow:** new people pick this device only or this device + Google Drive (local storage is explained before the
+  browser is asked to keep it); returning people bring their lists in from Google Drive or a backup file.
 - **Undo** for deletes, moves and resets.
 - **Sync & settings:** download everything as one JSON file and restore it in any browser. First-time users can load a
   starter catalog.
