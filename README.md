@@ -29,7 +29,8 @@ Drive sync.
 The first time you open QuokkaPack, it asks whether you're new or already use it on another device.
 
 - **New:** choose where your lists live, either on this device only or on this device plus your Google Drive. Then
-  start with a ready-made catalog of about 50 common items, or start empty.
+  start with a ready-made catalog of about 100 common items in 14 categories (from clothes and toiletries to pets,
+  kids, a vacation rental and a before-you-leave checklist), or start empty.
 - **Already using it:** connect the same Google Drive account to bring your lists over, or restore a backup file.
 
 ## Install it on your phone or computer
