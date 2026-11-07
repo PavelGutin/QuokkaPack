@@ -38,7 +38,10 @@ The first time you open QuokkaPack, it asks whether you're new or already use it
 - **iPhone or iPad (Safari):** tap **Share → Add to Home Screen**.
 - **Desktop Chrome or Edge:** click the install icon at the right end of the address bar.
 
-Installed, it opens in its own window like any other app.
+Installed, it opens in its own window like any other app. You can also install it from the welcome screen or from
+**Sync & settings → Install the app**, which opens your browser's install dialog where the browser allows it and
+shows the steps where it doesn't. On Android, removing the icon from the home screen may leave the app installed:
+uninstall it from the app list to get the install option back.
 
 ## What you can do
 

@@ -4,12 +4,13 @@ import { emptyDoc } from '../../data/model';
 import * as ops from '../../data/ops';
 import { Store } from '../../data/store';
 import { DriveSync } from '../../sync/drive-sync.service';
+import { InstallPrompt } from '../../ui/install-prompt';
 import { ThemePref, ThemeService } from '../../ui/theme';
 import { ToastService } from '../../ui/toast.service';
 
 @Component({
   selector: 'qp-backup',
-  imports: [RouterLink],
+  imports: [RouterLink, InstallPrompt],
   templateUrl: './backup.html',
 })
 export class BackupPage implements OnInit {

@@ -8,6 +8,10 @@
     <meta name="description" content="Packing lists for every trip. Reusable categories, check items off as you pack. Works offline." />
     <meta name="theme-color" content="#F3EBDD" />
     <script>
+      /* Keep the browser's install offer if it arrives before the app starts. Read by ui/install.service.ts. */
+      window.addEventListener('beforeinstallprompt', function (e) { window.__qpInstallEvent = e; });
+    </script>
+    <script>
       /* Apply the saved or system theme before the app loads, so there is no flash. Mirrors ui/theme.ts. */
       (function () {
         var pref = null;
