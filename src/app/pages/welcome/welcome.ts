@@ -7,6 +7,7 @@ import { Store } from '../../data/store';
 import { DriveSync } from '../../sync/drive-sync.service';
 import { hasData } from '../../sync/decide';
 import { ToastService } from '../../ui/toast.service';
+import { InstallPrompt } from '../../ui/install-prompt';
 import { needsWelcome } from './needs-welcome';
 
 /** start → (new) storage → local? → starter;  start → (returning) return → found | notfound. */
@@ -15,7 +16,7 @@ const STEPS: WelcomeStep[] = ['start', 'storage', 'local', 'starter', 'return', 
 
 @Component({
   selector: 'qp-welcome',
-  imports: [NgTemplateOutlet],
+  imports: [NgTemplateOutlet, InstallPrompt],
   templateUrl: './welcome.html',
 })
 export class WelcomePage implements OnInit {

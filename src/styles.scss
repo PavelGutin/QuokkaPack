@@ -1726,3 +1726,29 @@ $serif: Georgia, 'Iowan Old Style', 'Palatino Linotype', 'Times New Roman', seri
   margin-left: -8px;
   filter: drop-shadow(4px 4px 0 rgba(0, 0, 0, 0.25));
 }
+
+/* ------------------------------------------------------------ install */
+
+.qp-install-hint {
+  font-size: 0.875rem;
+}
+.qp-install-link {
+  text-align: center;
+  button {
+    min-height: 44px;
+    border: 0;
+    background: none;
+    color: inherit;
+    font-size: 0.875rem;
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  p {
+    margin: 0 auto;
+    max-width: 22rem;
+    font-size: 0.8125rem;
+    line-height: 1.45;
+    opacity: 0.9;
+  }
+}

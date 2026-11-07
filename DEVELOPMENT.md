@@ -62,6 +62,14 @@ Code is in `src/app/sync`.
 - Local sync state (connected, file id, last synced, auto) is in `localStorage` under `quokkapack.driveSync`.
 - The service worker only caches the app's own files, so Google requests are never cached.
 
+## Installing
+
+`ui/install.service.ts` keeps Chromium's `beforeinstallprompt` event (an inline script in `index.html` catches it if
+it fires before Angular starts) so the "Install the app" button can open the browser's dialog later. The browser's
+own install bar is left alone. Browsers without the event get instructions from `ui/install-hint.ts` (iOS: Share →
+Add to Home Screen; Firefox on Android: menu; Firefox on a computer: not supported). Nothing shows when running in
+standalone display mode or after `appinstalled`.
+
 ## Theme
 
 - Color tokens are CSS custom properties on `:root` and `[data-bs-theme='dark']` in `src/styles.scss`, followed by the
